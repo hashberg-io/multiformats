@@ -1,0 +1,12 @@
+[MESSAGES CONTROL]
+disable = too-many-ancestors,
+          too-few-public-methods,
+          invalid-name,
+          unused-argument,
+          redefined-outer-name,
+          useless-super-delegation,
+          isinstance-second-argument-not-valid-type,
+          too-many-lines,
+          protected-access
+[FORMAT]
+max-line-length=160
