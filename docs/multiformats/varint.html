@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
-<title>multiformats API documentation</title>
-<meta name="description" content="This package implements existing multiformat protocols, according to the [Multiformats](https://multiformats.io/) specifications." />
+<title>multiformats.varint API documentation</title>
+<meta name="description" content="Implementation of the [unsigned-varint spec](https://github.com/multiformats/unsigned-varint)" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -20,33 +20,141 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Package <code>multiformats</code></h1>
+<h1 class="title">Module <code>multiformats.varint</code></h1>
 </header>
 <section id="section-intro">
-<p>This package implements existing multiformat protocols, according to the <a href="https://multiformats.io/">Multiformats</a> specifications.</p>
+<p>Implementation of the <a href="https://github.com/multiformats/unsigned-varint">unsigned-varint spec</a></p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">&#34;&#34;&#34;
-    This package implements existing multiformat protocols, according to the [Multiformats](https://multiformats.io/) specifications.
+    Implementation of the [unsigned-varint spec](https://github.com/multiformats/unsigned-varint)
 &#34;&#34;&#34;
 
-from . import varint</code></pre>
+from typing import List
+
+_max_num_bytes: int = 9
+
+def encode(x: int) -&gt; bytes:
+    &#34;&#34;&#34;
+        Encodes a non-negative integer as an unsigned varint.
+
+        Raises `ValueError` if `x &lt; 0` and if `x &gt;= 2**63`, according to the specs.
+    &#34;&#34;&#34;
+    if x &lt; 0:
+        raise ValueError(&#34;The unsigned-varint encoding is for non-negative integers only.&#34;)
+    orig_x = x
+    varint_bytes: List[int] = []
+    while True:
+        next_byte = x &amp; 0b0111_1111
+        x &gt;&gt;= 7
+        if x &gt; 0:
+            varint_bytes.append(next_byte | 0b1000_0000)
+        else:
+            varint_bytes.append(next_byte)
+            break
+        if len(varint_bytes) &gt;= _max_num_bytes:
+            raise ValueError(f&#34;The unsigned-varint spec limits varints to {_max_num_bytes} bytes {orig_x, x, varint_bytes}.&#34;)
+    return bytes(varint_bytes)
+
+def decode(varint: bytes) -&gt; int:
+    &#34;&#34;&#34;
+        Decodes an unsigned varint.
+
+        Raises `ValueError` if `len(varint) == 0` and if `len(varint) &gt; 9`, according to the specs.
+    &#34;&#34;&#34;
+    if len(varint) == 0:
+        raise ValueError(&#34;Varints must be at least 1 byte long.&#34;)
+    if len(varint) &gt; _max_num_bytes:
+        raise ValueError(f&#34;Varints must be at most {_max_num_bytes} bytes long.&#34;)
+    x = 0
+    for i, byte_i in enumerate(varint):
+        x += (byte_i &amp; 0b0111_1111) &lt;&lt; (7 * i)
+        cont = byte_i &gt;&gt; 7
+        if cont == 0b1 and i == len(varint)-1:
+            raise ValueError(&#34;Last byte of varint is a continuation byte.&#34;)
+        if cont == 0b0 and i != len(varint)-1:
+            raise ValueError(f&#34;Byte #{i} of varint is not a continuation byte and not the last byte.&#34;)
+    if len(varint) &gt; 1 and x &lt; 2**(7*(len(varint)-1)):
+        raise ValueError(f&#34;Number {x} was not minimally encoded (used {len(varint)} bytes).&#34;)
+    return x</code></pre>
 </details>
 </section>
 <section>
-<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt><code class="name"><a title="multiformats.varint" href="varint.html">multiformats.varint</a></code></dt>
+<dt id="multiformats.varint.decode"><code class="name flex">
+<span>def <span class="ident">decode</span></span>(<span>varint: bytes) ‑> int</span>
+</code></dt>
 <dd>
-<div class="desc"><p>Implementation of the <a href="https://github.com/multiformats/unsigned-varint">unsigned-varint spec</a></p></div>
+<div class="desc"><p>Decodes an unsigned varint.</p>
+<p>Raises <code>ValueError</code> if <code>len(varint) == 0</code> and if <code>len(varint) &gt; 9</code>, according to the specs.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def decode(varint: bytes) -&gt; int:
+    &#34;&#34;&#34;
+        Decodes an unsigned varint.
+
+        Raises `ValueError` if `len(varint) == 0` and if `len(varint) &gt; 9`, according to the specs.
+    &#34;&#34;&#34;
+    if len(varint) == 0:
+        raise ValueError(&#34;Varints must be at least 1 byte long.&#34;)
+    if len(varint) &gt; _max_num_bytes:
+        raise ValueError(f&#34;Varints must be at most {_max_num_bytes} bytes long.&#34;)
+    x = 0
+    for i, byte_i in enumerate(varint):
+        x += (byte_i &amp; 0b0111_1111) &lt;&lt; (7 * i)
+        cont = byte_i &gt;&gt; 7
+        if cont == 0b1 and i == len(varint)-1:
+            raise ValueError(&#34;Last byte of varint is a continuation byte.&#34;)
+        if cont == 0b0 and i != len(varint)-1:
+            raise ValueError(f&#34;Byte #{i} of varint is not a continuation byte and not the last byte.&#34;)
+    if len(varint) &gt; 1 and x &lt; 2**(7*(len(varint)-1)):
+        raise ValueError(f&#34;Number {x} was not minimally encoded (used {len(varint)} bytes).&#34;)
+    return x</code></pre>
+</details>
+</dd>
+<dt id="multiformats.varint.encode"><code class="name flex">
+<span>def <span class="ident">encode</span></span>(<span>x: int) ‑> bytes</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Encodes a non-negative integer as an unsigned varint.</p>
+<p>Raises <code>ValueError</code> if <code>x &lt; 0</code> and if <code>x &gt;= 2**63</code>, according to the specs.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def encode(x: int) -&gt; bytes:
+    &#34;&#34;&#34;
+        Encodes a non-negative integer as an unsigned varint.
+
+        Raises `ValueError` if `x &lt; 0` and if `x &gt;= 2**63`, according to the specs.
+    &#34;&#34;&#34;
+    if x &lt; 0:
+        raise ValueError(&#34;The unsigned-varint encoding is for non-negative integers only.&#34;)
+    orig_x = x
+    varint_bytes: List[int] = []
+    while True:
+        next_byte = x &amp; 0b0111_1111
+        x &gt;&gt;= 7
+        if x &gt; 0:
+            varint_bytes.append(next_byte | 0b1000_0000)
+        else:
+            varint_bytes.append(next_byte)
+            break
+        if len(varint_bytes) &gt;= _max_num_bytes:
+            raise ValueError(f&#34;The unsigned-varint spec limits varints to {_max_num_bytes} bytes {orig_x, x, varint_bytes}.&#34;)
+    return bytes(varint_bytes)</code></pre>
+</details>
 </dd>
 </dl>
-</section>
-<section>
-</section>
-<section>
 </section>
 <section>
 </section>
@@ -57,9 +165,15 @@ from . import varint</code></pre>
 <ul></ul>
 </div>
 <ul id="index">
-<li><h3><a href="#header-submodules">Sub-modules</a></h3>
+<li><h3>Super-module</h3>
 <ul>
-<li><code><a title="multiformats.varint" href="varint.html">multiformats.varint</a></code></li>
+<li><code><a title="multiformats" href="index.html">multiformats</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="multiformats.varint.decode" href="#multiformats.varint.decode">decode</a></code></li>
+<li><code><a title="multiformats.varint.encode" href="#multiformats.varint.encode">encode</a></code></li>
 </ul>
 </li>
 </ul>
