@@ -32,19 +32,24 @@
     Implementation of the [unsigned-varint spec](https://github.com/multiformats/unsigned-varint)
 &#34;&#34;&#34;
 
-from typing import List
+from io import BufferedIOBase, BytesIO
+from typing import List, Union
 
 _max_num_bytes: int = 9
+
 
 def encode(x: int) -&gt; bytes:
     &#34;&#34;&#34;
         Encodes a non-negative integer as an unsigned varint.
+        If a `stream` is given, the encoded varint is written to the stream and nothing is returned.
+        Otherwise, the encoded varint is written to an internal stream and the bytes are returned at the end.
 
-        Raises `ValueError` if `x &lt; 0` and if `x &gt;= 2**63`, according to the specs.
+        Raises `ValueError` if:
+        - `x &lt; 0` (varints encode unsigned integers)
+        - `x &gt;= 2**63` (from specs, varints are limited to 9 bytes)
     &#34;&#34;&#34;
     if x &lt; 0:
-        raise ValueError(&#34;The unsigned-varint encoding is for non-negative integers only.&#34;)
-    orig_x = x
+        raise ValueError(&#34;Integer is negative.&#34;)
     varint_bytes: List[int] = []
     while True:
         next_byte = x &amp; 0b0111_1111
@@ -55,29 +60,43 @@ def encode(x: int) -&gt; bytes:
             varint_bytes.append(next_byte)
             break
         if len(varint_bytes) &gt;= _max_num_bytes:
-            raise ValueError(f&#34;The unsigned-varint spec limits varints to {_max_num_bytes} bytes {orig_x, x, varint_bytes}.&#34;)
+            raise ValueError(f&#34;Varints must be at most {_max_num_bytes} bytes long.&#34;)
     return bytes(varint_bytes)
 
-def decode(varint: bytes) -&gt; int:
+def decode(varint: Union[bytes, bytearray, BufferedIOBase]) -&gt; int:
     &#34;&#34;&#34;
-        Decodes an unsigned varint.
+        Decodes an unsigned varint from a `bytes` object or a buffered binary stream.
+        If a stream is passed, only the bytes encoding the varint are read from it.
+        If a `bytes` or `bytearray` object is passed, the varint encoding must use all bytes.
 
-        Raises `ValueError` if `len(varint) == 0` and if `len(varint) &gt; 9`, according to the specs.
+        Raises `ValueError` if:
+
+        - `varint` contains no bytes (from specs, the number 0 is encoded as 0b0000_0000)
+        - the 9th byte of `varint` is a continuation byte (from specs, no number &gt;= 2**63 is allowed)
+        - the last byte of `varint` is a continuation byte (invalid format)
+        - the decoded integer could be encoded in fewer bytes than were read (from specs, encoding must be minimal)
+        - `varint` is a `bytes` or `bytearray` object and the number of bytes used by the encoding is fewer than its length
     &#34;&#34;&#34;
-    if len(varint) == 0:
-        raise ValueError(&#34;Varints must be at least 1 byte long.&#34;)
-    if len(varint) &gt; _max_num_bytes:
-        raise ValueError(f&#34;Varints must be at most {_max_num_bytes} bytes long.&#34;)
+    stream = BytesIO(varint) if isinstance(varint, (bytes, bytearray)) else varint
+    expect_next = True
+    num_bytes_read = 0
     x = 0
-    for i, byte_i in enumerate(varint):
-        x += (byte_i &amp; 0b0111_1111) &lt;&lt; (7 * i)
-        cont = byte_i &gt;&gt; 7
-        if cont == 0b1 and i == len(varint)-1:
-            raise ValueError(&#34;Last byte of varint is a continuation byte.&#34;)
-        if cont == 0b0 and i != len(varint)-1:
-            raise ValueError(f&#34;Byte #{i} of varint is not a continuation byte and not the last byte.&#34;)
-    if len(varint) &gt; 1 and x &lt; 2**(7*(len(varint)-1)):
-        raise ValueError(f&#34;Number {x} was not minimally encoded (used {len(varint)} bytes).&#34;)
+    while expect_next:
+        _next_byte: bytes = stream.read(1)
+        if len(_next_byte) == 0:
+            if num_bytes_read == 0:
+                raise ValueError(&#34;Varints must be at least 1 byte long.&#34;)
+            raise ValueError(f&#34;Byte #{num_bytes_read-1} was a continuation byte, but byte #{num_bytes_read} not available.&#34;)
+        next_byte: int = _next_byte[0]
+        x += (next_byte &amp; 0b0111_1111) &lt;&lt; (7 * num_bytes_read)
+        expect_next = (next_byte &gt;&gt; 7) == 0b1
+        num_bytes_read += 1
+        if expect_next and num_bytes_read &gt;= _max_num_bytes:
+            raise ValueError(f&#34;Varints must be at most {_max_num_bytes} bytes long.&#34;)
+    if isinstance(varint, (bytes, bytearray)) and len(varint) &gt; num_bytes_read:
+        raise ValueError(&#34;A bytes or bytearray object was passed, but not all bytes were used by the encoding.&#34;)
+    if num_bytes_read &gt; 1 and x &lt; 2**(7*(num_bytes_read-1)):
+        raise ValueError(f&#34;Number {x} was not minimally encoded (as a {num_bytes_read} bytes varint).&#34;)
     return x</code></pre>
 </details>
 </section>
@@ -89,35 +108,58 @@ def decode(varint: bytes) -&gt; int:
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="multiformats.varint.decode"><code class="name flex">
-<span>def <span class="ident">decode</span></span>(<span>varint: bytes) ‑> int</span>
+<span>def <span class="ident">decode</span></span>(<span>varint: Union[bytes, bytearray, io.BufferedIOBase]) ‑> int</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Decodes an unsigned varint.</p>
-<p>Raises <code>ValueError</code> if <code>len(varint) == 0</code> and if <code>len(varint) &gt; 9</code>, according to the specs.</p></div>
+<div class="desc"><p>Decodes an unsigned varint from a <code>bytes</code> object or a buffered binary stream.
+If a stream is passed, only the bytes encoding the varint are read from it.
+If a <code>bytes</code> or <code>bytearray</code> object is passed, the varint encoding must use all bytes.</p>
+<p>Raises <code>ValueError</code> if:</p>
+<ul>
+<li><code>varint</code> contains no bytes (from specs, the number 0 is encoded as 0b0000_0000)</li>
+<li>the 9th byte of <code>varint</code> is a continuation byte (from specs, no number &gt;= 2**63 is allowed)</li>
+<li>the last byte of <code>varint</code> is a continuation byte (invalid format)</li>
+<li>the decoded integer could be encoded in fewer bytes than were read (from specs, encoding must be minimal)</li>
+<li><code>varint</code> is a <code>bytes</code> or <code>bytearray</code> object and the number of bytes used by the encoding is fewer than its length</li>
+</ul></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def decode(varint: bytes) -&gt; int:
+<pre><code class="python">def decode(varint: Union[bytes, bytearray, BufferedIOBase]) -&gt; int:
     &#34;&#34;&#34;
-        Decodes an unsigned varint.
+        Decodes an unsigned varint from a `bytes` object or a buffered binary stream.
+        If a stream is passed, only the bytes encoding the varint are read from it.
+        If a `bytes` or `bytearray` object is passed, the varint encoding must use all bytes.
 
-        Raises `ValueError` if `len(varint) == 0` and if `len(varint) &gt; 9`, according to the specs.
+        Raises `ValueError` if:
+
+        - `varint` contains no bytes (from specs, the number 0 is encoded as 0b0000_0000)
+        - the 9th byte of `varint` is a continuation byte (from specs, no number &gt;= 2**63 is allowed)
+        - the last byte of `varint` is a continuation byte (invalid format)
+        - the decoded integer could be encoded in fewer bytes than were read (from specs, encoding must be minimal)
+        - `varint` is a `bytes` or `bytearray` object and the number of bytes used by the encoding is fewer than its length
     &#34;&#34;&#34;
-    if len(varint) == 0:
-        raise ValueError(&#34;Varints must be at least 1 byte long.&#34;)
-    if len(varint) &gt; _max_num_bytes:
-        raise ValueError(f&#34;Varints must be at most {_max_num_bytes} bytes long.&#34;)
+    stream = BytesIO(varint) if isinstance(varint, (bytes, bytearray)) else varint
+    expect_next = True
+    num_bytes_read = 0
     x = 0
-    for i, byte_i in enumerate(varint):
-        x += (byte_i &amp; 0b0111_1111) &lt;&lt; (7 * i)
-        cont = byte_i &gt;&gt; 7
-        if cont == 0b1 and i == len(varint)-1:
-            raise ValueError(&#34;Last byte of varint is a continuation byte.&#34;)
-        if cont == 0b0 and i != len(varint)-1:
-            raise ValueError(f&#34;Byte #{i} of varint is not a continuation byte and not the last byte.&#34;)
-    if len(varint) &gt; 1 and x &lt; 2**(7*(len(varint)-1)):
-        raise ValueError(f&#34;Number {x} was not minimally encoded (used {len(varint)} bytes).&#34;)
+    while expect_next:
+        _next_byte: bytes = stream.read(1)
+        if len(_next_byte) == 0:
+            if num_bytes_read == 0:
+                raise ValueError(&#34;Varints must be at least 1 byte long.&#34;)
+            raise ValueError(f&#34;Byte #{num_bytes_read-1} was a continuation byte, but byte #{num_bytes_read} not available.&#34;)
+        next_byte: int = _next_byte[0]
+        x += (next_byte &amp; 0b0111_1111) &lt;&lt; (7 * num_bytes_read)
+        expect_next = (next_byte &gt;&gt; 7) == 0b1
+        num_bytes_read += 1
+        if expect_next and num_bytes_read &gt;= _max_num_bytes:
+            raise ValueError(f&#34;Varints must be at most {_max_num_bytes} bytes long.&#34;)
+    if isinstance(varint, (bytes, bytearray)) and len(varint) &gt; num_bytes_read:
+        raise ValueError(&#34;A bytes or bytearray object was passed, but not all bytes were used by the encoding.&#34;)
+    if num_bytes_read &gt; 1 and x &lt; 2**(7*(num_bytes_read-1)):
+        raise ValueError(f&#34;Number {x} was not minimally encoded (as a {num_bytes_read} bytes varint).&#34;)
     return x</code></pre>
 </details>
 </dd>
@@ -125,8 +167,12 @@ def decode(varint: bytes) -&gt; int:
 <span>def <span class="ident">encode</span></span>(<span>x: int) ‑> bytes</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Encodes a non-negative integer as an unsigned varint.</p>
-<p>Raises <code>ValueError</code> if <code>x &lt; 0</code> and if <code>x &gt;= 2**63</code>, according to the specs.</p></div>
+<div class="desc"><p>Encodes a non-negative integer as an unsigned varint.
+If a <code>stream</code> is given, the encoded varint is written to the stream and nothing is returned.
+Otherwise, the encoded varint is written to an internal stream and the bytes are returned at the end.</p>
+<p>Raises <code>ValueError</code> if:
+- <code>x &lt; 0</code> (varints encode unsigned integers)
+- <code>x &gt;= 2**63</code> (from specs, varints are limited to 9 bytes)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -134,12 +180,15 @@ def decode(varint: bytes) -&gt; int:
 <pre><code class="python">def encode(x: int) -&gt; bytes:
     &#34;&#34;&#34;
         Encodes a non-negative integer as an unsigned varint.
+        If a `stream` is given, the encoded varint is written to the stream and nothing is returned.
+        Otherwise, the encoded varint is written to an internal stream and the bytes are returned at the end.
 
-        Raises `ValueError` if `x &lt; 0` and if `x &gt;= 2**63`, according to the specs.
+        Raises `ValueError` if:
+        - `x &lt; 0` (varints encode unsigned integers)
+        - `x &gt;= 2**63` (from specs, varints are limited to 9 bytes)
     &#34;&#34;&#34;
     if x &lt; 0:
-        raise ValueError(&#34;The unsigned-varint encoding is for non-negative integers only.&#34;)
-    orig_x = x
+        raise ValueError(&#34;Integer is negative.&#34;)
     varint_bytes: List[int] = []
     while True:
         next_byte = x &amp; 0b0111_1111
@@ -150,7 +199,7 @@ def decode(varint: bytes) -&gt; int:
             varint_bytes.append(next_byte)
             break
         if len(varint_bytes) &gt;= _max_num_bytes:
-            raise ValueError(f&#34;The unsigned-varint spec limits varints to {_max_num_bytes} bytes {orig_x, x, varint_bytes}.&#34;)
+            raise ValueError(f&#34;Varints must be at most {_max_num_bytes} bytes long.&#34;)
     return bytes(varint_bytes)</code></pre>
 </details>
 </dd>
