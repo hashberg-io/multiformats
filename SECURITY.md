@@ -1,6 +1,6 @@
 # Security Policy
 
-[Multiformat protocols](https://multiformats.io/) are a fundamental low-level component of the distributed web: we take security of this package very seriously.
+We take security of this package very seriously.
 
 ## Supported Versions
 

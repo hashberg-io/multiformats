@@ -7,12 +7,9 @@ from typing import List, Union
 
 _max_num_bytes: int = 9
 
-
 def encode(x: int) -> bytes:
     """
-        Encodes a non-negative integer as an unsigned varint.
-        If a `stream` is given, the encoded varint is written to the stream and nothing is returned.
-        Otherwise, the encoded varint is written to an internal stream and the bytes are returned at the end.
+        Encodes a non-negative integer as an unsigned varint, returning the encoded bytes.
 
         Raises `ValueError` if:
         - `x < 0` (varints encode unsigned integers)
@@ -20,18 +17,18 @@ def encode(x: int) -> bytes:
     """
     if x < 0:
         raise ValueError("Integer is negative.")
-    varint_bytes: List[int] = []
+    varint_bytelist: List[int] = []
     while True:
         next_byte = x & 0b0111_1111
         x >>= 7
         if x > 0:
-            varint_bytes.append(next_byte | 0b1000_0000)
+            varint_bytelist.append(next_byte | 0b1000_0000)
         else:
-            varint_bytes.append(next_byte)
+            varint_bytelist.append(next_byte)
             break
-        if len(varint_bytes) >= _max_num_bytes:
+        if len(varint_bytelist) >= _max_num_bytes:
             raise ValueError(f"Varints must be at most {_max_num_bytes} bytes long.")
-    return bytes(varint_bytes)
+    return bytes(varint_bytelist)
 
 
 def decode(varint: Union[bytes, bytearray, BufferedIOBase]) -> int:

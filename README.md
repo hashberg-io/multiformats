@@ -42,6 +42,19 @@ b'\x80\x01'
 128
 ```
 
+A buffered binary stream (i.e. an instance of `io.BufferedIOBase`) can be passed to the `decode` function instead of a `bytes` object, in which case only the varint bytes are read from the stream:
+
+```
+>>> from io import BytesIO
+>>> stream = BytesIO(bytes([0x80, 0x01, 0x12, 0xff]))
+>>> varint.decode(stream)
+128
+>>> stream.read()
+b'\x12\xff'
+```
+
+If a `bytes` (or `bytearray`) object is passed to `decode`, the encoded varint must span all bytes (`ValueError` is raised if not).
+
 
 ## API
 
@@ -50,7 +63,7 @@ The [API documentation](https://hashberg-io.github.io/multiformats/multiformats/
 
 ## Contributing
 
-There are many ways to contribute to this project: see [the contributing file](./CONTRIBUTING.md)!
+Please see [the contributing file](./CONTRIBUTING.md).
 
 
 ## License
