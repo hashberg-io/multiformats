@@ -34,7 +34,7 @@ pip install multiformats
 
 The `varint` module implements the [unsigned-varint spec](https://github.com/multiformats/unsigned-varint). Functionality is provided by the `encode` and `decode` functions, converting between non-negative `int` values and the corresponding varint `bytes`: 
 
-```
+```py
 >>> from multiformats import varint
 >>> varint.encode(128)
 b'\x80\x01'
