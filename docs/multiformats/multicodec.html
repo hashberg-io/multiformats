@@ -1,0 +1,802 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>multiformats.multicodec API documentation</title>
+<meta name="description" content="Implementation of the [multicodec spec](https://github.com/multiformats/multicodec) …" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS_CHTML" integrity="sha256-kZafAc6mZvK3W3v1pHOcUix30OHQN6pU/NO2oFkqZVw=" crossorigin></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>multiformats.multicodec</code></h1>
+</header>
+<section id="section-intro">
+<p>Implementation of the <a href="https://github.com/multiformats/multicodec">multicodec spec</a>.</p>
+<p>The <code><a title="multiformats.multicodec.Multicodec" href="#multiformats.multicodec.Multicodec">Multicodec</a></code> dataclass provides a container for multicodec data:</p>
+<pre><code class="language-py">&gt;&gt;&gt; from multiformats import multicodec
+&gt;&gt;&gt; from multicodec import Multicodec
+&gt;&gt;&gt; Multicodec(&quot;identity&quot;, &quot;multihash&quot;, 0x00, &quot;permanent&quot;, &quot;raw binary&quot;)
+Multicodec(name='identity', tag='multihash', code=0,
+           status='permanent', description='raw binary')
+</code></pre>
+<p>The <code><a title="multiformats.multicodec.exists" href="#multiformats.multicodec.exists">exists()</a></code> and <code><a title="multiformats.multicodec.get" href="#multiformats.multicodec.get">get()</a></code> functions can be used to check whether a multicodec with given name or code is known, and if so to get the corresponding object:</p>
+<pre><code class="language-py">&gt;&gt;&gt; multicodec.exists(&quot;identity&quot;)
+True
+&gt;&gt;&gt; multicodec.exists(0x00)
+True
+&gt;&gt;&gt; multicodec.get(&quot;identity&quot;)
+Multicodec(name='identity', tag='multihash', code=0,
+           status='permanent', description='raw binary')
+&gt;&gt;&gt; multicodec.get(0x00)
+Multicodec(name='identity', tag='multihash', code=0,
+           status='permanent', description='raw binary')
+</code></pre>
+<p>The <code><a title="multiformats.multicodec.table" href="#multiformats.multicodec.table">table()</a></code> function can be used to iterate through known multicodecs, optionally restrictiong to one or more tags and/or statuses:</p>
+<pre><code class="language-py">&gt;&gt;&gt; len(list(multicodec.table()))
+482
+&gt;&gt;&gt; selected = multicodec.table(tag=[&quot;ipld&quot;, &quot;multiaddr&quot;], status=&quot;permanent&quot;)
+&gt;&gt;&gt; [m.code for m in selected]
+[1, 4, 6, 41, 53, 54, 55, 56, 85, 112, 113, 114, 120,
+ 144, 145, 146, 147, 148, 149, 150, 151, 152, 176, 177,
+ 178, 192, 193, 290, 297, 400, 421, 460, 477, 478, 479]
+</code></pre>
+<p>The <code><a title="multiformats.multicodec.register" href="#multiformats.multicodec.register">register()</a></code> function can be used to register a custom multicodec as known:</p>
+<pre><code class="language-py">&gt;&gt;&gt; m = Multicodec(&quot;my-multicodec&quot;, &quot;my-tag&quot;, 0x300001, &quot;draft&quot;, &quot;...&quot;)
+&gt;&gt;&gt; multicodec.register(m)
+&gt;&gt;&gt; multicodec.exists(0x300001)
+True
+&gt;&gt;&gt; multicodec.get(0x300001).name
+'my-multicodec'
+&gt;&gt;&gt; multicodec.get(0x300001).is_private_use
+True # code in range(0x300000, 0x400000)
+</code></pre>
+<p>The <code><a title="multiformats.multicodec.unregister" href="#multiformats.multicodec.unregister">unregister()</a></code> function can be used to unregister an existing multicodec (by name or code):</p>
+<pre><code class="language-py">&gt;&gt;&gt; multicodec.unregister(0x300001)
+&gt;&gt;&gt; multicodec.exists(0x300001)
+False
+</code></pre>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;
+    Implementation of the [multicodec spec](https://github.com/multiformats/multicodec).
+
+    The `Multicodec` dataclass provides a container for multicodec data:
+
+    ```py
+    &gt;&gt;&gt; from multiformats import multicodec
+    &gt;&gt;&gt; from multicodec import Multicodec
+    &gt;&gt;&gt; Multicodec(&#34;identity&#34;, &#34;multihash&#34;, 0x00, &#34;permanent&#34;, &#34;raw binary&#34;)
+    Multicodec(name=&#39;identity&#39;, tag=&#39;multihash&#39;, code=0,
+               status=&#39;permanent&#39;, description=&#39;raw binary&#39;)
+    ```
+
+    The `exists` and `get` functions can be used to check whether a multicodec with given name or code is known, and if so to get the corresponding object:
+
+    ```py
+    &gt;&gt;&gt; multicodec.exists(&#34;identity&#34;)
+    True
+    &gt;&gt;&gt; multicodec.exists(0x00)
+    True
+    &gt;&gt;&gt; multicodec.get(&#34;identity&#34;)
+    Multicodec(name=&#39;identity&#39;, tag=&#39;multihash&#39;, code=0,
+               status=&#39;permanent&#39;, description=&#39;raw binary&#39;)
+    &gt;&gt;&gt; multicodec.get(0x00)
+    Multicodec(name=&#39;identity&#39;, tag=&#39;multihash&#39;, code=0,
+               status=&#39;permanent&#39;, description=&#39;raw binary&#39;)
+    ```
+
+    The `table` function can be used to iterate through known multicodecs, optionally restrictiong to one or more tags and/or statuses:
+
+    ```py
+    &gt;&gt;&gt; len(list(multicodec.table()))
+    482
+    &gt;&gt;&gt; selected = multicodec.table(tag=[&#34;ipld&#34;, &#34;multiaddr&#34;], status=&#34;permanent&#34;)
+    &gt;&gt;&gt; [m.code for m in selected]
+    [1, 4, 6, 41, 53, 54, 55, 56, 85, 112, 113, 114, 120,
+     144, 145, 146, 147, 148, 149, 150, 151, 152, 176, 177,
+     178, 192, 193, 290, 297, 400, 421, 460, 477, 478, 479]
+    ```
+
+    The `register` function can be used to register a custom multicodec as known:
+
+    ```py
+    &gt;&gt;&gt; m = Multicodec(&#34;my-multicodec&#34;, &#34;my-tag&#34;, 0x300001, &#34;draft&#34;, &#34;...&#34;)
+    &gt;&gt;&gt; multicodec.register(m)
+    &gt;&gt;&gt; multicodec.exists(0x300001)
+    True
+    &gt;&gt;&gt; multicodec.get(0x300001).name
+    &#39;my-multicodec&#39;
+    &gt;&gt;&gt; multicodec.get(0x300001).is_private_use
+    True # code in range(0x300000, 0x400000)
+    ```
+
+    The `unregister` function can be used to unregister an existing multicodec (by name or code):
+
+    ```py
+    &gt;&gt;&gt; multicodec.unregister(0x300001)
+    &gt;&gt;&gt; multicodec.exists(0x300001)
+    False
+    ```
+&#34;&#34;&#34;
+
+import csv
+from dataclasses import dataclass
+from importlib import resources
+import re
+from typing import Collection, Dict, Iterable, Iterator, Mapping, Optional, Set, Tuple, Union
+
+
+@dataclass(frozen=True)
+class Multicodec:
+    &#34;&#34;&#34; Dataclass for a multicodec. &#34;&#34;&#34;
+
+    name: str
+    &#34;&#34;&#34; Multicodec name. &#34;&#34;&#34;
+
+    tag: str
+    &#34;&#34;&#34; Multicodec tag. &#34;&#34;&#34;
+
+    code: int
+    &#34;&#34;&#34; Multicodec code (as a non-negative integer). &#34;&#34;&#34;
+
+    status: str
+    &#34;&#34;&#34; Multicodec status (currently only &#39;draft&#39; or &#39;permanent&#39;).&#34;&#34;&#34;
+
+    description: str
+    &#34;&#34;&#34; Multicodec description. &#34;&#34;&#34;
+
+    def __post_init__(self):
+        if not re.match(r&#34;^[a-z][a-z0-9_-]+$&#34;, self.name):
+            raise ValueError(f&#34;Invalid multicodec name {repr(self.name)}&#34;)
+        if self.status not in (&#34;draft&#34;, &#34;permanent&#34;):
+            raise ValueError(f&#34;Invalid multicodec status {repr(self.status)}.&#34;)
+        if self.code &lt; 0:
+            raise ValueError(f&#34;Invalid multicodec code {self.code}.&#34;)
+
+    @property
+    def hexcode(self) -&gt; str:
+        &#34;&#34;&#34;
+            Multicodec code as a hex string (with hex digits zero-padded to even length).
+        &#34;&#34;&#34;
+        code = hex(self.code)
+        if len(code) % 2 != 0:
+            code = &#34;0x0&#34;+code[2:]
+        return code
+
+    @property
+    def is_private_use(self) -&gt; bool:
+        &#34;&#34;&#34;
+            Whether this multicodec code is reserved for private use,
+            i.e. whether it is in `range(0x300000, 0x400000)`.
+        &#34;&#34;&#34;
+        return self.code in range(0x300000, 0x400000)
+
+    def to_json(self) -&gt; Mapping[str, str]:
+        &#34;&#34;&#34;
+            Returns a JSON dictionary representation of this multicodec object,
+            compatible with the one from the table.csv found in the
+            [multicodec spec](https://github.com/multiformats/multicodec)
+        &#34;&#34;&#34;
+        return {
+            &#34;name&#34;: self.name,
+            &#34;tag&#34;: self.tag,
+            &#34;code&#34;: self.hexcode,
+            &#34;status&#34;: self.status,
+            &#34;description&#34;: self.description
+        }
+
+    @staticmethod
+    def from_json(multicodec: Mapping[str, str]) -&gt; &#34;Multicodec&#34;:
+        &#34;&#34;&#34;
+            Decodes a `Multicodec` object from a JSON dictionary representation
+            compatible with the one from the table.csv found in the
+            [multicodec spec](https://github.com/multiformats/multicodec)
+        &#34;&#34;&#34;
+        return Multicodec(
+            multicodec[&#34;name&#34;],
+            multicodec[&#34;tag&#34;],
+            int(multicodec[&#34;code&#34;][2:], base=16),
+            multicodec[&#34;status&#34;],
+            multicodec[&#34;description&#34;]
+        )
+
+    def __str__(self) -&gt; str:
+        return str(self.to_json())
+
+
+def get(name_or_code: Union[str, int]) -&gt; Multicodec:
+    &#34;&#34;&#34;
+        Gets the multicodec with given name (if a string is passed) or code (if an int is passed).
+        Raises `KeyError` if no such multicodec exists.
+    &#34;&#34;&#34;
+    if isinstance(name_or_code, str):
+        name: str = name_or_code
+        if name not in _name_table:
+            raise KeyError(f&#34;No multicodec named {repr(name)}.&#34;)
+        return _name_table[name]
+    code: int = name_or_code
+    if code not in _code_table:
+        raise KeyError(f&#34;No multicodec with code {repr(code)}.&#34;)
+    return _code_table[code]
+
+
+def exists(name_or_code: Union[str, int]) -&gt; bool:
+    &#34;&#34;&#34;
+        Checks whether there is a multicodec with the given name (if a string is passed)
+        or code (if an int is passed).
+    &#34;&#34;&#34;
+    if isinstance(name_or_code, str):
+        name: str = name_or_code
+        return name in _name_table
+    code: int = name_or_code
+    return code in _code_table
+
+
+def register(m: Multicodec, overwrite: bool = False):
+    &#34;&#34;&#34;
+        Registers a given multicodec. The optional keyword argument `overwrite` (default: `False`)
+        can be used to overwrite a multicodec with existing code.
+    &#34;&#34;&#34;
+    if not overwrite and m.code in _code_table:
+        raise ValueError(f&#34;Multicodec with code {repr(m.code)} already exists: {_code_table[m.code]}&#34;)
+    if m.name in _name_table:
+        raise ValueError(f&#34;Multicodec with name {repr(m.name)} already exists: {_name_table[m.name]}&#34;)
+    _code_table[m.code] = m
+    _name_table[m.name] = m
+
+
+def unregister(name_or_code: Union[str, int]):
+    &#34;&#34;&#34;
+        Unregisters the multicodec with given name (if a string is passed) or code (if an int is passed).
+        Raises `KeyError` if no such multicodec exists.
+    &#34;&#34;&#34;
+    m = get(name_or_code)
+    del _code_table[m.code]
+    del _name_table[m.name]
+
+
+def table(tag: Union[None, str, Collection[str]] = None, status: Union[None, str, Collection[str]] = None) -&gt; Iterator[Multicodec]:
+    &#34;&#34;&#34;
+        Iterates through the registered multicodecs, in order of ascending code.
+        The optional keyword arguments `tag` and `status` can be used to restrict the iterator
+        to multicodecs with a given `tag` or `status` respectively.
+    &#34;&#34;&#34;
+    tags: Optional[Collection[str]]
+    if tag is None:
+        tags = None
+    elif isinstance(tag, str):
+        tags = [tag]
+    else:
+        tags = tag
+    statuses: Optional[Collection[str]]
+    if status is None:
+        statuses = None
+    elif isinstance(status, str):
+        statuses = [status]
+    else:
+        statuses = status
+    for code in sorted(_code_table.keys()):
+        m = _code_table[code]
+        if tags is not None and m.tag not in tags:
+            continue
+        if statuses is not None and m.status not in statuses:
+            continue
+        yield m
+
+
+def build_multicodec_tables(multicodecs: Iterable[Multicodec], *,
+                            allow_private_use: bool = False) -&gt; Tuple[Dict[int, Multicodec], Dict[str, Multicodec]]:
+    &#34;&#34;&#34;
+        Creates code-&gt;multicodec and name-&gt;multicodec mappings from a finite iterable of multicodecs,
+        returning the mappings. Use as:
+
+        ```py
+            code_table, name_table = build_multicodec_tables(multicodecs)
+        ```
+
+        The keyword argument `allow_private_use` (default: `False`) can be used to allow multicodec entries
+        with private use codes in `range(0x300000, 0x400000)`.
+    &#34;&#34;&#34;
+    code_table: Dict[int, Multicodec] = {}
+    name_table: Dict[str, Multicodec] = {}
+    overwritten_draft_codes: Set[int] = set()
+    for m in multicodecs:
+        if not allow_private_use and m.is_private_use:
+            raise ValueError(f&#34;Private use multicodec not allowed: {m}&#34;)
+        if m.code in code_table:
+            if code_table[m.code].status == &#34;permanent&#34;:
+                if m.status == &#34;draft&#34;:
+                    # this draft code has been superseded by a permanent one, skip it
+                    continue
+                raise ValueError(f&#34;Multicodec code {m.hexcode} appears multiple times in table.&#34;)
+            if m.code != &#34;permanent&#34;:
+                # overwriting draft code with another draft code: dodgy, need to check at the end
+                overwritten_draft_codes.add(m.code)
+        code_table[m.code] = m
+        if m.name in name_table:
+            raise ValueError(f&#34;Multicodec name {m.name} appears multiple times in table.&#34;)
+        name_table[m.name] = m
+    for code in overwritten_draft_codes:
+        m = code_table[code]
+        if m.status != &#34;permanent&#34;:
+            raise ValueError(f&#34;Code {m.code} appears multiple times in table, &#34;
+                              &#34;but none of the associated multicodecs is permanent.&#34;)
+    return code_table, name_table
+
+# Create the global code-&gt;multicodec and name-&gt;multicodec mappings.
+with resources.open_text(&#34;multiformats&#34;, &#34;multicodec-table.csv&#34;) as csv_table:
+    reader = csv.DictReader(csv_table)
+    multicodecs = (Multicodec.from_json({k.strip(): v.strip() for k, v in _row.items()})
+                   for _row in reader)
+    _code_table, _name_table = build_multicodec_tables(multicodecs)</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="multiformats.multicodec.build_multicodec_tables"><code class="name flex">
+<span>def <span class="ident">build_multicodec_tables</span></span>(<span>multicodecs: Iterable[<a title="multiformats.multicodec.Multicodec" href="#multiformats.multicodec.Multicodec">Multicodec</a>], *, allow_private_use: bool = False) ‑> Tuple[Dict[int, <a title="multiformats.multicodec.Multicodec" href="#multiformats.multicodec.Multicodec">Multicodec</a>], Dict[str, <a title="multiformats.multicodec.Multicodec" href="#multiformats.multicodec.Multicodec">Multicodec</a>]]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Creates code-&gt;multicodec and name-&gt;multicodec mappings from a finite iterable of multicodecs,
+returning the mappings. Use as:</p>
+<pre><code class="language-py">    code_table, name_table = build_multicodec_tables(multicodecs)
+</code></pre>
+<p>The keyword argument <code>allow_private_use</code> (default: <code>False</code>) can be used to allow multicodec entries
+with private use codes in <code>range(0x300000, 0x400000)</code>.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def build_multicodec_tables(multicodecs: Iterable[Multicodec], *,
+                            allow_private_use: bool = False) -&gt; Tuple[Dict[int, Multicodec], Dict[str, Multicodec]]:
+    &#34;&#34;&#34;
+        Creates code-&gt;multicodec and name-&gt;multicodec mappings from a finite iterable of multicodecs,
+        returning the mappings. Use as:
+
+        ```py
+            code_table, name_table = build_multicodec_tables(multicodecs)
+        ```
+
+        The keyword argument `allow_private_use` (default: `False`) can be used to allow multicodec entries
+        with private use codes in `range(0x300000, 0x400000)`.
+    &#34;&#34;&#34;
+    code_table: Dict[int, Multicodec] = {}
+    name_table: Dict[str, Multicodec] = {}
+    overwritten_draft_codes: Set[int] = set()
+    for m in multicodecs:
+        if not allow_private_use and m.is_private_use:
+            raise ValueError(f&#34;Private use multicodec not allowed: {m}&#34;)
+        if m.code in code_table:
+            if code_table[m.code].status == &#34;permanent&#34;:
+                if m.status == &#34;draft&#34;:
+                    # this draft code has been superseded by a permanent one, skip it
+                    continue
+                raise ValueError(f&#34;Multicodec code {m.hexcode} appears multiple times in table.&#34;)
+            if m.code != &#34;permanent&#34;:
+                # overwriting draft code with another draft code: dodgy, need to check at the end
+                overwritten_draft_codes.add(m.code)
+        code_table[m.code] = m
+        if m.name in name_table:
+            raise ValueError(f&#34;Multicodec name {m.name} appears multiple times in table.&#34;)
+        name_table[m.name] = m
+    for code in overwritten_draft_codes:
+        m = code_table[code]
+        if m.status != &#34;permanent&#34;:
+            raise ValueError(f&#34;Code {m.code} appears multiple times in table, &#34;
+                              &#34;but none of the associated multicodecs is permanent.&#34;)
+    return code_table, name_table</code></pre>
+</details>
+</dd>
+<dt id="multiformats.multicodec.exists"><code class="name flex">
+<span>def <span class="ident">exists</span></span>(<span>name_or_code: Union[str, int]) ‑> bool</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Checks whether there is a multicodec with the given name (if a string is passed)
+or code (if an int is passed).</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def exists(name_or_code: Union[str, int]) -&gt; bool:
+    &#34;&#34;&#34;
+        Checks whether there is a multicodec with the given name (if a string is passed)
+        or code (if an int is passed).
+    &#34;&#34;&#34;
+    if isinstance(name_or_code, str):
+        name: str = name_or_code
+        return name in _name_table
+    code: int = name_or_code
+    return code in _code_table</code></pre>
+</details>
+</dd>
+<dt id="multiformats.multicodec.get"><code class="name flex">
+<span>def <span class="ident">get</span></span>(<span>name_or_code: Union[str, int]) ‑> <a title="multiformats.multicodec.Multicodec" href="#multiformats.multicodec.Multicodec">Multicodec</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Gets the multicodec with given name (if a string is passed) or code (if an int is passed).
+Raises <code>KeyError</code> if no such multicodec exists.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get(name_or_code: Union[str, int]) -&gt; Multicodec:
+    &#34;&#34;&#34;
+        Gets the multicodec with given name (if a string is passed) or code (if an int is passed).
+        Raises `KeyError` if no such multicodec exists.
+    &#34;&#34;&#34;
+    if isinstance(name_or_code, str):
+        name: str = name_or_code
+        if name not in _name_table:
+            raise KeyError(f&#34;No multicodec named {repr(name)}.&#34;)
+        return _name_table[name]
+    code: int = name_or_code
+    if code not in _code_table:
+        raise KeyError(f&#34;No multicodec with code {repr(code)}.&#34;)
+    return _code_table[code]</code></pre>
+</details>
+</dd>
+<dt id="multiformats.multicodec.register"><code class="name flex">
+<span>def <span class="ident">register</span></span>(<span>m: <a title="multiformats.multicodec.Multicodec" href="#multiformats.multicodec.Multicodec">Multicodec</a>, overwrite: bool = False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Registers a given multicodec. The optional keyword argument <code>overwrite</code> (default: <code>False</code>)
+can be used to overwrite a multicodec with existing code.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def register(m: Multicodec, overwrite: bool = False):
+    &#34;&#34;&#34;
+        Registers a given multicodec. The optional keyword argument `overwrite` (default: `False`)
+        can be used to overwrite a multicodec with existing code.
+    &#34;&#34;&#34;
+    if not overwrite and m.code in _code_table:
+        raise ValueError(f&#34;Multicodec with code {repr(m.code)} already exists: {_code_table[m.code]}&#34;)
+    if m.name in _name_table:
+        raise ValueError(f&#34;Multicodec with name {repr(m.name)} already exists: {_name_table[m.name]}&#34;)
+    _code_table[m.code] = m
+    _name_table[m.name] = m</code></pre>
+</details>
+</dd>
+<dt id="multiformats.multicodec.table"><code class="name flex">
+<span>def <span class="ident">table</span></span>(<span>tag: Union[ForwardRef(None), str, Collection[str]] = None, status: Union[ForwardRef(None), str, Collection[str]] = None) ‑> Iterator[<a title="multiformats.multicodec.Multicodec" href="#multiformats.multicodec.Multicodec">Multicodec</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Iterates through the registered multicodecs, in order of ascending code.
+The optional keyword arguments <code>tag</code> and <code>status</code> can be used to restrict the iterator
+to multicodecs with a given <code>tag</code> or <code>status</code> respectively.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def table(tag: Union[None, str, Collection[str]] = None, status: Union[None, str, Collection[str]] = None) -&gt; Iterator[Multicodec]:
+    &#34;&#34;&#34;
+        Iterates through the registered multicodecs, in order of ascending code.
+        The optional keyword arguments `tag` and `status` can be used to restrict the iterator
+        to multicodecs with a given `tag` or `status` respectively.
+    &#34;&#34;&#34;
+    tags: Optional[Collection[str]]
+    if tag is None:
+        tags = None
+    elif isinstance(tag, str):
+        tags = [tag]
+    else:
+        tags = tag
+    statuses: Optional[Collection[str]]
+    if status is None:
+        statuses = None
+    elif isinstance(status, str):
+        statuses = [status]
+    else:
+        statuses = status
+    for code in sorted(_code_table.keys()):
+        m = _code_table[code]
+        if tags is not None and m.tag not in tags:
+            continue
+        if statuses is not None and m.status not in statuses:
+            continue
+        yield m</code></pre>
+</details>
+</dd>
+<dt id="multiformats.multicodec.unregister"><code class="name flex">
+<span>def <span class="ident">unregister</span></span>(<span>name_or_code: Union[str, int])</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Unregisters the multicodec with given name (if a string is passed) or code (if an int is passed).
+Raises <code>KeyError</code> if no such multicodec exists.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def unregister(name_or_code: Union[str, int]):
+    &#34;&#34;&#34;
+        Unregisters the multicodec with given name (if a string is passed) or code (if an int is passed).
+        Raises `KeyError` if no such multicodec exists.
+    &#34;&#34;&#34;
+    m = get(name_or_code)
+    del _code_table[m.code]
+    del _name_table[m.name]</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="multiformats.multicodec.Multicodec"><code class="flex name class">
+<span>class <span class="ident">Multicodec</span></span>
+<span>(</span><span>name: str, tag: str, code: int, status: str, description: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Dataclass for a multicodec.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass(frozen=True)
+class Multicodec:
+    &#34;&#34;&#34; Dataclass for a multicodec. &#34;&#34;&#34;
+
+    name: str
+    &#34;&#34;&#34; Multicodec name. &#34;&#34;&#34;
+
+    tag: str
+    &#34;&#34;&#34; Multicodec tag. &#34;&#34;&#34;
+
+    code: int
+    &#34;&#34;&#34; Multicodec code (as a non-negative integer). &#34;&#34;&#34;
+
+    status: str
+    &#34;&#34;&#34; Multicodec status (currently only &#39;draft&#39; or &#39;permanent&#39;).&#34;&#34;&#34;
+
+    description: str
+    &#34;&#34;&#34; Multicodec description. &#34;&#34;&#34;
+
+    def __post_init__(self):
+        if not re.match(r&#34;^[a-z][a-z0-9_-]+$&#34;, self.name):
+            raise ValueError(f&#34;Invalid multicodec name {repr(self.name)}&#34;)
+        if self.status not in (&#34;draft&#34;, &#34;permanent&#34;):
+            raise ValueError(f&#34;Invalid multicodec status {repr(self.status)}.&#34;)
+        if self.code &lt; 0:
+            raise ValueError(f&#34;Invalid multicodec code {self.code}.&#34;)
+
+    @property
+    def hexcode(self) -&gt; str:
+        &#34;&#34;&#34;
+            Multicodec code as a hex string (with hex digits zero-padded to even length).
+        &#34;&#34;&#34;
+        code = hex(self.code)
+        if len(code) % 2 != 0:
+            code = &#34;0x0&#34;+code[2:]
+        return code
+
+    @property
+    def is_private_use(self) -&gt; bool:
+        &#34;&#34;&#34;
+            Whether this multicodec code is reserved for private use,
+            i.e. whether it is in `range(0x300000, 0x400000)`.
+        &#34;&#34;&#34;
+        return self.code in range(0x300000, 0x400000)
+
+    def to_json(self) -&gt; Mapping[str, str]:
+        &#34;&#34;&#34;
+            Returns a JSON dictionary representation of this multicodec object,
+            compatible with the one from the table.csv found in the
+            [multicodec spec](https://github.com/multiformats/multicodec)
+        &#34;&#34;&#34;
+        return {
+            &#34;name&#34;: self.name,
+            &#34;tag&#34;: self.tag,
+            &#34;code&#34;: self.hexcode,
+            &#34;status&#34;: self.status,
+            &#34;description&#34;: self.description
+        }
+
+    @staticmethod
+    def from_json(multicodec: Mapping[str, str]) -&gt; &#34;Multicodec&#34;:
+        &#34;&#34;&#34;
+            Decodes a `Multicodec` object from a JSON dictionary representation
+            compatible with the one from the table.csv found in the
+            [multicodec spec](https://github.com/multiformats/multicodec)
+        &#34;&#34;&#34;
+        return Multicodec(
+            multicodec[&#34;name&#34;],
+            multicodec[&#34;tag&#34;],
+            int(multicodec[&#34;code&#34;][2:], base=16),
+            multicodec[&#34;status&#34;],
+            multicodec[&#34;description&#34;]
+        )
+
+    def __str__(self) -&gt; str:
+        return str(self.to_json())</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="multiformats.multicodec.Multicodec.code"><code class="name">var <span class="ident">code</span> : int</code></dt>
+<dd>
+<div class="desc"><p>Multicodec code (as a non-negative integer).</p></div>
+</dd>
+<dt id="multiformats.multicodec.Multicodec.description"><code class="name">var <span class="ident">description</span> : str</code></dt>
+<dd>
+<div class="desc"><p>Multicodec description.</p></div>
+</dd>
+<dt id="multiformats.multicodec.Multicodec.name"><code class="name">var <span class="ident">name</span> : str</code></dt>
+<dd>
+<div class="desc"><p>Multicodec name.</p></div>
+</dd>
+<dt id="multiformats.multicodec.Multicodec.status"><code class="name">var <span class="ident">status</span> : str</code></dt>
+<dd>
+<div class="desc"><p>Multicodec status (currently only 'draft' or 'permanent').</p></div>
+</dd>
+<dt id="multiformats.multicodec.Multicodec.tag"><code class="name">var <span class="ident">tag</span> : str</code></dt>
+<dd>
+<div class="desc"><p>Multicodec tag.</p></div>
+</dd>
+</dl>
+<h3>Static methods</h3>
+<dl>
+<dt id="multiformats.multicodec.Multicodec.from_json"><code class="name flex">
+<span>def <span class="ident">from_json</span></span>(<span>multicodec: Mapping[str, str]) ‑> <a title="multiformats.multicodec.Multicodec" href="#multiformats.multicodec.Multicodec">Multicodec</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Decodes a <code><a title="multiformats.multicodec.Multicodec" href="#multiformats.multicodec.Multicodec">Multicodec</a></code> object from a JSON dictionary representation
+compatible with the one from the table.csv found in the
+<a href="https://github.com/multiformats/multicodec">multicodec spec</a></p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def from_json(multicodec: Mapping[str, str]) -&gt; &#34;Multicodec&#34;:
+    &#34;&#34;&#34;
+        Decodes a `Multicodec` object from a JSON dictionary representation
+        compatible with the one from the table.csv found in the
+        [multicodec spec](https://github.com/multiformats/multicodec)
+    &#34;&#34;&#34;
+    return Multicodec(
+        multicodec[&#34;name&#34;],
+        multicodec[&#34;tag&#34;],
+        int(multicodec[&#34;code&#34;][2:], base=16),
+        multicodec[&#34;status&#34;],
+        multicodec[&#34;description&#34;]
+    )</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Instance variables</h3>
+<dl>
+<dt id="multiformats.multicodec.Multicodec.hexcode"><code class="name">var <span class="ident">hexcode</span> : str</code></dt>
+<dd>
+<div class="desc"><p>Multicodec code as a hex string (with hex digits zero-padded to even length).</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def hexcode(self) -&gt; str:
+    &#34;&#34;&#34;
+        Multicodec code as a hex string (with hex digits zero-padded to even length).
+    &#34;&#34;&#34;
+    code = hex(self.code)
+    if len(code) % 2 != 0:
+        code = &#34;0x0&#34;+code[2:]
+    return code</code></pre>
+</details>
+</dd>
+<dt id="multiformats.multicodec.Multicodec.is_private_use"><code class="name">var <span class="ident">is_private_use</span> : bool</code></dt>
+<dd>
+<div class="desc"><p>Whether this multicodec code is reserved for private use,
+i.e. whether it is in <code>range(0x300000, 0x400000)</code>.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def is_private_use(self) -&gt; bool:
+    &#34;&#34;&#34;
+        Whether this multicodec code is reserved for private use,
+        i.e. whether it is in `range(0x300000, 0x400000)`.
+    &#34;&#34;&#34;
+    return self.code in range(0x300000, 0x400000)</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="multiformats.multicodec.Multicodec.to_json"><code class="name flex">
+<span>def <span class="ident">to_json</span></span>(<span>self) ‑> Mapping[str, str]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Returns a JSON dictionary representation of this multicodec object,
+compatible with the one from the table.csv found in the
+<a href="https://github.com/multiformats/multicodec">multicodec spec</a></p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def to_json(self) -&gt; Mapping[str, str]:
+    &#34;&#34;&#34;
+        Returns a JSON dictionary representation of this multicodec object,
+        compatible with the one from the table.csv found in the
+        [multicodec spec](https://github.com/multiformats/multicodec)
+    &#34;&#34;&#34;
+    return {
+        &#34;name&#34;: self.name,
+        &#34;tag&#34;: self.tag,
+        &#34;code&#34;: self.hexcode,
+        &#34;status&#34;: self.status,
+        &#34;description&#34;: self.description
+    }</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="multiformats" href="index.html">multiformats</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="multiformats.multicodec.build_multicodec_tables" href="#multiformats.multicodec.build_multicodec_tables">build_multicodec_tables</a></code></li>
+<li><code><a title="multiformats.multicodec.exists" href="#multiformats.multicodec.exists">exists</a></code></li>
+<li><code><a title="multiformats.multicodec.get" href="#multiformats.multicodec.get">get</a></code></li>
+<li><code><a title="multiformats.multicodec.register" href="#multiformats.multicodec.register">register</a></code></li>
+<li><code><a title="multiformats.multicodec.table" href="#multiformats.multicodec.table">table</a></code></li>
+<li><code><a title="multiformats.multicodec.unregister" href="#multiformats.multicodec.unregister">unregister</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="multiformats.multicodec.Multicodec" href="#multiformats.multicodec.Multicodec">Multicodec</a></code></h4>
+<ul class="two-column">
+<li><code><a title="multiformats.multicodec.Multicodec.code" href="#multiformats.multicodec.Multicodec.code">code</a></code></li>
+<li><code><a title="multiformats.multicodec.Multicodec.description" href="#multiformats.multicodec.Multicodec.description">description</a></code></li>
+<li><code><a title="multiformats.multicodec.Multicodec.from_json" href="#multiformats.multicodec.Multicodec.from_json">from_json</a></code></li>
+<li><code><a title="multiformats.multicodec.Multicodec.hexcode" href="#multiformats.multicodec.Multicodec.hexcode">hexcode</a></code></li>
+<li><code><a title="multiformats.multicodec.Multicodec.is_private_use" href="#multiformats.multicodec.Multicodec.is_private_use">is_private_use</a></code></li>
+<li><code><a title="multiformats.multicodec.Multicodec.name" href="#multiformats.multicodec.Multicodec.name">name</a></code></li>
+<li><code><a title="multiformats.multicodec.Multicodec.status" href="#multiformats.multicodec.Multicodec.status">status</a></code></li>
+<li><code><a title="multiformats.multicodec.Multicodec.tag" href="#multiformats.multicodec.Multicodec.tag">tag</a></code></li>
+<li><code><a title="multiformats.multicodec.Multicodec.to_json" href="#multiformats.multicodec.Multicodec.to_json">to_json</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>

@@ -1,5 +1,30 @@
 """
-    Implementation of the [unsigned-varint spec](https://github.com/multiformats/unsigned-varint)
+    Implementation of the [unsigned-varint spec](https://github.com/multiformats/unsigned-varint).
+
+    Functionality is provided by the `encode` and `decode` functions, converting between non-negative
+    `int` values and the corresponding varint `bytes`:
+
+    ```py
+    >>> from multiformats import varint
+    >>> varint.encode(128)
+    b'\x80\x01'
+    >>> varint.decode(b'\x80\x01')
+    128
+    ```
+
+    A buffered binary stream (i.e. an instance of `io.BufferedIOBase`) can be passed to the `decode`
+    function instead of a `bytes` object, in which case only the varint bytes are read from the stream:
+
+    ```py
+    >>> from io import BytesIO
+    >>> stream = BytesIO(bytes([0x80, 0x01, 0x12, 0xff]))
+    >>> varint.decode(stream)
+    128
+    >>> stream.read()
+    b'\x12\xff'
+    ```
+
+    If a `bytes` (or `bytearray`) object is passed to `decode`, the encoded varint must span all bytes (`ValueError` is raised if not).
 """
 
 from io import BufferedIOBase, BytesIO
@@ -44,6 +69,8 @@ def decode(varint: Union[bytes, bytearray, BufferedIOBase]) -> int:
         - the last byte of `varint` is a continuation byte (invalid format)
         - the decoded integer could be encoded in fewer bytes than were read (from specs, encoding must be minimal)
         - `varint` is a `bytes` or `bytearray` object and the number of bytes used by the encoding is fewer than its length
+
+        The last point is a designed choice aimed to reduce errors when decoding fixed-length bytestrings (rather than streams).
     """
     stream = BytesIO(varint) if isinstance(varint, (bytes, bytearray)) else varint
     expect_next = True

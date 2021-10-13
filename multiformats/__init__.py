@@ -3,3 +3,8 @@
 """
 
 from . import varint
+from . import multicodec
+
+__pdoc__ = {
+    "multicodec-spec": False
+}

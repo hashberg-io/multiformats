@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
 <title>multiformats.varint API documentation</title>
-<meta name="description" content="Implementation of the [unsigned-varint spec](https://github.com/multiformats/unsigned-varint)" />
+<meta name="description" content="Implementation of the [unsigned-varint spec](https://github.com/multiformats/unsigned-varint) …" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -23,13 +23,56 @@
 <h1 class="title">Module <code>multiformats.varint</code></h1>
 </header>
 <section id="section-intro">
-<p>Implementation of the <a href="https://github.com/multiformats/unsigned-varint">unsigned-varint spec</a></p>
+<p>Implementation of the <a href="https://github.com/multiformats/unsigned-varint">unsigned-varint spec</a>.</p>
+<p>Functionality is provided by the <code><a title="multiformats.varint.encode" href="#multiformats.varint.encode">encode()</a></code> and <code><a title="multiformats.varint.decode" href="#multiformats.varint.decode">decode()</a></code> functions, converting between non-negative
+<code>int</code> values and the corresponding varint <code>bytes</code>:</p>
+<pre><code class="language-py">&gt;&gt;&gt; from multiformats import varint
+&gt;&gt;&gt; varint.encode(128)
+b''
+&gt;&gt;&gt; varint.decode(b'')
+128
+</code></pre>
+<p>A buffered binary stream (i.e. an instance of <code>io.BufferedIOBase</code>) can be passed to the <code><a title="multiformats.varint.decode" href="#multiformats.varint.decode">decode()</a></code>
+function instead of a <code>bytes</code> object, in which case only the varint bytes are read from the stream:</p>
+<pre><code class="language-py">&gt;&gt;&gt; from io import BytesIO
+&gt;&gt;&gt; stream = BytesIO(bytes([0x80, 0x01, 0x12, 0xff]))
+&gt;&gt;&gt; varint.decode(stream)
+128
+&gt;&gt;&gt; stream.read()
+b'ÿ'
+</code></pre>
+<p>If a <code>bytes</code> (or <code>bytearray</code>) object is passed to <code><a title="multiformats.varint.decode" href="#multiformats.varint.decode">decode()</a></code>, the encoded varint must span all bytes (<code>ValueError</code> is raised if not).</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">&#34;&#34;&#34;
-    Implementation of the [unsigned-varint spec](https://github.com/multiformats/unsigned-varint)
+    Implementation of the [unsigned-varint spec](https://github.com/multiformats/unsigned-varint).
+
+    Functionality is provided by the `encode` and `decode` functions, converting between non-negative
+    `int` values and the corresponding varint `bytes`:
+
+    ```py
+    &gt;&gt;&gt; from multiformats import varint
+    &gt;&gt;&gt; varint.encode(128)
+    b&#39;\x80\x01&#39;
+    &gt;&gt;&gt; varint.decode(b&#39;\x80\x01&#39;)
+    128
+    ```
+
+    A buffered binary stream (i.e. an instance of `io.BufferedIOBase`) can be passed to the `decode`
+    function instead of a `bytes` object, in which case only the varint bytes are read from the stream:
+
+    ```py
+    &gt;&gt;&gt; from io import BytesIO
+    &gt;&gt;&gt; stream = BytesIO(bytes([0x80, 0x01, 0x12, 0xff]))
+    &gt;&gt;&gt; varint.decode(stream)
+    128
+    &gt;&gt;&gt; stream.read()
+    b&#39;\x12\xff&#39;
+    ```
+
+    If a `bytes` (or `bytearray`) object is passed to `decode`, the encoded varint must span all bytes (`ValueError` is raised if not).
 &#34;&#34;&#34;
 
 from io import BufferedIOBase, BytesIO
@@ -37,12 +80,9 @@ from typing import List, Union
 
 _max_num_bytes: int = 9
 
-
 def encode(x: int) -&gt; bytes:
     &#34;&#34;&#34;
-        Encodes a non-negative integer as an unsigned varint.
-        If a `stream` is given, the encoded varint is written to the stream and nothing is returned.
-        Otherwise, the encoded varint is written to an internal stream and the bytes are returned at the end.
+        Encodes a non-negative integer as an unsigned varint, returning the encoded bytes.
 
         Raises `ValueError` if:
         - `x &lt; 0` (varints encode unsigned integers)
@@ -50,18 +90,19 @@ def encode(x: int) -&gt; bytes:
     &#34;&#34;&#34;
     if x &lt; 0:
         raise ValueError(&#34;Integer is negative.&#34;)
-    varint_bytes: List[int] = []
+    varint_bytelist: List[int] = []
     while True:
         next_byte = x &amp; 0b0111_1111
         x &gt;&gt;= 7
         if x &gt; 0:
-            varint_bytes.append(next_byte | 0b1000_0000)
+            varint_bytelist.append(next_byte | 0b1000_0000)
         else:
-            varint_bytes.append(next_byte)
+            varint_bytelist.append(next_byte)
             break
-        if len(varint_bytes) &gt;= _max_num_bytes:
+        if len(varint_bytelist) &gt;= _max_num_bytes:
             raise ValueError(f&#34;Varints must be at most {_max_num_bytes} bytes long.&#34;)
-    return bytes(varint_bytes)
+    return bytes(varint_bytelist)
+
 
 def decode(varint: Union[bytes, bytearray, BufferedIOBase]) -&gt; int:
     &#34;&#34;&#34;
@@ -76,6 +117,8 @@ def decode(varint: Union[bytes, bytearray, BufferedIOBase]) -&gt; int:
         - the last byte of `varint` is a continuation byte (invalid format)
         - the decoded integer could be encoded in fewer bytes than were read (from specs, encoding must be minimal)
         - `varint` is a `bytes` or `bytearray` object and the number of bytes used by the encoding is fewer than its length
+
+        The last point is a designed choice aimed to reduce errors when decoding fixed-length bytestrings (rather than streams).
     &#34;&#34;&#34;
     stream = BytesIO(varint) if isinstance(varint, (bytes, bytearray)) else varint
     expect_next = True
@@ -121,7 +164,8 @@ If a <code>bytes</code> or <code>bytearray</code> object is passed, the varint e
 <li>the last byte of <code>varint</code> is a continuation byte (invalid format)</li>
 <li>the decoded integer could be encoded in fewer bytes than were read (from specs, encoding must be minimal)</li>
 <li><code>varint</code> is a <code>bytes</code> or <code>bytearray</code> object and the number of bytes used by the encoding is fewer than its length</li>
-</ul></div>
+</ul>
+<p>The last point is a designed choice aimed to reduce errors when decoding fixed-length bytestrings (rather than streams).</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -139,6 +183,8 @@ If a <code>bytes</code> or <code>bytearray</code> object is passed, the varint e
         - the last byte of `varint` is a continuation byte (invalid format)
         - the decoded integer could be encoded in fewer bytes than were read (from specs, encoding must be minimal)
         - `varint` is a `bytes` or `bytearray` object and the number of bytes used by the encoding is fewer than its length
+
+        The last point is a designed choice aimed to reduce errors when decoding fixed-length bytestrings (rather than streams).
     &#34;&#34;&#34;
     stream = BytesIO(varint) if isinstance(varint, (bytes, bytearray)) else varint
     expect_next = True
@@ -167,9 +213,7 @@ If a <code>bytes</code> or <code>bytearray</code> object is passed, the varint e
 <span>def <span class="ident">encode</span></span>(<span>x: int) ‑> bytes</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Encodes a non-negative integer as an unsigned varint.
-If a <code>stream</code> is given, the encoded varint is written to the stream and nothing is returned.
-Otherwise, the encoded varint is written to an internal stream and the bytes are returned at the end.</p>
+<div class="desc"><p>Encodes a non-negative integer as an unsigned varint, returning the encoded bytes.</p>
 <p>Raises <code>ValueError</code> if:
 - <code>x &lt; 0</code> (varints encode unsigned integers)
 - <code>x &gt;= 2**63</code> (from specs, varints are limited to 9 bytes)</p></div>
@@ -179,9 +223,7 @@ Otherwise, the encoded varint is written to an internal stream and the bytes are
 </summary>
 <pre><code class="python">def encode(x: int) -&gt; bytes:
     &#34;&#34;&#34;
-        Encodes a non-negative integer as an unsigned varint.
-        If a `stream` is given, the encoded varint is written to the stream and nothing is returned.
-        Otherwise, the encoded varint is written to an internal stream and the bytes are returned at the end.
+        Encodes a non-negative integer as an unsigned varint, returning the encoded bytes.
 
         Raises `ValueError` if:
         - `x &lt; 0` (varints encode unsigned integers)
@@ -189,18 +231,18 @@ Otherwise, the encoded varint is written to an internal stream and the bytes are
     &#34;&#34;&#34;
     if x &lt; 0:
         raise ValueError(&#34;Integer is negative.&#34;)
-    varint_bytes: List[int] = []
+    varint_bytelist: List[int] = []
     while True:
         next_byte = x &amp; 0b0111_1111
         x &gt;&gt;= 7
         if x &gt; 0:
-            varint_bytes.append(next_byte | 0b1000_0000)
+            varint_bytelist.append(next_byte | 0b1000_0000)
         else:
-            varint_bytes.append(next_byte)
+            varint_bytelist.append(next_byte)
             break
-        if len(varint_bytes) &gt;= _max_num_bytes:
+        if len(varint_bytelist) &gt;= _max_num_bytes:
             raise ValueError(f&#34;Varints must be at most {_max_num_bytes} bytes long.&#34;)
-    return bytes(varint_bytes)</code></pre>
+    return bytes(varint_bytelist)</code></pre>
 </details>
 </dd>
 </dl>

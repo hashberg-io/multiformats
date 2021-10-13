@@ -1,4 +1,4 @@
-""" Tests for varints. """
+""" Tests for the `multiformats.varint` module. """
 
 from io import BytesIO
 from random import Random
