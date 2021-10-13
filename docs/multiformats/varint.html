@@ -32,16 +32,6 @@ b''
 &gt;&gt;&gt; varint.decode(b'')
 128
 </code></pre>
-<p>A buffered binary stream (i.e. an instance of <code>io.BufferedIOBase</code>) can be passed to the <code><a title="multiformats.varint.decode" href="#multiformats.varint.decode">decode()</a></code>
-function instead of a <code>bytes</code> object, in which case only the varint bytes are read from the stream:</p>
-<pre><code class="language-py">&gt;&gt;&gt; from io import BytesIO
-&gt;&gt;&gt; stream = BytesIO(bytes([0x80, 0x01, 0x12, 0xff]))
-&gt;&gt;&gt; varint.decode(stream)
-128
-&gt;&gt;&gt; stream.read()
-b'ÿ'
-</code></pre>
-<p>If a <code>bytes</code> (or <code>bytearray</code>) object is passed to <code><a title="multiformats.varint.decode" href="#multiformats.varint.decode">decode()</a></code>, the encoded varint must span all bytes (<code>ValueError</code> is raised if not).</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -59,20 +49,6 @@ b'ÿ'
     &gt;&gt;&gt; varint.decode(b&#39;\x80\x01&#39;)
     128
     ```
-
-    A buffered binary stream (i.e. an instance of `io.BufferedIOBase`) can be passed to the `decode`
-    function instead of a `bytes` object, in which case only the varint bytes are read from the stream:
-
-    ```py
-    &gt;&gt;&gt; from io import BytesIO
-    &gt;&gt;&gt; stream = BytesIO(bytes([0x80, 0x01, 0x12, 0xff]))
-    &gt;&gt;&gt; varint.decode(stream)
-    128
-    &gt;&gt;&gt; stream.read()
-    b&#39;\x12\xff&#39;
-    ```
-
-    If a `bytes` (or `bytearray`) object is passed to `decode`, the encoded varint must span all bytes (`ValueError` is raised if not).
 &#34;&#34;&#34;
 
 from io import BufferedIOBase, BytesIO
@@ -87,6 +63,14 @@ def encode(x: int) -&gt; bytes:
         Raises `ValueError` if:
         - `x &lt; 0` (varints encode unsigned integers)
         - `x &gt;= 2**63` (from specs, varints are limited to 9 bytes)
+
+        Example usage:
+
+        ```py
+        &gt;&gt;&gt; from multiformats import varint
+        &gt;&gt;&gt; varint.encode(128)
+        b&#39;\x80\x01&#39;
+        ```
     &#34;&#34;&#34;
     if x &lt; 0:
         raise ValueError(&#34;Integer is negative.&#34;)
@@ -119,6 +103,26 @@ def decode(varint: Union[bytes, bytearray, BufferedIOBase]) -&gt; int:
         - `varint` is a `bytes` or `bytearray` object and the number of bytes used by the encoding is fewer than its length
 
         The last point is a designed choice aimed to reduce errors when decoding fixed-length bytestrings (rather than streams).
+
+        Example usage with bytes:
+
+        ```py
+        &gt;&gt;&gt; from multiformats import varint
+        &gt;&gt;&gt; varint.decode(b&#39;\x80\x01&#39;)
+        128
+        ```
+
+        Example usage with streams:
+
+        ```py
+        &gt;&gt;&gt; from io import BytesIO
+        &gt;&gt;&gt; stream = BytesIO(bytes([0x80, 0x01, 0x12, 0xff]))
+        &gt;&gt;&gt; varint.decode(stream)
+        128
+        &gt;&gt;&gt; stream.read()
+        b&#39;\x12\xff&#39;
+        ```
+
     &#34;&#34;&#34;
     stream = BytesIO(varint) if isinstance(varint, (bytes, bytearray)) else varint
     expect_next = True
@@ -165,7 +169,20 @@ If a <code>bytes</code> or <code>bytearray</code> object is passed, the varint e
 <li>the decoded integer could be encoded in fewer bytes than were read (from specs, encoding must be minimal)</li>
 <li><code>varint</code> is a <code>bytes</code> or <code>bytearray</code> object and the number of bytes used by the encoding is fewer than its length</li>
 </ul>
-<p>The last point is a designed choice aimed to reduce errors when decoding fixed-length bytestrings (rather than streams).</p></div>
+<p>The last point is a designed choice aimed to reduce errors when decoding fixed-length bytestrings (rather than streams).</p>
+<p>Example usage with bytes:</p>
+<pre><code class="language-py">&gt;&gt;&gt; from multiformats import varint
+&gt;&gt;&gt; varint.decode(b'')
+128
+</code></pre>
+<p>Example usage with streams:</p>
+<pre><code class="language-py">&gt;&gt;&gt; from io import BytesIO
+&gt;&gt;&gt; stream = BytesIO(bytes([0x80, 0x01, 0x12, 0xff]))
+&gt;&gt;&gt; varint.decode(stream)
+128
+&gt;&gt;&gt; stream.read()
+b'ÿ'
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -185,6 +202,26 @@ If a <code>bytes</code> or <code>bytearray</code> object is passed, the varint e
         - `varint` is a `bytes` or `bytearray` object and the number of bytes used by the encoding is fewer than its length
 
         The last point is a designed choice aimed to reduce errors when decoding fixed-length bytestrings (rather than streams).
+
+        Example usage with bytes:
+
+        ```py
+        &gt;&gt;&gt; from multiformats import varint
+        &gt;&gt;&gt; varint.decode(b&#39;\x80\x01&#39;)
+        128
+        ```
+
+        Example usage with streams:
+
+        ```py
+        &gt;&gt;&gt; from io import BytesIO
+        &gt;&gt;&gt; stream = BytesIO(bytes([0x80, 0x01, 0x12, 0xff]))
+        &gt;&gt;&gt; varint.decode(stream)
+        128
+        &gt;&gt;&gt; stream.read()
+        b&#39;\x12\xff&#39;
+        ```
+
     &#34;&#34;&#34;
     stream = BytesIO(varint) if isinstance(varint, (bytes, bytearray)) else varint
     expect_next = True
@@ -216,7 +253,12 @@ If a <code>bytes</code> or <code>bytearray</code> object is passed, the varint e
 <div class="desc"><p>Encodes a non-negative integer as an unsigned varint, returning the encoded bytes.</p>
 <p>Raises <code>ValueError</code> if:
 - <code>x &lt; 0</code> (varints encode unsigned integers)
-- <code>x &gt;= 2**63</code> (from specs, varints are limited to 9 bytes)</p></div>
+- <code>x &gt;= 2**63</code> (from specs, varints are limited to 9 bytes)</p>
+<p>Example usage:</p>
+<pre><code class="language-py">&gt;&gt;&gt; from multiformats import varint
+&gt;&gt;&gt; varint.encode(128)
+b''
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -228,6 +270,14 @@ If a <code>bytes</code> or <code>bytearray</code> object is passed, the varint e
         Raises `ValueError` if:
         - `x &lt; 0` (varints encode unsigned integers)
         - `x &gt;= 2**63` (from specs, varints are limited to 9 bytes)
+
+        Example usage:
+
+        ```py
+        &gt;&gt;&gt; from multiformats import varint
+        &gt;&gt;&gt; varint.encode(128)
+        b&#39;\x80\x01&#39;
+        ```
     &#34;&#34;&#34;
     if x &lt; 0:
         raise ValueError(&#34;Integer is negative.&#34;)

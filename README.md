@@ -43,18 +43,7 @@ b'\x80\x01'
 128
 ```
 
-A buffered binary stream (i.e. an instance of `io.BufferedIOBase`) can be passed to the `decode` function instead of a `bytes` object, in which case only the varint bytes are read from the stream:
-
-```py
->>> from io import BytesIO
->>> stream = BytesIO(bytes([0x80, 0x01, 0x12, 0xff]))
->>> varint.decode(stream)
-128
->>> stream.read()
-b'\x12\xff'
-```
-
-If a `bytes` (or `bytearray`) object is passed to `decode`, the encoded varint must span all bytes (`ValueError` is raised if not).
+For advanced usage, see the [API documentation](https://hashberg-io.github.io/multiformats/multiformats/varint.html). 
 
 
 ### Multicodec
@@ -63,8 +52,7 @@ The `multicodec` module implements the [multicodec spec](https://github.com/mult
 The `Multicodec` dataclass provides a container for multicodec data:
 
 ```py
->>> from multiformats import multicodec
->>> from multicodec import Multicodec
+>>> from multiformats.multicodec import Multicodec
 >>> Multicodec("identity", "multihash", 0x00, "permanent", "raw binary")
 Multicodec(name='identity', tag='multihash', code=0,
            status='permanent', description='raw binary')
@@ -73,16 +61,17 @@ Multicodec(name='identity', tag='multihash', code=0,
 The `exists` and `get` functions can be used to check whether a multicodec with given name or code is known, and if so to get the corresponding object:
 
 ```py
+>>> from multiformats import multicodec
 >>> multicodec.exists("identity")
 True
->>> multicodec.exists(0x00)
+>>> multicodec.exists(0x01)
 True
 >>> multicodec.get("identity")
 Multicodec(name='identity', tag='multihash', code=0,
            status='permanent', description='raw binary')
->>> multicodec.get(0x00)
-Multicodec(name='identity', tag='multihash', code=0,
-           status='permanent', description='raw binary')
+>>> multicodec.get(0x01)
+Multicodec(name='cidv1', tag='ipld', code=1,
+           status='permanent', description='CIDv1')
 ```
 
 The `table` function can be used to iterate through known multicodecs, optionally restrictiong to one or more tags and/or statuses:
@@ -97,26 +86,7 @@ The `table` function can be used to iterate through known multicodecs, optionall
  178, 192, 193, 290, 297, 400, 421, 460, 477, 478, 479]
 ```
 
-The `register` function can be used to register a custom multicodec as known:
-
-```py
->>> m = Multicodec("my-multicodec", "my-tag", 0x300001, "draft", "...")
->>> multicodec.register(m)
->>> multicodec.exists(0x300001)
-True
->>> multicodec.get(0x300001).name
-'my-multicodec'
->>> multicodec.get(0x300001).is_private_use
-True # code in range(0x300000, 0x400000)
-```
-
-The `unregister` function can be used to unregister an existing multicodec (by name or code):
-
-```py
->>> multicodec.unregister(0x300001)
->>> multicodec.exists(0x300001)
-False
-```
+For advanced usage, see the [API documentation](https://hashberg-io.github.io/multiformats/multiformats/multicodec.html).
 
 
 ## API
