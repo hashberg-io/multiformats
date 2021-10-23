@@ -22,16 +22,16 @@ new_bytes = requests.get(multicodec_table_url).content
 new_text = new_bytes.decode("utf-8")
 print("Building new multicodec table...")
 reader = csv.DictReader(io.StringIO(new_text))
-multicodecs = (multicodec.Multicodec.from_json({k.strip(): v.strip() for k, v in _row.items()})
+multicodecs = (multicodec.Multicodec(**{k.strip(): v.strip() for k, v in _row.items()})
                for _row in reader)
 new_table, _ = multicodec.build_multicodec_tables(multicodecs)
 
 # Loads and validates the current multicodec table:
 print("Building current multicodec table...")
-with open("multiformats/multicodec-table.csv", "r") as f:
+with open("multiformats/multicodec/multicodec-table.csv", "r") as f:
     current_text = f.read()
 reader = csv.DictReader(io.StringIO(current_text))
-multicodecs = (multicodec.Multicodec.from_json({k.strip(): v.strip() for k, v in _row.items()})
+multicodecs = (multicodec.Multicodec(**{k.strip(): v.strip() for k, v in _row.items()})
                for _row in reader)
 current_table, _ = multicodec.build_multicodec_tables(multicodecs)
 
@@ -86,7 +86,7 @@ print()
 if added or removed or changed:
     answer = input("Would you like to update the multicodec table? (y/n) ")
     if answer.lower().startswith("y"):
-        with open("multiformats/multicodec-table.csv", "w") as f:
+        with open("multiformats/multicodec/multicodec-table.csv", "w") as f:
             f.write(new_text)
 else:
     print("Nothing to update, exiting.")

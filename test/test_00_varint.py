@@ -4,7 +4,9 @@ from io import BytesIO
 from random import Random
 from multiformats import varint
 
-def test_encode_decode():
+
+
+def test_encode_decode() -> None:
     """ Check that encoding followed by decoding yields the initial integer value. """
     random = Random(0)
     for x in range(256):
@@ -16,13 +18,13 @@ def test_encode_decode():
             assert varint.decode(x_enc) == x, f"Error at value {x}"
             assert varint.decode(bytearray(x_enc)) == x, f"Error at value {x} (bytearray)"
 
-def test_minimal_encoding():
+def test_minimal_encoding() -> None:
     """ Check that encoding is minimal in number of bytes. """
     for k in range(1, 10):
         x = 2**(7*k)-1
         assert len(varint.encode(x)) == k, f"Error at {k} bytes"
 
-def test_stream_decoding():
+def test_stream_decoding() -> None:
     """ Check that decoding from stream only reads the varint bytes. """
     num_extra_bytes = 10
     for k in range(1, 10):
@@ -31,7 +33,7 @@ def test_stream_decoding():
         varint.decode(stream)
         assert len(stream.read()) == num_extra_bytes, f"Error at {k} bytes"
 
-def test_failure_modes():
+def test_failure_modes() -> None:
     """ Checks varint failure modes. """
     try:
         varint.encode(-1)

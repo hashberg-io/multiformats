@@ -7,6 +7,8 @@ disable = too-many-ancestors,
           useless-super-delegation,
           isinstance-second-argument-not-valid-type,
           too-many-lines,
-          protected-access
+          protected-access,
+          useless-import-alias,
+          duplicate-code
 [FORMAT]
 max-line-length=160

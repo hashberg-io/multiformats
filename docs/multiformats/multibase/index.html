@@ -1,0 +1,1532 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>multiformats.multibase API documentation</title>
+<meta name="description" content="Implementation of the [multibase spec](https://github.com/multiformats/multibase) …" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS_CHTML" integrity="sha256-kZafAc6mZvK3W3v1pHOcUix30OHQN6pU/NO2oFkqZVw=" crossorigin></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>multiformats.multibase</code></h1>
+</header>
+<section id="section-intro">
+<p>Implementation of the <a href="https://github.com/multiformats/multibase">multibase spec</a>.</p>
+<p>The <code><a title="multiformats.multibase.Encoding" href="#multiformats.multibase.Encoding">Encoding</a></code> dataclass provides a container for multibase encoding data:</p>
+<pre><code class="language-py">&gt;&gt;&gt; from multiformats import multibase
+&gt;&gt;&gt; from multiformats.multibase import Encoding
+&gt;&gt;&gt; Encoding(encoding=&quot;base16&quot;, code=&quot;f&quot;,
+             status=&quot;default&quot;, description=&quot;hexadecimal&quot;)
+</code></pre>
+<p>Core functionality is provided by the <code><a title="multiformats.multibase.encode" href="#multiformats.multibase.encode">encode()</a></code> and <code><a title="multiformats.multibase.decode" href="#multiformats.multibase.decode">decode()</a></code> functions, which can be used to
+encode a bytestring into a string using a chosen multibase encoding and to decode a string
+into a bytestring using the multibase encoding specified by its first character:</p>
+<pre><code class="language-py">&gt;&gt;&gt; multibase.encode(b&quot;Hello World!&quot;, &quot;base32&quot;)
+'bjbswy3dpeblw64tmmqqq'
+&gt;&gt;&gt; multibase.decode('bjbswy3dpeblw64tmmqqq')
+b'Hello World!'
+</code></pre>
+<p>The multibase encoding specified by a given string is accessible using the <code><a title="multiformats.multibase.encoding_of" href="#multiformats.multibase.encoding_of">encoding_of()</a></code> function:</p>
+<pre><code class="language-py">&gt;&gt;&gt; multibase.encoding_of('bjbswy3dpeblw64tmmqqq')
+Encoding(encoding='base32', code='b',
+         status='default',
+         description='rfc4648 case-insensitive - no padding')
+</code></pre>
+<p>Additional encoding management functionality is provided by the <code><a title="multiformats.multibase.exists" href="#multiformats.multibase.exists">exists()</a></code> and <code><a title="multiformats.multibase.encoding" href="#multiformats.multibase.encoding">encoding()</a></code> functions,
+which can be used to check whether an encoding with given name or code is known, and if so to get the corresponding object:</p>
+<pre><code class="language-py">&gt;&gt;&gt; multibase.exists(&quot;base32&quot;)
+True
+&gt;&gt;&gt; multibase.exists(&quot;f&quot;)
+True
+&gt;&gt;&gt; multibase.encoding(&quot;base32&quot;)
+Encoding(encoding='base32', code='b',
+         status='default',
+         description='rfc4648 case-insensitive - no padding')
+&gt;&gt;&gt; multibase.encoding(&quot;f&quot;)
+Encoding(encoding=&quot;base16&quot;, code=&quot;f&quot;,
+         status=&quot;default&quot;, description=&quot;hexadecimal&quot;)
+</code></pre>
+<p>Encoding objects have <code><a title="multiformats.multibase.encode" href="#multiformats.multibase.encode">encode()</a></code> and <code><a title="multiformats.multibase.decode" href="#multiformats.multibase.decode">decode()</a></code> methods that perform functionality analogous to the homonymous functions:</p>
+<pre><code class="language-py">&gt;&gt;&gt; base32 = multibase.encoding(&quot;base32&quot;)
+&gt;&gt;&gt; base32.encode(b&quot;Hello World!&quot;)
+'bjbswy3dpeblw64tmmqqq'
+&gt;&gt;&gt; base32.decode('bjbswy3dpeblw64tmmqqq')
+b'Hello World!'
+</code></pre>
+<p>The <code><a title="multiformats.multibase.decode" href="#multiformats.multibase.decode">decode()</a></code> method includes additional encoding validation:</p>
+<pre><code class="language-py">&gt;&gt;&gt; base32.decode('Bjbswy3dpeblw64tmmqqq')
+ValueError: Expected 'base32' encoding, found 'base32upper' encoding instead.
+</code></pre>
+<p>The <code><a title="multiformats.multibase.table" href="#multiformats.multibase.table">table()</a></code> function can be used to iterate through known multibase encodings</p>
+<pre><code class="language-py">&gt;&gt;&gt; list(enc.name for enc in multibase.table())
+['identity', 'base2', 'base8', 'base10', 'base32upper',
+ 'base32padupper', 'base16upper', 'base36upper', 'base64pad',
+ 'base32hexpadupper', 'base64urlpad', 'base32hexupper',
+ 'base58flickr', 'base32', 'base32pad', 'base16', 'base32z',
+ 'base36', 'base64', 'proquint', 'base32hexpad', 'base64url',
+ 'base32hex', 'base58btc']
+</code></pre>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;
+    Implementation of the [multibase spec](https://github.com/multiformats/multibase).
+
+    The `Encoding` dataclass provides a container for multibase encoding data:
+
+    ```py
+    &gt;&gt;&gt; from multiformats import multibase
+    &gt;&gt;&gt; from multiformats.multibase import Encoding
+    &gt;&gt;&gt; Encoding(encoding=&#34;base16&#34;, code=&#34;f&#34;,
+                 status=&#34;default&#34;, description=&#34;hexadecimal&#34;)
+    ```
+
+    Core functionality is provided by the `encode` and `decode` functions, which can be used to
+    encode a bytestring into a string using a chosen multibase encoding and to decode a string
+    into a bytestring using the multibase encoding specified by its first character:
+
+    ```py
+    &gt;&gt;&gt; multibase.encode(b&#34;Hello World!&#34;, &#34;base32&#34;)
+    &#39;bjbswy3dpeblw64tmmqqq&#39;
+    &gt;&gt;&gt; multibase.decode(&#39;bjbswy3dpeblw64tmmqqq&#39;)
+    b&#39;Hello World!&#39;
+    ```
+
+    The multibase encoding specified by a given string is accessible using the `encoding_of` function:
+    ```py
+    &gt;&gt;&gt; multibase.encoding_of(&#39;bjbswy3dpeblw64tmmqqq&#39;)
+    Encoding(encoding=&#39;base32&#39;, code=&#39;b&#39;,
+             status=&#39;default&#39;,
+             description=&#39;rfc4648 case-insensitive - no padding&#39;)
+    ```
+
+    Additional encoding management functionality is provided by the `exists` and `encoding` functions,
+    which can be used to check whether an encoding with given name or code is known, and if so to get the corresponding object:
+
+    ```py
+    &gt;&gt;&gt; multibase.exists(&#34;base32&#34;)
+    True
+    &gt;&gt;&gt; multibase.exists(&#34;f&#34;)
+    True
+    &gt;&gt;&gt; multibase.encoding(&#34;base32&#34;)
+    Encoding(encoding=&#39;base32&#39;, code=&#39;b&#39;,
+             status=&#39;default&#39;,
+             description=&#39;rfc4648 case-insensitive - no padding&#39;)
+    &gt;&gt;&gt; multibase.encoding(&#34;f&#34;)
+    Encoding(encoding=&#34;base16&#34;, code=&#34;f&#34;,
+             status=&#34;default&#34;, description=&#34;hexadecimal&#34;)
+    ```
+
+    Encoding objects have `encode` and `decode` methods that perform functionality analogous to the homonymous functions:
+
+    ```py
+    &gt;&gt;&gt; base32 = multibase.encoding(&#34;base32&#34;)
+    &gt;&gt;&gt; base32.encode(b&#34;Hello World!&#34;)
+    &#39;bjbswy3dpeblw64tmmqqq&#39;
+    &gt;&gt;&gt; base32.decode(&#39;bjbswy3dpeblw64tmmqqq&#39;)
+    b&#39;Hello World!&#39;
+    ```
+
+    The `decode` method includes additional encoding validation:
+
+    ```py
+    &gt;&gt;&gt; base32.decode(&#39;Bjbswy3dpeblw64tmmqqq&#39;)
+    ValueError: Expected &#39;base32&#39; encoding, found &#39;base32upper&#39; encoding instead.
+    ```
+
+    The `table` function can be used to iterate through known multibase encodings
+
+    ```py
+    &gt;&gt;&gt; list(enc.name for enc in multibase.table())
+    [&#39;identity&#39;, &#39;base2&#39;, &#39;base8&#39;, &#39;base10&#39;, &#39;base32upper&#39;,
+     &#39;base32padupper&#39;, &#39;base16upper&#39;, &#39;base36upper&#39;, &#39;base64pad&#39;,
+     &#39;base32hexpadupper&#39;, &#39;base64urlpad&#39;, &#39;base32hexupper&#39;,
+     &#39;base58flickr&#39;, &#39;base32&#39;, &#39;base32pad&#39;, &#39;base16&#39;, &#39;base32z&#39;,
+     &#39;base36&#39;, &#39;base64&#39;, &#39;proquint&#39;, &#39;base32hexpad&#39;, &#39;base64url&#39;,
+     &#39;base32hex&#39;, &#39;base58btc&#39;]
+    ```
+&#34;&#34;&#34;
+
+from abc import ABC, abstractmethod
+import binascii
+import csv
+from itertools import product
+import math
+import re
+from typing import Callable, cast, Dict, Iterable, Iterator, List, Mapping, Optional, Tuple, Union
+import sys
+
+from typing_extensions import Literal
+
+from bases import (base2, base16, base8, base10, base36, base58btc, base58flickr, base58ripple,
+                   base32, base32hex, base32z, base64, base64url, base45,)
+from bases.encoding import BaseEncoding
+
+from multiformats.multibase import raw_encoding as raw_encoding
+from .raw_encoding import RawEncoder, RawDecoder
+
+if sys.version_info[1] &gt;= 7:
+    import importlib.resources as importlib_resources
+else:
+    import importlib_resources
+
+
+class Encoding:
+    &#34;&#34;&#34;
+        Container class for a multibase encoding.
+
+        Example usage:
+
+        ```py
+            Encoding(name=&#34;base16&#34;, code=&#34;f&#34;,
+            status=&#34;default&#34;, description=&#34;hexadecimal&#34;)
+        ```
+
+        For compatibility with the [multibase table](https://github.com/multiformats/multibase/raw/master/multibase.csv),
+        the `name` argument can alternatively be specified as `encoding`:
+
+        ```py
+            Encoding(encoding=&#34;base16&#34;, code=&#34;f&#34;,
+            status=&#34;default&#34;, description=&#34;hexadecimal&#34;)
+        ```
+    &#34;&#34;&#34;
+
+    _name: str
+    _code: str
+    _status: Literal[&#34;draft&#34;, &#34;candidate&#34;, &#34;default&#34;]
+    _description: str
+
+    def __init__(self, *,
+                 name: str,
+                 code: str,
+                 status: str = &#34;draft&#34;,
+                 description: str = &#34;&#34;
+                ):
+        for arg in (name, code, status, description):
+            if not isinstance(arg, str):
+                raise TypeError(f&#34;Expected string, found {repr(arg)}.&#34;)
+        name = Encoding._validate_name(name)
+        code = Encoding.validate_code(code)
+        status = Encoding._validate_status(status)
+        self._name = name
+        self._code = code
+        self._status = status
+        self._description = description
+
+    @staticmethod
+    def _validate_name(name: Optional[str]) -&gt; str:
+        assert name is not None
+        if not re.match(r&#34;^[a-z][a-z0-9_-]+$&#34;, name): # ensures len(name) &gt; 1
+            raise ValueError(f&#34;Invalid multibase encoding name {repr(name)}&#34;)
+        return name
+
+    @staticmethod
+    def validate_code(code: str) -&gt; str:
+        &#34;&#34;&#34;
+            Validates a multibase code and transforms it to single-character format (if in hex format).
+        &#34;&#34;&#34;
+        if re.match(r&#34;^0x[0-9a-zA-Z][0-9a-zA-Z]$&#34;, code):
+            ord_code = int(code, base=16)
+            code = chr(ord_code)
+        elif len(code) != 1:
+            raise ValueError(&#34;Multibase codes must be single-character strings or the hex digits &#39;0xYZ&#39; of a single byte.&#34;)
+        if ord(code) not in range(0x00, 0x80):
+            raise ValueError(&#34;Multibase codes must be ASCII characters.&#34;)
+        return code
+
+    @staticmethod
+    def _validate_status(status: str) -&gt; Literal[&#34;draft&#34;, &#34;candidate&#34;, &#34;default&#34;]:
+        if status not in (&#34;draft&#34;, &#34;candidate&#34;, &#34;default&#34;):
+            raise ValueError(f&#34;Invalid multibase encoding status {repr(status)}.&#34;)
+        return cast(Literal[&#34;draft&#34;, &#34;candidate&#34;, &#34;default&#34;], status)
+
+    @property
+    def code(self) -&gt; str:
+        &#34;&#34;&#34;
+            Multibase code. Must either have length 1 or satisfy:
+
+            ```py
+            re.match(r&#34;^0x$&#34;, code)
+            ```
+        &#34;&#34;&#34;
+        return self._code
+
+    @property
+    def code_printable(self) -&gt; str:
+        &#34;&#34;&#34;
+            Printable version of `Encoding.code`:
+
+            - if the code is a single non-printable ASCII character, returns the hex string of its byte
+            - otherwise, returns the code itself
+        &#34;&#34;&#34;
+        code = self.code
+        ord_code = ord(code)
+        if ord_code not in range(0x20, 0x7F):
+            return &#34;0x&#34;+base16.encode(bytes([ord_code]))
+        return code
+
+    @property
+    def status(self) -&gt; Literal[&#34;draft&#34;, &#34;candidate&#34;, &#34;default&#34;]:
+        &#34;&#34;&#34; Encoding status. Must be &#39;draft&#39;, &#39;candidate&#39; or &#39;default&#39;.&#34;&#34;&#34;
+        return self._status
+
+    @property
+    def description(self) -&gt; str:
+        &#34;&#34;&#34; Encoding description. &#34;&#34;&#34;
+        return self._description
+
+    @property
+    def name(self) -&gt; str:
+        &#34;&#34;&#34;
+            Encoding name. Must satisfy the following:
+
+            ```py
+            re.match(r&#34;^[a-z][a-z0-9_-]+$&#34;, name)
+            ```
+
+            In the [multibase table](https://github.com/multiformats/multibase/raw/master/multibase.csv),
+            this is listed under `encoding`.
+        &#34;&#34;&#34;
+        return self._name
+
+    @property
+    def raw_encoder(self) -&gt; RawEncoder:
+        &#34;&#34;&#34;
+            Returns the raw encoder for this encoding:
+            given bytes, it produces the encoded string without the multibase prefix.
+        &#34;&#34;&#34;
+        enc = raw_encoding.get(self.name)
+        if enc is None:
+            raise NotImplementedError(f&#34;Encoding/decoding for {repr(self.name)} is not yet implemented.&#34;)
+        return enc.encode
+
+    @property
+    def raw_decoder(self) -&gt; RawDecoder:
+        &#34;&#34;&#34;
+            Returns the raw encoder for this encoding:
+            given a string without the multibase prefix, it produces the decoded data.
+        &#34;&#34;&#34;
+        enc = raw_encoding.get(self.name)
+        if enc is None:
+            raise NotImplementedError(f&#34;Encoding/decoding for {repr(self.name)} is not yet implemented.&#34;)
+        return enc.decode
+
+    def encode(self, data: bytes) -&gt; str:
+        &#34;&#34;&#34;
+            Encodes bytes into a multibase string: it first uses `Encoding.raw_encoder`,
+            and then prepends the multibase prefix given by `Encoding.code` and returns
+            the resulting multibase string.
+
+            Example usage:
+
+            ```py
+            &gt;&gt;&gt; base32 = multibase.encoding(&#34;base32&#34;)
+            &gt;&gt;&gt; base32.encode(b&#34;Hello World!&#34;)
+            &#39;bjbswy3dpeblw64tmmqqq&#39;
+            ```
+        &#34;&#34;&#34;
+        return self.code+self.raw_encoder(data)
+
+    def decode(self, data: str) -&gt; bytes:
+        &#34;&#34;&#34;
+            Decodes a multibase string into bytes: it first checks that the multibase
+            prefix matches the value specified by `Encoding.code`, then uses
+            `Encoding.raw_encoder` on the string without prefix and returns the bytes.
+
+            Example usage:
+
+            ```py
+            &gt;&gt;&gt; base32 = multibase.encoding(&#34;base32&#34;)
+            &gt;&gt;&gt; base32.decode(&#34;bjbswy3dpeblw64tmmqqq&#34;)
+            b&#39;Hello World!&#39;
+            ```
+        &#34;&#34;&#34;
+        encoding = encoding_of(data)
+        if encoding != self:
+            raise ValueError(f&#34;Expected {repr(self.name)} encoding, &#34;
+                             f&#34;found {repr(encoding.name)} encoding instead.&#34;)
+        return self.raw_decoder(data[1:])
+
+    def to_json(self) -&gt; Mapping[str, str]:
+        &#34;&#34;&#34;
+            Returns a JSON dictionary representation of this `Encoding` object,
+            compatible with the one from the multibase.csv table found in the
+            [multibase spec](https://github.com/multiformats/multibase).
+
+            Example usage:
+
+            ```py
+            &gt;&gt;&gt; base32 = multibase.encoding(&#34;base32&#34;)
+            &gt;&gt;&gt; base32.to_json()
+            {&#39;name&#39;: &#39;base32&#39;, &#39;code&#39;: &#39;b&#39;,
+             &#39;status&#39;: &#39;default&#39;,
+             &#39;description&#39;: &#39;rfc4648 case-insensitive - no padding&#39;}
+            ```
+        &#34;&#34;&#34;
+        return {
+            &#34;name&#34;: self.name,
+            &#34;code&#34;: self.code_printable,
+            &#34;status&#34;: self.status,
+            &#34;description&#34;: self.description
+        }
+
+    def __str__(self) -&gt; str:
+        if exists(self.name) and get(self.name) == self:
+            return f&#34;multibase.get({repr(self.name)})&#34;
+        return repr(self)
+
+    def __repr__(self) -&gt; str:
+        return f&#34;Encoding({&#39;, &#39;.join(f&#39;{k}={v}&#39; for k, v in self.to_json().items())})&#34;
+
+
+def encoding(name: Optional[str] = None, *, code: Optional[str] = None) -&gt; Encoding:
+    &#34;&#34;&#34;
+        Gets the multibase encoding with given name (if a string of length &gt;= 2 is passed)
+        or multibase code (if a string of length 1 is passed). Raises `ValueError` if the
+        empty string is passed. Raises `KeyError` if no such encoding exists.
+
+        Example usage:
+
+        ```py
+        &gt;&gt;&gt; multibase.encoding(name=&#34;base8&#34;)
+        Encoding(encoding=&#39;base8&#39;, code=&#39;7&#39;,
+                 status=&#39;draft&#39;, description=&#39;octal&#39;)
+        &gt;&gt;&gt; multibase.encoding(code=&#34;t&#34;)
+        Encoding(encoding=&#39;base32hexpad&#39;, code=&#39;t&#39;, status=&#39;candidate&#39;,
+                 description=&#39;rfc4648 case-insensitive - with padding&#39;)
+        ```
+    &#34;&#34;&#34;
+    if (name is None) == (code is None):
+        raise ValueError(&#34;Must specify exactly one between encoding name and code.&#34;)
+    if code is not None:
+        if code not in _code_table:
+            raise KeyError(f&#34;No multibase encoding with code {repr(code)}.&#34;)
+        return _code_table[code]
+    if name not in _name_table:
+        raise KeyError(f&#34;No multibase encoding named {repr(name)}.&#34;)
+    return _name_table[name]
+
+def get(name: Optional[str] = None, *, code: Optional[str] = None) -&gt; Encoding:
+    &#34;&#34;&#34;
+        An alias to `encoding`, for uniformity of API with other sub-modules.
+    &#34;&#34;&#34;
+    return encoding(name, code=code)
+
+def exists(name: Optional[str] = None, *, code: Optional[str] = None) -&gt; bool:
+    &#34;&#34;&#34;
+        Checks whether a multibase encoding with given name (if a string of length &gt;= 2 is passed)
+        or multibase code (if a string of length 1 is passed) exists. Raises `ValueError` if the
+        empty string is passed.
+
+        Example usage:
+
+        ```py
+        &gt;&gt;&gt; multibase.exists(&#34;base8&#34;)
+        True
+        &gt;&gt;&gt; multibase.exists(&#39;t&#39;)
+        True
+        ```
+    &#34;&#34;&#34;
+    if (name is None) == (code is None):
+        raise ValueError(&#34;Must specify exactly one between encoding name and code.&#34;)
+    if code is not None:
+        code = Encoding.validate_code(code)
+        return code in _code_table
+    return name in _name_table
+
+
+def register(enc: Encoding, *, overwrite: bool = False) -&gt; None:
+    &#34;&#34;&#34;
+        Registers a given multibase encoding. The optional keyword argument `overwrite` (default: `False`)
+        can be used to overwrite a multibase encoding with existing code.
+
+        If `overwrite` is `False`, raises `ValueError` if a multibase encoding with the same name or code already exists.
+        If `overwrite` is `True`, raises `ValueError` if a multibase encoding with the same name but different code already exists.
+
+        Example usage:
+
+        ```py
+        &gt;&gt;&gt; base45 = Encoding(encoding=&#34;base45&#34;, code=&#34;:&#34;,
+                              status=&#34;draft&#34;, description=&#34;base45 encoding&#34;)
+        &gt;&gt;&gt; multibase.register(base45)
+        &gt;&gt;&gt; multibase.encoding(&#34;base45&#34;)
+        Encoding(encoding=&#39;base45&#39;, code=&#39;:&#39;, status=&#39;draft&#39;,
+                 description=&#39;base45 encoding&#39;)
+        ```
+    &#34;&#34;&#34;
+    if not overwrite and enc.code in _code_table:
+        raise ValueError(f&#34;Multibase encoding with code {repr(enc.code)} already exists: {_code_table[enc.code]}&#34;)
+    if enc.name in _name_table and _name_table[enc.name].code != enc.code:
+        raise ValueError(f&#34;Multibase encoding with name {repr(enc.name)} already exists: {_name_table[enc.name]}&#34;)
+    _code_table[enc.code] = enc
+    _name_table[enc.name] = enc
+
+
+def unregister(name: Optional[str] = None, *, code: Optional[str] = None) -&gt; None:
+    &#34;&#34;&#34;
+        Unregisters the multibase encoding with given name (if a string is passed) or code (if an int is passed).
+        Raises `KeyError` if no such multibase encoding exists.
+
+        Example usage:
+
+        ```py
+        &gt;&gt;&gt; base45 = Encoding(encoding=&#34;base45&#34;, code=&#34;:&#34;,
+                              status=&#34;draft&#34;, description=&#34;base45 encoding&#34;)
+        &gt;&gt;&gt; multibase.register(base45)
+        &gt;&gt;&gt; multibase.encoding(&#34;base45&#34;)
+        Encoding(encoding=&#39;base45&#39;, code=&#39;:&#39;, status=&#39;draft&#39;,
+                 description=&#39;base45 encoding&#39;)
+        &gt;&gt;&gt; multibase.unregister(code=&#34;:&#34;)
+        &gt;&gt;&gt; multibase.exists(&#34;base45&#34;)
+        False
+        ```
+    &#34;&#34;&#34;
+    enc = encoding(name=name, code=code)
+    del _code_table[enc.code]
+    del _name_table[enc.name]
+
+
+def table() -&gt; Iterator[Encoding]:
+    &#34;&#34;&#34;
+        Iterates through the registered encodings, in order of ascending code.
+
+        Example usage:
+
+        ```py
+        &gt;&gt;&gt; [e.code for e in multibase.table()]
+        [&#39;\\x00&#39;, &#39;0&#39;, &#39;7&#39;, &#39;9&#39;, &#39;B&#39;, &#39;C&#39;, &#39;F&#39;, &#39;K&#39;, &#39;M&#39;, &#39;T&#39;, &#39;U&#39;, &#39;V&#39;,
+         &#39;Z&#39;,&#39;b&#39;, &#39;c&#39;, &#39;f&#39;, &#39;h&#39;, &#39;k&#39;, &#39;m&#39;, &#39;p&#39;, &#39;t&#39;, &#39;u&#39;, &#39;v&#39;, &#39;z&#39;]
+        ```
+    &#34;&#34;&#34;
+    for code in sorted(_code_table.keys()):
+        yield _code_table[code]
+
+
+def encoding_of(data: str) -&gt; Encoding:
+    &#34;&#34;&#34;
+        Returns the multibase encoding for the data, according to the code specified by its prefix.
+        Raises `ValueError` if the empty string is passed.
+        Raises `KeyError` if no encoding exists with that code.
+
+        Example usage:
+
+        ```py
+        &gt;&gt;&gt; multibase.encoding_of(&#34;mSGVsbG8gd29ybGQh&#34;)
+        Encoding(encoding=&#39;base64&#39;, code=&#39;m&#39;, status=&#39;default&#39;,
+                 description=&#39;rfc4648 no padding&#39;)
+        ```
+    &#34;&#34;&#34;
+    if len(data) == 0:
+        raise ValueError(&#34;Empty string is not valid for encoded data.&#34;)
+    for code in _code_table:
+        if data.startswith(code):
+            return encoding(code=code)
+    raise KeyError(&#34;No known multibase code is a prefix of the given data.&#34;)
+
+
+def encode(data: bytes, enc: Union[str, &#34;Encoding&#34;]) -&gt; str:
+    &#34;&#34;&#34;
+        Encodes the given bytes into a multibase string using the given encoding.
+        If the encoding is passed by name or code (i.e. as a string), the `encoding`
+        function is used to retrieve it. Encoding is performed by `Encoding.encode`.
+
+        Example usage:
+
+        ```py
+        &gt;&gt;&gt; multibase.encode(b&#34;Hello world!&#34;, &#34;base64&#34;)
+        &#39;mSGVsbG8gd29ybGQh&#39;
+        ```
+    &#34;&#34;&#34;
+    if isinstance(enc, str):
+        enc = encoding(enc)
+    return enc.encode(data)
+
+
+def decode(data: str) -&gt; bytes:
+    &#34;&#34;&#34;
+        Decodes the given multibase string into bytes.
+        The encoding is inferred using the `encoding_of` function.
+        Decoding is then performed by `Encoding.decode`.
+
+        Example usage:
+
+        ```py
+        &gt;&gt;&gt; multibase.decode(&#34;mSGVsbG8gd29ybGQh&#34;)
+        b&#39;Hello world!&#39;
+        ```
+    &#34;&#34;&#34;
+    enc = encoding_of(data)
+    return enc.decode(data)
+
+
+def build_multibase_tables(encodings: Iterable[Encoding]) -&gt; Tuple[Dict[str, Encoding], Dict[str, Encoding]]:
+    &#34;&#34;&#34;
+        Creates code-&gt;encoding and name-&gt;encoding mappings from a finite iterable of encodings, returning the mappings.
+
+        Raises `ValueError` if the same encoding code or name is encountered multiple times
+
+        Example usage:
+
+        ```py
+            code_table, name_table = build_multicodec_tables(encodings)
+        ```
+    &#34;&#34;&#34;
+    code_table: Dict[str, Encoding] = {}
+    name_table: Dict[str, Encoding] = {}
+    for e in encodings:
+        if e.code in code_table:
+            raise ValueError(f&#34;Multicodec name {e.name} appears multiple times in table.&#34;)
+        code_table[e.code] = e
+        if e.name in name_table:
+            raise ValueError(f&#34;Multicodec name {e.name} appears multiple times in table.&#34;)
+        name_table[e.name] = e
+    return code_table, name_table
+
+# Create the global code-&gt;multicodec and name-&gt;multicodec mappings.
+# _code_table: Dict[str, Encoding] = {}
+# _name_table: Dict[str, Encoding] = {}
+with importlib_resources.open_text(&#34;multiformats.multibase&#34;, &#34;multibase-table.csv&#34;) as csv_table:
+    reader = csv.DictReader(csv_table)
+    clean_rows = ({k.strip(): v.strip() for k, v in row.items()} for row in reader)
+    renamed_rows = ({(k if k != &#34;encoding&#34; else &#34;name&#34;): v for k, v in row.items()} for row in clean_rows)
+    multicodecs = (Encoding(**row) for row in renamed_rows)
+    _code_table, _name_table = build_multibase_tables(multicodecs)
+
+
+# additional docs info
+__pdoc__ = {
+    &#34;build_multibase_tables&#34;: False # exclude from docs
+}</code></pre>
+</details>
+</section>
+<section>
+<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+<dl>
+<dt><code class="name"><a title="multiformats.multibase.raw_encoding" href="raw_encoding.html">multiformats.multibase.raw_encoding</a></code></dt>
+<dd>
+<div class="desc"><p>Implementation of raw data encodings used by multibase encodings …</p></div>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="multiformats.multibase.decode"><code class="name flex">
+<span>def <span class="ident">decode</span></span>(<span>data: str) ‑> bytes</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Decodes the given multibase string into bytes.
+The encoding is inferred using the <code><a title="multiformats.multibase.encoding_of" href="#multiformats.multibase.encoding_of">encoding_of()</a></code> function.
+Decoding is then performed by <code><a title="multiformats.multibase.Encoding.decode" href="#multiformats.multibase.Encoding.decode">Encoding.decode()</a></code>.</p>
+<p>Example usage:</p>
+<pre><code class="language-py">&gt;&gt;&gt; multibase.decode(&quot;mSGVsbG8gd29ybGQh&quot;)
+b'Hello world!'
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def decode(data: str) -&gt; bytes:
+    &#34;&#34;&#34;
+        Decodes the given multibase string into bytes.
+        The encoding is inferred using the `encoding_of` function.
+        Decoding is then performed by `Encoding.decode`.
+
+        Example usage:
+
+        ```py
+        &gt;&gt;&gt; multibase.decode(&#34;mSGVsbG8gd29ybGQh&#34;)
+        b&#39;Hello world!&#39;
+        ```
+    &#34;&#34;&#34;
+    enc = encoding_of(data)
+    return enc.decode(data)</code></pre>
+</details>
+</dd>
+<dt id="multiformats.multibase.encode"><code class="name flex">
+<span>def <span class="ident">encode</span></span>(<span>data: bytes, enc: Union[str, ForwardRef('<a title="multiformats.multibase.Encoding" href="#multiformats.multibase.Encoding">Encoding</a>')]) ‑> str</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Encodes the given bytes into a multibase string using the given encoding.
+If the encoding is passed by name or code (i.e. as a string), the <code><a title="multiformats.multibase.encoding" href="#multiformats.multibase.encoding">encoding()</a></code>
+function is used to retrieve it. Encoding is performed by <code><a title="multiformats.multibase.Encoding.encode" href="#multiformats.multibase.Encoding.encode">Encoding.encode()</a></code>.</p>
+<p>Example usage:</p>
+<pre><code class="language-py">&gt;&gt;&gt; multibase.encode(b&quot;Hello world!&quot;, &quot;base64&quot;)
+'mSGVsbG8gd29ybGQh'
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def encode(data: bytes, enc: Union[str, &#34;Encoding&#34;]) -&gt; str:
+    &#34;&#34;&#34;
+        Encodes the given bytes into a multibase string using the given encoding.
+        If the encoding is passed by name or code (i.e. as a string), the `encoding`
+        function is used to retrieve it. Encoding is performed by `Encoding.encode`.
+
+        Example usage:
+
+        ```py
+        &gt;&gt;&gt; multibase.encode(b&#34;Hello world!&#34;, &#34;base64&#34;)
+        &#39;mSGVsbG8gd29ybGQh&#39;
+        ```
+    &#34;&#34;&#34;
+    if isinstance(enc, str):
+        enc = encoding(enc)
+    return enc.encode(data)</code></pre>
+</details>
+</dd>
+<dt id="multiformats.multibase.encoding"><code class="name flex">
+<span>def <span class="ident">encoding</span></span>(<span>name: Optional[str] = None, *, code: Optional[str] = None) ‑> <a title="multiformats.multibase.Encoding" href="#multiformats.multibase.Encoding">Encoding</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Gets the multibase encoding with given name (if a string of length &gt;= 2 is passed)
+or multibase code (if a string of length 1 is passed). Raises <code>ValueError</code> if the
+empty string is passed. Raises <code>KeyError</code> if no such encoding exists.</p>
+<p>Example usage:</p>
+<pre><code class="language-py">&gt;&gt;&gt; multibase.encoding(name=&quot;base8&quot;)
+Encoding(encoding='base8', code='7',
+         status='draft', description='octal')
+&gt;&gt;&gt; multibase.encoding(code=&quot;t&quot;)
+Encoding(encoding='base32hexpad', code='t', status='candidate',
+         description='rfc4648 case-insensitive - with padding')
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def encoding(name: Optional[str] = None, *, code: Optional[str] = None) -&gt; Encoding:
+    &#34;&#34;&#34;
+        Gets the multibase encoding with given name (if a string of length &gt;= 2 is passed)
+        or multibase code (if a string of length 1 is passed). Raises `ValueError` if the
+        empty string is passed. Raises `KeyError` if no such encoding exists.
+
+        Example usage:
+
+        ```py
+        &gt;&gt;&gt; multibase.encoding(name=&#34;base8&#34;)
+        Encoding(encoding=&#39;base8&#39;, code=&#39;7&#39;,
+                 status=&#39;draft&#39;, description=&#39;octal&#39;)
+        &gt;&gt;&gt; multibase.encoding(code=&#34;t&#34;)
+        Encoding(encoding=&#39;base32hexpad&#39;, code=&#39;t&#39;, status=&#39;candidate&#39;,
+                 description=&#39;rfc4648 case-insensitive - with padding&#39;)
+        ```
+    &#34;&#34;&#34;
+    if (name is None) == (code is None):
+        raise ValueError(&#34;Must specify exactly one between encoding name and code.&#34;)
+    if code is not None:
+        if code not in _code_table:
+            raise KeyError(f&#34;No multibase encoding with code {repr(code)}.&#34;)
+        return _code_table[code]
+    if name not in _name_table:
+        raise KeyError(f&#34;No multibase encoding named {repr(name)}.&#34;)
+    return _name_table[name]</code></pre>
+</details>
+</dd>
+<dt id="multiformats.multibase.encoding_of"><code class="name flex">
+<span>def <span class="ident">encoding_of</span></span>(<span>data: str) ‑> <a title="multiformats.multibase.Encoding" href="#multiformats.multibase.Encoding">Encoding</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Returns the multibase encoding for the data, according to the code specified by its prefix.
+Raises <code>ValueError</code> if the empty string is passed.
+Raises <code>KeyError</code> if no encoding exists with that code.</p>
+<p>Example usage:</p>
+<pre><code class="language-py">&gt;&gt;&gt; multibase.encoding_of(&quot;mSGVsbG8gd29ybGQh&quot;)
+Encoding(encoding='base64', code='m', status='default',
+         description='rfc4648 no padding')
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def encoding_of(data: str) -&gt; Encoding:
+    &#34;&#34;&#34;
+        Returns the multibase encoding for the data, according to the code specified by its prefix.
+        Raises `ValueError` if the empty string is passed.
+        Raises `KeyError` if no encoding exists with that code.
+
+        Example usage:
+
+        ```py
+        &gt;&gt;&gt; multibase.encoding_of(&#34;mSGVsbG8gd29ybGQh&#34;)
+        Encoding(encoding=&#39;base64&#39;, code=&#39;m&#39;, status=&#39;default&#39;,
+                 description=&#39;rfc4648 no padding&#39;)
+        ```
+    &#34;&#34;&#34;
+    if len(data) == 0:
+        raise ValueError(&#34;Empty string is not valid for encoded data.&#34;)
+    for code in _code_table:
+        if data.startswith(code):
+            return encoding(code=code)
+    raise KeyError(&#34;No known multibase code is a prefix of the given data.&#34;)</code></pre>
+</details>
+</dd>
+<dt id="multiformats.multibase.exists"><code class="name flex">
+<span>def <span class="ident">exists</span></span>(<span>name: Optional[str] = None, *, code: Optional[str] = None) ‑> bool</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Checks whether a multibase encoding with given name (if a string of length &gt;= 2 is passed)
+or multibase code (if a string of length 1 is passed) exists. Raises <code>ValueError</code> if the
+empty string is passed.</p>
+<p>Example usage:</p>
+<pre><code class="language-py">&gt;&gt;&gt; multibase.exists(&quot;base8&quot;)
+True
+&gt;&gt;&gt; multibase.exists('t')
+True
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def exists(name: Optional[str] = None, *, code: Optional[str] = None) -&gt; bool:
+    &#34;&#34;&#34;
+        Checks whether a multibase encoding with given name (if a string of length &gt;= 2 is passed)
+        or multibase code (if a string of length 1 is passed) exists. Raises `ValueError` if the
+        empty string is passed.
+
+        Example usage:
+
+        ```py
+        &gt;&gt;&gt; multibase.exists(&#34;base8&#34;)
+        True
+        &gt;&gt;&gt; multibase.exists(&#39;t&#39;)
+        True
+        ```
+    &#34;&#34;&#34;
+    if (name is None) == (code is None):
+        raise ValueError(&#34;Must specify exactly one between encoding name and code.&#34;)
+    if code is not None:
+        code = Encoding.validate_code(code)
+        return code in _code_table
+    return name in _name_table</code></pre>
+</details>
+</dd>
+<dt id="multiformats.multibase.get"><code class="name flex">
+<span>def <span class="ident">get</span></span>(<span>name: Optional[str] = None, *, code: Optional[str] = None) ‑> <a title="multiformats.multibase.Encoding" href="#multiformats.multibase.Encoding">Encoding</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>An alias to <code><a title="multiformats.multibase.encoding" href="#multiformats.multibase.encoding">encoding()</a></code>, for uniformity of API with other sub-modules.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get(name: Optional[str] = None, *, code: Optional[str] = None) -&gt; Encoding:
+    &#34;&#34;&#34;
+        An alias to `encoding`, for uniformity of API with other sub-modules.
+    &#34;&#34;&#34;
+    return encoding(name, code=code)</code></pre>
+</details>
+</dd>
+<dt id="multiformats.multibase.register"><code class="name flex">
+<span>def <span class="ident">register</span></span>(<span>enc: <a title="multiformats.multibase.Encoding" href="#multiformats.multibase.Encoding">Encoding</a>, *, overwrite: bool = False) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Registers a given multibase encoding. The optional keyword argument <code>overwrite</code> (default: <code>False</code>)
+can be used to overwrite a multibase encoding with existing code.</p>
+<p>If <code>overwrite</code> is <code>False</code>, raises <code>ValueError</code> if a multibase encoding with the same name or code already exists.
+If <code>overwrite</code> is <code>True</code>, raises <code>ValueError</code> if a multibase encoding with the same name but different code already exists.</p>
+<p>Example usage:</p>
+<pre><code class="language-py">&gt;&gt;&gt; base45 = Encoding(encoding=&quot;base45&quot;, code=&quot;:&quot;,
+                      status=&quot;draft&quot;, description=&quot;base45 encoding&quot;)
+&gt;&gt;&gt; multibase.register(base45)
+&gt;&gt;&gt; multibase.encoding(&quot;base45&quot;)
+Encoding(encoding='base45', code=':', status='draft',
+         description='base45 encoding')
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def register(enc: Encoding, *, overwrite: bool = False) -&gt; None:
+    &#34;&#34;&#34;
+        Registers a given multibase encoding. The optional keyword argument `overwrite` (default: `False`)
+        can be used to overwrite a multibase encoding with existing code.
+
+        If `overwrite` is `False`, raises `ValueError` if a multibase encoding with the same name or code already exists.
+        If `overwrite` is `True`, raises `ValueError` if a multibase encoding with the same name but different code already exists.
+
+        Example usage:
+
+        ```py
+        &gt;&gt;&gt; base45 = Encoding(encoding=&#34;base45&#34;, code=&#34;:&#34;,
+                              status=&#34;draft&#34;, description=&#34;base45 encoding&#34;)
+        &gt;&gt;&gt; multibase.register(base45)
+        &gt;&gt;&gt; multibase.encoding(&#34;base45&#34;)
+        Encoding(encoding=&#39;base45&#39;, code=&#39;:&#39;, status=&#39;draft&#39;,
+                 description=&#39;base45 encoding&#39;)
+        ```
+    &#34;&#34;&#34;
+    if not overwrite and enc.code in _code_table:
+        raise ValueError(f&#34;Multibase encoding with code {repr(enc.code)} already exists: {_code_table[enc.code]}&#34;)
+    if enc.name in _name_table and _name_table[enc.name].code != enc.code:
+        raise ValueError(f&#34;Multibase encoding with name {repr(enc.name)} already exists: {_name_table[enc.name]}&#34;)
+    _code_table[enc.code] = enc
+    _name_table[enc.name] = enc</code></pre>
+</details>
+</dd>
+<dt id="multiformats.multibase.table"><code class="name flex">
+<span>def <span class="ident">table</span></span>(<span>) ‑> Iterator[<a title="multiformats.multibase.Encoding" href="#multiformats.multibase.Encoding">Encoding</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Iterates through the registered encodings, in order of ascending code.</p>
+<p>Example usage:</p>
+<pre><code class="language-py">&gt;&gt;&gt; [e.code for e in multibase.table()]
+['\x00', '0', '7', '9', 'B', 'C', 'F', 'K', 'M', 'T', 'U', 'V',
+ 'Z','b', 'c', 'f', 'h', 'k', 'm', 'p', 't', 'u', 'v', 'z']
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def table() -&gt; Iterator[Encoding]:
+    &#34;&#34;&#34;
+        Iterates through the registered encodings, in order of ascending code.
+
+        Example usage:
+
+        ```py
+        &gt;&gt;&gt; [e.code for e in multibase.table()]
+        [&#39;\\x00&#39;, &#39;0&#39;, &#39;7&#39;, &#39;9&#39;, &#39;B&#39;, &#39;C&#39;, &#39;F&#39;, &#39;K&#39;, &#39;M&#39;, &#39;T&#39;, &#39;U&#39;, &#39;V&#39;,
+         &#39;Z&#39;,&#39;b&#39;, &#39;c&#39;, &#39;f&#39;, &#39;h&#39;, &#39;k&#39;, &#39;m&#39;, &#39;p&#39;, &#39;t&#39;, &#39;u&#39;, &#39;v&#39;, &#39;z&#39;]
+        ```
+    &#34;&#34;&#34;
+    for code in sorted(_code_table.keys()):
+        yield _code_table[code]</code></pre>
+</details>
+</dd>
+<dt id="multiformats.multibase.unregister"><code class="name flex">
+<span>def <span class="ident">unregister</span></span>(<span>name: Optional[str] = None, *, code: Optional[str] = None) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Unregisters the multibase encoding with given name (if a string is passed) or code (if an int is passed).
+Raises <code>KeyError</code> if no such multibase encoding exists.</p>
+<p>Example usage:</p>
+<pre><code class="language-py">&gt;&gt;&gt; base45 = Encoding(encoding=&quot;base45&quot;, code=&quot;:&quot;,
+                      status=&quot;draft&quot;, description=&quot;base45 encoding&quot;)
+&gt;&gt;&gt; multibase.register(base45)
+&gt;&gt;&gt; multibase.encoding(&quot;base45&quot;)
+Encoding(encoding='base45', code=':', status='draft',
+         description='base45 encoding')
+&gt;&gt;&gt; multibase.unregister(code=&quot;:&quot;)
+&gt;&gt;&gt; multibase.exists(&quot;base45&quot;)
+False
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def unregister(name: Optional[str] = None, *, code: Optional[str] = None) -&gt; None:
+    &#34;&#34;&#34;
+        Unregisters the multibase encoding with given name (if a string is passed) or code (if an int is passed).
+        Raises `KeyError` if no such multibase encoding exists.
+
+        Example usage:
+
+        ```py
+        &gt;&gt;&gt; base45 = Encoding(encoding=&#34;base45&#34;, code=&#34;:&#34;,
+                              status=&#34;draft&#34;, description=&#34;base45 encoding&#34;)
+        &gt;&gt;&gt; multibase.register(base45)
+        &gt;&gt;&gt; multibase.encoding(&#34;base45&#34;)
+        Encoding(encoding=&#39;base45&#39;, code=&#39;:&#39;, status=&#39;draft&#39;,
+                 description=&#39;base45 encoding&#39;)
+        &gt;&gt;&gt; multibase.unregister(code=&#34;:&#34;)
+        &gt;&gt;&gt; multibase.exists(&#34;base45&#34;)
+        False
+        ```
+    &#34;&#34;&#34;
+    enc = encoding(name=name, code=code)
+    del _code_table[enc.code]
+    del _name_table[enc.name]</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="multiformats.multibase.Encoding"><code class="flex name class">
+<span>class <span class="ident">Encoding</span></span>
+<span>(</span><span>*, name: str, code: str, status: str = 'draft', description: str = '')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Container class for a multibase encoding.</p>
+<p>Example usage:</p>
+<pre><code class="language-py">    Encoding(name=&quot;base16&quot;, code=&quot;f&quot;,
+    status=&quot;default&quot;, description=&quot;hexadecimal&quot;)
+</code></pre>
+<p>For compatibility with the <a href="https://github.com/multiformats/multibase/raw/master/multibase.csv">multibase table</a>,
+the <code>name</code> argument can alternatively be specified as <code><a title="multiformats.multibase.encoding" href="#multiformats.multibase.encoding">encoding()</a></code>:</p>
+<pre><code class="language-py">    Encoding(encoding=&quot;base16&quot;, code=&quot;f&quot;,
+    status=&quot;default&quot;, description=&quot;hexadecimal&quot;)
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Encoding:
+    &#34;&#34;&#34;
+        Container class for a multibase encoding.
+
+        Example usage:
+
+        ```py
+            Encoding(name=&#34;base16&#34;, code=&#34;f&#34;,
+            status=&#34;default&#34;, description=&#34;hexadecimal&#34;)
+        ```
+
+        For compatibility with the [multibase table](https://github.com/multiformats/multibase/raw/master/multibase.csv),
+        the `name` argument can alternatively be specified as `encoding`:
+
+        ```py
+            Encoding(encoding=&#34;base16&#34;, code=&#34;f&#34;,
+            status=&#34;default&#34;, description=&#34;hexadecimal&#34;)
+        ```
+    &#34;&#34;&#34;
+
+    _name: str
+    _code: str
+    _status: Literal[&#34;draft&#34;, &#34;candidate&#34;, &#34;default&#34;]
+    _description: str
+
+    def __init__(self, *,
+                 name: str,
+                 code: str,
+                 status: str = &#34;draft&#34;,
+                 description: str = &#34;&#34;
+                ):
+        for arg in (name, code, status, description):
+            if not isinstance(arg, str):
+                raise TypeError(f&#34;Expected string, found {repr(arg)}.&#34;)
+        name = Encoding._validate_name(name)
+        code = Encoding.validate_code(code)
+        status = Encoding._validate_status(status)
+        self._name = name
+        self._code = code
+        self._status = status
+        self._description = description
+
+    @staticmethod
+    def _validate_name(name: Optional[str]) -&gt; str:
+        assert name is not None
+        if not re.match(r&#34;^[a-z][a-z0-9_-]+$&#34;, name): # ensures len(name) &gt; 1
+            raise ValueError(f&#34;Invalid multibase encoding name {repr(name)}&#34;)
+        return name
+
+    @staticmethod
+    def validate_code(code: str) -&gt; str:
+        &#34;&#34;&#34;
+            Validates a multibase code and transforms it to single-character format (if in hex format).
+        &#34;&#34;&#34;
+        if re.match(r&#34;^0x[0-9a-zA-Z][0-9a-zA-Z]$&#34;, code):
+            ord_code = int(code, base=16)
+            code = chr(ord_code)
+        elif len(code) != 1:
+            raise ValueError(&#34;Multibase codes must be single-character strings or the hex digits &#39;0xYZ&#39; of a single byte.&#34;)
+        if ord(code) not in range(0x00, 0x80):
+            raise ValueError(&#34;Multibase codes must be ASCII characters.&#34;)
+        return code
+
+    @staticmethod
+    def _validate_status(status: str) -&gt; Literal[&#34;draft&#34;, &#34;candidate&#34;, &#34;default&#34;]:
+        if status not in (&#34;draft&#34;, &#34;candidate&#34;, &#34;default&#34;):
+            raise ValueError(f&#34;Invalid multibase encoding status {repr(status)}.&#34;)
+        return cast(Literal[&#34;draft&#34;, &#34;candidate&#34;, &#34;default&#34;], status)
+
+    @property
+    def code(self) -&gt; str:
+        &#34;&#34;&#34;
+            Multibase code. Must either have length 1 or satisfy:
+
+            ```py
+            re.match(r&#34;^0x$&#34;, code)
+            ```
+        &#34;&#34;&#34;
+        return self._code
+
+    @property
+    def code_printable(self) -&gt; str:
+        &#34;&#34;&#34;
+            Printable version of `Encoding.code`:
+
+            - if the code is a single non-printable ASCII character, returns the hex string of its byte
+            - otherwise, returns the code itself
+        &#34;&#34;&#34;
+        code = self.code
+        ord_code = ord(code)
+        if ord_code not in range(0x20, 0x7F):
+            return &#34;0x&#34;+base16.encode(bytes([ord_code]))
+        return code
+
+    @property
+    def status(self) -&gt; Literal[&#34;draft&#34;, &#34;candidate&#34;, &#34;default&#34;]:
+        &#34;&#34;&#34; Encoding status. Must be &#39;draft&#39;, &#39;candidate&#39; or &#39;default&#39;.&#34;&#34;&#34;
+        return self._status
+
+    @property
+    def description(self) -&gt; str:
+        &#34;&#34;&#34; Encoding description. &#34;&#34;&#34;
+        return self._description
+
+    @property
+    def name(self) -&gt; str:
+        &#34;&#34;&#34;
+            Encoding name. Must satisfy the following:
+
+            ```py
+            re.match(r&#34;^[a-z][a-z0-9_-]+$&#34;, name)
+            ```
+
+            In the [multibase table](https://github.com/multiformats/multibase/raw/master/multibase.csv),
+            this is listed under `encoding`.
+        &#34;&#34;&#34;
+        return self._name
+
+    @property
+    def raw_encoder(self) -&gt; RawEncoder:
+        &#34;&#34;&#34;
+            Returns the raw encoder for this encoding:
+            given bytes, it produces the encoded string without the multibase prefix.
+        &#34;&#34;&#34;
+        enc = raw_encoding.get(self.name)
+        if enc is None:
+            raise NotImplementedError(f&#34;Encoding/decoding for {repr(self.name)} is not yet implemented.&#34;)
+        return enc.encode
+
+    @property
+    def raw_decoder(self) -&gt; RawDecoder:
+        &#34;&#34;&#34;
+            Returns the raw encoder for this encoding:
+            given a string without the multibase prefix, it produces the decoded data.
+        &#34;&#34;&#34;
+        enc = raw_encoding.get(self.name)
+        if enc is None:
+            raise NotImplementedError(f&#34;Encoding/decoding for {repr(self.name)} is not yet implemented.&#34;)
+        return enc.decode
+
+    def encode(self, data: bytes) -&gt; str:
+        &#34;&#34;&#34;
+            Encodes bytes into a multibase string: it first uses `Encoding.raw_encoder`,
+            and then prepends the multibase prefix given by `Encoding.code` and returns
+            the resulting multibase string.
+
+            Example usage:
+
+            ```py
+            &gt;&gt;&gt; base32 = multibase.encoding(&#34;base32&#34;)
+            &gt;&gt;&gt; base32.encode(b&#34;Hello World!&#34;)
+            &#39;bjbswy3dpeblw64tmmqqq&#39;
+            ```
+        &#34;&#34;&#34;
+        return self.code+self.raw_encoder(data)
+
+    def decode(self, data: str) -&gt; bytes:
+        &#34;&#34;&#34;
+            Decodes a multibase string into bytes: it first checks that the multibase
+            prefix matches the value specified by `Encoding.code`, then uses
+            `Encoding.raw_encoder` on the string without prefix and returns the bytes.
+
+            Example usage:
+
+            ```py
+            &gt;&gt;&gt; base32 = multibase.encoding(&#34;base32&#34;)
+            &gt;&gt;&gt; base32.decode(&#34;bjbswy3dpeblw64tmmqqq&#34;)
+            b&#39;Hello World!&#39;
+            ```
+        &#34;&#34;&#34;
+        encoding = encoding_of(data)
+        if encoding != self:
+            raise ValueError(f&#34;Expected {repr(self.name)} encoding, &#34;
+                             f&#34;found {repr(encoding.name)} encoding instead.&#34;)
+        return self.raw_decoder(data[1:])
+
+    def to_json(self) -&gt; Mapping[str, str]:
+        &#34;&#34;&#34;
+            Returns a JSON dictionary representation of this `Encoding` object,
+            compatible with the one from the multibase.csv table found in the
+            [multibase spec](https://github.com/multiformats/multibase).
+
+            Example usage:
+
+            ```py
+            &gt;&gt;&gt; base32 = multibase.encoding(&#34;base32&#34;)
+            &gt;&gt;&gt; base32.to_json()
+            {&#39;name&#39;: &#39;base32&#39;, &#39;code&#39;: &#39;b&#39;,
+             &#39;status&#39;: &#39;default&#39;,
+             &#39;description&#39;: &#39;rfc4648 case-insensitive - no padding&#39;}
+            ```
+        &#34;&#34;&#34;
+        return {
+            &#34;name&#34;: self.name,
+            &#34;code&#34;: self.code_printable,
+            &#34;status&#34;: self.status,
+            &#34;description&#34;: self.description
+        }
+
+    def __str__(self) -&gt; str:
+        if exists(self.name) and get(self.name) == self:
+            return f&#34;multibase.get({repr(self.name)})&#34;
+        return repr(self)
+
+    def __repr__(self) -&gt; str:
+        return f&#34;Encoding({&#39;, &#39;.join(f&#39;{k}={v}&#39; for k, v in self.to_json().items())})&#34;</code></pre>
+</details>
+<h3>Static methods</h3>
+<dl>
+<dt id="multiformats.multibase.Encoding.validate_code"><code class="name flex">
+<span>def <span class="ident">validate_code</span></span>(<span>code: str) ‑> str</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Validates a multibase code and transforms it to single-character format (if in hex format).</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def validate_code(code: str) -&gt; str:
+    &#34;&#34;&#34;
+        Validates a multibase code and transforms it to single-character format (if in hex format).
+    &#34;&#34;&#34;
+    if re.match(r&#34;^0x[0-9a-zA-Z][0-9a-zA-Z]$&#34;, code):
+        ord_code = int(code, base=16)
+        code = chr(ord_code)
+    elif len(code) != 1:
+        raise ValueError(&#34;Multibase codes must be single-character strings or the hex digits &#39;0xYZ&#39; of a single byte.&#34;)
+    if ord(code) not in range(0x00, 0x80):
+        raise ValueError(&#34;Multibase codes must be ASCII characters.&#34;)
+    return code</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Instance variables</h3>
+<dl>
+<dt id="multiformats.multibase.Encoding.code"><code class="name">var <span class="ident">code</span> : str</code></dt>
+<dd>
+<div class="desc"><p>Multibase code. Must either have length 1 or satisfy:</p>
+<pre><code class="language-py">re.match(r&quot;^0x$&quot;, code)
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def code(self) -&gt; str:
+    &#34;&#34;&#34;
+        Multibase code. Must either have length 1 or satisfy:
+
+        ```py
+        re.match(r&#34;^0x$&#34;, code)
+        ```
+    &#34;&#34;&#34;
+    return self._code</code></pre>
+</details>
+</dd>
+<dt id="multiformats.multibase.Encoding.code_printable"><code class="name">var <span class="ident">code_printable</span> : str</code></dt>
+<dd>
+<div class="desc"><p>Printable version of <code><a title="multiformats.multibase.Encoding.code" href="#multiformats.multibase.Encoding.code">Encoding.code</a></code>:</p>
+<ul>
+<li>if the code is a single non-printable ASCII character, returns the hex string of its byte</li>
+<li>otherwise, returns the code itself</li>
+</ul></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def code_printable(self) -&gt; str:
+    &#34;&#34;&#34;
+        Printable version of `Encoding.code`:
+
+        - if the code is a single non-printable ASCII character, returns the hex string of its byte
+        - otherwise, returns the code itself
+    &#34;&#34;&#34;
+    code = self.code
+    ord_code = ord(code)
+    if ord_code not in range(0x20, 0x7F):
+        return &#34;0x&#34;+base16.encode(bytes([ord_code]))
+    return code</code></pre>
+</details>
+</dd>
+<dt id="multiformats.multibase.Encoding.description"><code class="name">var <span class="ident">description</span> : str</code></dt>
+<dd>
+<div class="desc"><p>Encoding description.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def description(self) -&gt; str:
+    &#34;&#34;&#34; Encoding description. &#34;&#34;&#34;
+    return self._description</code></pre>
+</details>
+</dd>
+<dt id="multiformats.multibase.Encoding.name"><code class="name">var <span class="ident">name</span> : str</code></dt>
+<dd>
+<div class="desc"><p>Encoding name. Must satisfy the following:</p>
+<pre><code class="language-py">re.match(r&quot;^[a-z][a-z0-9_-]+$&quot;, name)
+</code></pre>
+<p>In the <a href="https://github.com/multiformats/multibase/raw/master/multibase.csv">multibase table</a>,
+this is listed under <code><a title="multiformats.multibase.encoding" href="#multiformats.multibase.encoding">encoding()</a></code>.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def name(self) -&gt; str:
+    &#34;&#34;&#34;
+        Encoding name. Must satisfy the following:
+
+        ```py
+        re.match(r&#34;^[a-z][a-z0-9_-]+$&#34;, name)
+        ```
+
+        In the [multibase table](https://github.com/multiformats/multibase/raw/master/multibase.csv),
+        this is listed under `encoding`.
+    &#34;&#34;&#34;
+    return self._name</code></pre>
+</details>
+</dd>
+<dt id="multiformats.multibase.Encoding.raw_decoder"><code class="name">var <span class="ident">raw_decoder</span> : Callable[[str], bytes]</code></dt>
+<dd>
+<div class="desc"><p>Returns the raw encoder for this encoding:
+given a string without the multibase prefix, it produces the decoded data.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def raw_decoder(self) -&gt; RawDecoder:
+    &#34;&#34;&#34;
+        Returns the raw encoder for this encoding:
+        given a string without the multibase prefix, it produces the decoded data.
+    &#34;&#34;&#34;
+    enc = raw_encoding.get(self.name)
+    if enc is None:
+        raise NotImplementedError(f&#34;Encoding/decoding for {repr(self.name)} is not yet implemented.&#34;)
+    return enc.decode</code></pre>
+</details>
+</dd>
+<dt id="multiformats.multibase.Encoding.raw_encoder"><code class="name">var <span class="ident">raw_encoder</span> : Callable[[bytes], str]</code></dt>
+<dd>
+<div class="desc"><p>Returns the raw encoder for this encoding:
+given bytes, it produces the encoded string without the multibase prefix.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def raw_encoder(self) -&gt; RawEncoder:
+    &#34;&#34;&#34;
+        Returns the raw encoder for this encoding:
+        given bytes, it produces the encoded string without the multibase prefix.
+    &#34;&#34;&#34;
+    enc = raw_encoding.get(self.name)
+    if enc is None:
+        raise NotImplementedError(f&#34;Encoding/decoding for {repr(self.name)} is not yet implemented.&#34;)
+    return enc.encode</code></pre>
+</details>
+</dd>
+<dt id="multiformats.multibase.Encoding.status"><code class="name">var <span class="ident">status</span> : Literal['draft', 'candidate', 'default']</code></dt>
+<dd>
+<div class="desc"><p>Encoding status. Must be 'draft', 'candidate' or 'default'.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def status(self) -&gt; Literal[&#34;draft&#34;, &#34;candidate&#34;, &#34;default&#34;]:
+    &#34;&#34;&#34; Encoding status. Must be &#39;draft&#39;, &#39;candidate&#39; or &#39;default&#39;.&#34;&#34;&#34;
+    return self._status</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="multiformats.multibase.Encoding.decode"><code class="name flex">
+<span>def <span class="ident">decode</span></span>(<span>self, data: str) ‑> bytes</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Decodes a multibase string into bytes: it first checks that the multibase
+prefix matches the value specified by <code><a title="multiformats.multibase.Encoding.code" href="#multiformats.multibase.Encoding.code">Encoding.code</a></code>, then uses
+<code><a title="multiformats.multibase.Encoding.raw_encoder" href="#multiformats.multibase.Encoding.raw_encoder">Encoding.raw_encoder</a></code> on the string without prefix and returns the bytes.</p>
+<p>Example usage:</p>
+<pre><code class="language-py">&gt;&gt;&gt; base32 = multibase.encoding(&quot;base32&quot;)
+&gt;&gt;&gt; base32.decode(&quot;bjbswy3dpeblw64tmmqqq&quot;)
+b'Hello World!'
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def decode(self, data: str) -&gt; bytes:
+    &#34;&#34;&#34;
+        Decodes a multibase string into bytes: it first checks that the multibase
+        prefix matches the value specified by `Encoding.code`, then uses
+        `Encoding.raw_encoder` on the string without prefix and returns the bytes.
+
+        Example usage:
+
+        ```py
+        &gt;&gt;&gt; base32 = multibase.encoding(&#34;base32&#34;)
+        &gt;&gt;&gt; base32.decode(&#34;bjbswy3dpeblw64tmmqqq&#34;)
+        b&#39;Hello World!&#39;
+        ```
+    &#34;&#34;&#34;
+    encoding = encoding_of(data)
+    if encoding != self:
+        raise ValueError(f&#34;Expected {repr(self.name)} encoding, &#34;
+                         f&#34;found {repr(encoding.name)} encoding instead.&#34;)
+    return self.raw_decoder(data[1:])</code></pre>
+</details>
+</dd>
+<dt id="multiformats.multibase.Encoding.encode"><code class="name flex">
+<span>def <span class="ident">encode</span></span>(<span>self, data: bytes) ‑> str</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Encodes bytes into a multibase string: it first uses <code><a title="multiformats.multibase.Encoding.raw_encoder" href="#multiformats.multibase.Encoding.raw_encoder">Encoding.raw_encoder</a></code>,
+and then prepends the multibase prefix given by <code><a title="multiformats.multibase.Encoding.code" href="#multiformats.multibase.Encoding.code">Encoding.code</a></code> and returns
+the resulting multibase string.</p>
+<p>Example usage:</p>
+<pre><code class="language-py">&gt;&gt;&gt; base32 = multibase.encoding(&quot;base32&quot;)
+&gt;&gt;&gt; base32.encode(b&quot;Hello World!&quot;)
+'bjbswy3dpeblw64tmmqqq'
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def encode(self, data: bytes) -&gt; str:
+    &#34;&#34;&#34;
+        Encodes bytes into a multibase string: it first uses `Encoding.raw_encoder`,
+        and then prepends the multibase prefix given by `Encoding.code` and returns
+        the resulting multibase string.
+
+        Example usage:
+
+        ```py
+        &gt;&gt;&gt; base32 = multibase.encoding(&#34;base32&#34;)
+        &gt;&gt;&gt; base32.encode(b&#34;Hello World!&#34;)
+        &#39;bjbswy3dpeblw64tmmqqq&#39;
+        ```
+    &#34;&#34;&#34;
+    return self.code+self.raw_encoder(data)</code></pre>
+</details>
+</dd>
+<dt id="multiformats.multibase.Encoding.to_json"><code class="name flex">
+<span>def <span class="ident">to_json</span></span>(<span>self) ‑> Mapping[str, str]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Returns a JSON dictionary representation of this <code><a title="multiformats.multibase.Encoding" href="#multiformats.multibase.Encoding">Encoding</a></code> object,
+compatible with the one from the multibase.csv table found in the
+<a href="https://github.com/multiformats/multibase">multibase spec</a>.</p>
+<p>Example usage:</p>
+<pre><code class="language-py">&gt;&gt;&gt; base32 = multibase.encoding(&quot;base32&quot;)
+&gt;&gt;&gt; base32.to_json()
+{'name': 'base32', 'code': 'b',
+ 'status': 'default',
+ 'description': 'rfc4648 case-insensitive - no padding'}
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def to_json(self) -&gt; Mapping[str, str]:
+    &#34;&#34;&#34;
+        Returns a JSON dictionary representation of this `Encoding` object,
+        compatible with the one from the multibase.csv table found in the
+        [multibase spec](https://github.com/multiformats/multibase).
+
+        Example usage:
+
+        ```py
+        &gt;&gt;&gt; base32 = multibase.encoding(&#34;base32&#34;)
+        &gt;&gt;&gt; base32.to_json()
+        {&#39;name&#39;: &#39;base32&#39;, &#39;code&#39;: &#39;b&#39;,
+         &#39;status&#39;: &#39;default&#39;,
+         &#39;description&#39;: &#39;rfc4648 case-insensitive - no padding&#39;}
+        ```
+    &#34;&#34;&#34;
+    return {
+        &#34;name&#34;: self.name,
+        &#34;code&#34;: self.code_printable,
+        &#34;status&#34;: self.status,
+        &#34;description&#34;: self.description
+    }</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="multiformats" href="../index.html">multiformats</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-submodules">Sub-modules</a></h3>
+<ul>
+<li><code><a title="multiformats.multibase.raw_encoding" href="raw_encoding.html">multiformats.multibase.raw_encoding</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="two-column">
+<li><code><a title="multiformats.multibase.decode" href="#multiformats.multibase.decode">decode</a></code></li>
+<li><code><a title="multiformats.multibase.encode" href="#multiformats.multibase.encode">encode</a></code></li>
+<li><code><a title="multiformats.multibase.encoding" href="#multiformats.multibase.encoding">encoding</a></code></li>
+<li><code><a title="multiformats.multibase.encoding_of" href="#multiformats.multibase.encoding_of">encoding_of</a></code></li>
+<li><code><a title="multiformats.multibase.exists" href="#multiformats.multibase.exists">exists</a></code></li>
+<li><code><a title="multiformats.multibase.get" href="#multiformats.multibase.get">get</a></code></li>
+<li><code><a title="multiformats.multibase.register" href="#multiformats.multibase.register">register</a></code></li>
+<li><code><a title="multiformats.multibase.table" href="#multiformats.multibase.table">table</a></code></li>
+<li><code><a title="multiformats.multibase.unregister" href="#multiformats.multibase.unregister">unregister</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="multiformats.multibase.Encoding" href="#multiformats.multibase.Encoding">Encoding</a></code></h4>
+<ul class="two-column">
+<li><code><a title="multiformats.multibase.Encoding.code" href="#multiformats.multibase.Encoding.code">code</a></code></li>
+<li><code><a title="multiformats.multibase.Encoding.code_printable" href="#multiformats.multibase.Encoding.code_printable">code_printable</a></code></li>
+<li><code><a title="multiformats.multibase.Encoding.decode" href="#multiformats.multibase.Encoding.decode">decode</a></code></li>
+<li><code><a title="multiformats.multibase.Encoding.description" href="#multiformats.multibase.Encoding.description">description</a></code></li>
+<li><code><a title="multiformats.multibase.Encoding.encode" href="#multiformats.multibase.Encoding.encode">encode</a></code></li>
+<li><code><a title="multiformats.multibase.Encoding.name" href="#multiformats.multibase.Encoding.name">name</a></code></li>
+<li><code><a title="multiformats.multibase.Encoding.raw_decoder" href="#multiformats.multibase.Encoding.raw_decoder">raw_decoder</a></code></li>
+<li><code><a title="multiformats.multibase.Encoding.raw_encoder" href="#multiformats.multibase.Encoding.raw_encoder">raw_encoder</a></code></li>
+<li><code><a title="multiformats.multibase.Encoding.status" href="#multiformats.multibase.Encoding.status">status</a></code></li>
+<li><code><a title="multiformats.multibase.Encoding.to_json" href="#multiformats.multibase.Encoding.to_json">to_json</a></code></li>
+<li><code><a title="multiformats.multibase.Encoding.validate_code" href="#multiformats.multibase.Encoding.validate_code">validate_code</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>

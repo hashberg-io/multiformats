@@ -5,24 +5,24 @@
 
     ```py
     >>> from multiformats import multicodec
-    >>> from multicodec import Multicodec
+    >>> from multiformats.multicodec import Multicodec
     >>> Multicodec("identity", "multihash", 0x00, "permanent", "raw binary")
     Multicodec(name='identity', tag='multihash', code=0,
                status='permanent', description='raw binary')
     ```
 
-    Core functionality is provided by the `exists` and `get` functions, which can be used to check
+    Core functionality is provided by the `get` and `exists` functions, which can be used to check
     whether a multicodec with given name or code is known, and if so to get the corresponding object:
 
     ```py
     >>> multicodec.exists("identity")
     True
-    >>> multicodec.exists(0x01)
+    >>> multicodec.exists(code=0x01)
     True
     >>> multicodec.get("identity")
     Multicodec(name='identity', tag='multihash', code=0,
                status='permanent', description='raw binary')
-    >>> multicodec.get(0x01)
+    >>> multicodec.get(code=0x01)
     Multicodec(name='cidv1', tag='ipld', code=1,
                status='permanent', description='CIDv1')
     ```
@@ -41,55 +41,104 @@
 """
 
 import csv
-from dataclasses import dataclass
-from importlib import resources
 import re
-from typing import Collection, Dict, Iterable, Iterator, Mapping, Optional, Set, Tuple, Union
+import sys
+from typing import AbstractSet, Any, cast, Dict, Iterable, Iterator, Mapping, Optional, Set, Sequence, Tuple, Union
+from typing_extensions import Literal
 
+if sys.version_info[1] >= 7:
+    import importlib.resources as importlib_resources
+else:
+    import importlib_resources
 
-@dataclass(frozen=True)
 class Multicodec:
     """
-        Dataclass for a multicodec.
+        Container class for a multicodec.
 
         Example usage:
 
         ```py
-            >>> Multicodec("identity", "multihash", 0x00, "permanent", "raw binary")
-            Multicodec(name='identity', tag='multihash', code=0,
-                       status='permanent', description='raw binary')
+            >>> Multicodec(**{
+            ...     'name': 'cidv1', 'tag': 'ipld', 'code': '0x01',
+            ...     'status': 'permanent', 'description': 'CIDv1'})
+            Multicodec(name='cidv1', tag='ipld', code=1,
+                       status='permanent', description='CIDv1')
         ```
 
     """
 
-    name: str
-    """
-        Multicodec name. Must satisfy the following:
+    _name: str
+    _tag: str
+    _code: int
+    _status: Literal["draft", "permanent"]
+    _description: str
 
-        ```py
-        re.match(r"^[a-z][a-z0-9_-]+$", name)
-        ```
-    """
+    def __init__(self, *,
+                 name: str,
+                 tag: str,
+                 code: Union[int, str],
+                 status: str = "draft",
+                 description: str = ""
+                ):
+        for arg in (name, tag, status, description):
+            if not isinstance(arg, str):
+                raise TypeError(f"Expected string, found {repr(arg)}.")
+        if not isinstance(code, (int, str)):
+            raise TypeError(f"Expected int, found {repr(code)}")
+        name = Multicodec._validate_name(name)
+        code = Multicodec.validate_code(code)
+        status = Multicodec._validate_status(status)
+        self._name = name
+        self._tag = tag
+        self._code = code
+        self._status = status
+        self._description = description
 
-    tag: str
-    """ Multicodec tag. """
+    @staticmethod
+    def _validate_name(name: str) -> str:
+        if not re.match(r"^[a-z][a-z0-9_-]+$", name):
+            raise ValueError(f"Invalid multicodec name {repr(name)}")
+        return name
 
-    code: int
-    """ Multicodec code. Must be a non-negative integer. """
+    @staticmethod
+    def validate_code(code: Union[int, str]) -> int:
+        """
+            Validates a multibase code and transforms it to unsigned integer format (if in hex format).
+        """
+        if isinstance(code, str):
+            if code.startswith("0x"):
+                code = code[2:]
+            code = int(code, base=16)
+        if code < 0:
+            raise ValueError(f"Invalid multicodec code {repr(code)}.")
+        return code
 
-    status: str
-    """ Multicodec status. Must be 'draft' or 'permanent'."""
+    @staticmethod
+    def _validate_status(status: str) -> Literal["draft", "permanent"]:
+        if status not in ("draft", "permanent"):
+            raise ValueError(f"Invalid multicodec status {repr(status)}.")
+        return cast(Literal["draft", "permanent"], status)
 
-    description: str
-    """ Multicodec description. """
+    @property
+    def name(self) -> str:
+        """
+            Multicodec name. Must satisfy the following:
 
-    def __post_init__(self):
-        if not re.match(r"^[a-z][a-z0-9_-]+$", self.name):
-            raise ValueError(f"Invalid multicodec name {repr(self.name)}")
-        if self.status not in ("draft", "permanent"):
-            raise ValueError(f"Invalid multicodec status {repr(self.status)}.")
-        if self.code < 0:
-            raise ValueError(f"Invalid multicodec code {self.code}.")
+            ```py
+            re.match(r"^[a-z][a-z0-9_-]+$", name)
+            ```
+        """
+        return self._name
+
+    @property
+    def tag(self) -> str:
+        """ Multicodec tag. """
+        return self._tag
+
+    @property
+    def code(self) -> int:
+        """ Multicodec code. Must be a non-negative integer. """
+        return self._code
 
     @property
     def hexcode(self) -> str:
@@ -110,6 +159,16 @@ class Multicodec:
         if len(code) % 2 != 0:
             code = "0x0"+code[2:]
         return code
+
+    @property
+    def status(self) -> Literal["draft", "permanent"]:
+        """ Multicodec status. """
+        return self._status
+
+    @property
+    def description(self) -> str:
+        """ Multicodec description. """
+        return self._description
 
     @property
     def is_private_use(self) -> bool:
@@ -142,36 +201,21 @@ class Multicodec:
             "description": self.description
         }
 
-    @staticmethod
-    def from_json(multicodec: Mapping[str, str]) -> "Multicodec":
-        """
-            Decodes a `Multicodec` object from a JSON dictionary representation
-            compatible with the one from the table.csv found in the
-            [multicodec spec](https://github.com/multiformats/multicodec).
-
-            Example usage:
-
-            ```py
-            >>> m = Multicodec.from_json({
-            ...     'name': 'cidv1', 'tag': 'ipld', 'code': '0x01',
-            ...     'status': 'permanent', 'description': 'CIDv1'})
-            >>> m == multicodec.get(1)
-            True
-            ```
-        """
-        return Multicodec(
-            multicodec["name"],
-            multicodec["tag"],
-            int(multicodec["code"][2:], base=16),
-            multicodec["status"],
-            multicodec["description"]
-        )
-
     def __str__(self) -> str:
-        return str(self.to_json())
+        if exists(self.name) and get(self.name) == self:
+            return f"multicodec.get({repr(self.name)})"
+        return repr(self)
+
+    def __repr__(self) -> str:
+        return f"Multicodec({', '.join(f'{k}={v}' for k, v in self.to_json().items())})"
+
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, Multicodec):
+            return NotImplemented
+        return self.to_json() == other.to_json()
 
 
-def get(name_or_code: Union[str, int]) -> Multicodec:
+def get(name: Optional[str] = None, *, code: Optional[int] = None) -> Multicodec:
     """
         Gets the multicodec with given name (if a string is passed) or code (if an int is passed).
         Raises `KeyError` if no such multicodec exists.
@@ -182,23 +226,23 @@ def get(name_or_code: Union[str, int]) -> Multicodec:
         >>> multicodec.get("identity")
         Multicodec(name='identity', tag='multihash', code=0,
                    status='permanent', description='raw binary')
-        >>> multicodec.get(0x01)
+        >>> multicodec.get(code=0x01)
         Multicodec(name='cidv1', tag='ipld', code=1,
                    status='permanent', description='CIDv1')
         ```
     """
-    if isinstance(name_or_code, str):
-        name: str = name_or_code
+    if (name is None) == (code is None):
+        raise ValueError("Must specify exactly one between encoding name and code.")
+    if name is not None:
         if name not in _name_table:
             raise KeyError(f"No multicodec named {repr(name)}.")
         return _name_table[name]
-    code: int = name_or_code
     if code not in _code_table:
         raise KeyError(f"No multicodec with code {repr(code)}.")
     return _code_table[code]
 
 
-def exists(name_or_code: Union[str, int]) -> bool:
+def exists(name: Optional[str] = None, *, code: Optional[int] = None) -> bool:
     """
         Checks whether there is a multicodec with the given name (if a string is passed)
         or code (if an int is passed).
@@ -208,47 +252,47 @@ def exists(name_or_code: Union[str, int]) -> bool:
         ```py
         >>> multicodec.exists("identity")
         True
-        >>> multicodec.exists(0x01)
+        >>> multicodec.exists(code=0x01)
         True
         ```
     """
-    if isinstance(name_or_code, str):
-        name: str = name_or_code
+    if (name is None) == (code is None):
+        raise ValueError("Must specify exactly one between encoding name and code.")
+    if name is not None:
         return name in _name_table
-    code: int = name_or_code
     return code in _code_table
 
 
-def register(m: Multicodec, overwrite: bool = False) -> None:
+def register(m: Multicodec, *, overwrite: bool = False) -> None:
     """
         Registers a given multicodec. The optional keyword argument `overwrite` (default: `False`)
         can be used to overwrite a multicodec with existing code.
 
-        Raises `ValueError` if a multicodec with the same name exists, or if a multicodec with the
-        same code exists and `overwrite` is `False`.
+        If `overwrite` is `False`, raises `ValueError` if a multicodec with the same name or code already exists.
+        If `overwrite` is `True`, raises `ValueError` if a multicodec with the same name but different code already exists.
 
         Example usage:
 
         ```py
             >>> m = Multicodec("my-multicodec", "my-tag", 0x300001, "draft", "...")
             >>> multicodec.register(m)
-            >>> multicodec.exists(0x300001)
+            >>> multicodec.exists(code=0x300001)
             True
-            >>> multicodec.get(0x300001).name
+            >>> multicodec.get(code=0x300001).name
             'my-multicodec'
-            >>> multicodec.get(0x300001).is_private_use
+            >>> multicodec.get(code=0x300001).is_private_use
             True
         ```
     """
     if not overwrite and m.code in _code_table:
         raise ValueError(f"Multicodec with code {repr(m.code)} already exists: {_code_table[m.code]}")
-    if m.name in _name_table:
+    if m.name in _name_table and _name_table[m.name].code != m.code:
         raise ValueError(f"Multicodec with name {repr(m.name)} already exists: {_name_table[m.name]}")
     _code_table[m.code] = m
     _name_table[m.name] = m
 
 
-def unregister(name_or_code: Union[str, int]) -> None:
+def unregister(name: Optional[str] = None, *, code: Optional[int] = None) -> None:
     """
         Unregisters the multicodec with given name (if a string is passed) or code (if an int is passed).
         Raises `KeyError` if no such multicodec exists.
@@ -256,17 +300,19 @@ def unregister(name_or_code: Union[str, int]) -> None:
         Example usage:
 
         ```py
-        >>> multicodec.unregister(0x01) # cidv1
-        >>> multicodec.exists(0x01)
+        >>> multicodec.unregister(code=0x01) # cidv1
+        >>> multicodec.unregister(code=0x01)
         False
         ```
     """
-    m = get(name_or_code)
+    m = get(name, code=code)
     del _code_table[m.code]
     del _name_table[m.name]
 
 
-def table(tag: Union[None, str, Collection[str]] = None, status: Union[None, str, Collection[str]] = None) -> Iterator[Multicodec]:
+def table(*,
+          tag: Union[None, str, AbstractSet[str], Sequence[str]] = None,
+          status: Union[None, str, AbstractSet[str], Sequence[str]] = None) -> Iterator[Multicodec]:
     """
         Iterates through the registered multicodecs, in order of ascending code.
         The optional keyword arguments `tag` and `status` can be used to restrict the iterator
@@ -283,14 +329,14 @@ def table(tag: Union[None, str, Collection[str]] = None, status: Union[None, str
          178, 192, 193, 290, 297, 400, 421, 460, 477, 478, 479]
         ```
     """
-    tags: Optional[Collection[str]]
+    tags: Union[None, AbstractSet[str], Sequence[str]]
     if tag is None:
         tags = None
     elif isinstance(tag, str):
         tags = [tag]
     else:
         tags = tag
-    statuses: Optional[Collection[str]]
+    statuses: Union[None, AbstractSet[str], Sequence[str]]
     if status is None:
         statuses = None
     elif isinstance(status, str):
@@ -317,6 +363,7 @@ def build_multicodec_tables(multicodecs: Iterable[Multicodec], *,
 
         Raises `ValueError` if the same multicodec code is encountered multiple times, unless exactly one
         of the multicodecs has permanent status (in which case that codec is the one inserted in the table).
+        Raises `ValueError` if the same name is encountered multiple times.
 
         Example usage:
 
@@ -336,7 +383,7 @@ def build_multicodec_tables(multicodecs: Iterable[Multicodec], *,
                     # this draft code has been superseded by a permanent one, skip it
                     continue
                 raise ValueError(f"Multicodec code {m.hexcode} appears multiple times in table.")
-            if m.code != "permanent":
+            if m.status != "permanent":
                 # overwriting draft code with another draft code: dodgy, need to check at the end
                 overwritten_draft_codes.add(m.code)
         code_table[m.code] = m
@@ -351,8 +398,16 @@ def build_multicodec_tables(multicodecs: Iterable[Multicodec], *,
     return code_table, name_table
 
 # Create the global code->multicodec and name->multicodec mappings.
-with resources.open_text("multiformats", "multicodec-table.csv") as csv_table:
+# _code_table: Dict[str, Encoding] = {}
+# _name_table: Dict[str, Encoding] = {}
+with importlib_resources.open_text("multiformats.multicodec", "multicodec-table.csv") as csv_table:
     reader = csv.DictReader(csv_table)
-    multicodecs = (Multicodec.from_json({k.strip(): v.strip() for k, v in _row.items()})
+    multicodecs = (Multicodec(**{k.strip(): v.strip() for k, v in _row.items()})
                    for _row in reader)
     _code_table, _name_table = build_multicodec_tables(multicodecs)
+
+
+# additional docs info
+__pdoc__ = {
+    "build_multicodec_tables": False # exclude from docs
+}

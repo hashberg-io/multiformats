@@ -52,10 +52,11 @@ The `multicodec` module implements the [multicodec spec](https://github.com/mult
 The `Multicodec` dataclass provides a container for multicodec data:
 
 ```py
->>> from multiformats.multicodec import Multicodec
->>> Multicodec("identity", "multihash", 0x00, "permanent", "raw binary")
-Multicodec(name='identity', tag='multihash', code=0,
-           status='permanent', description='raw binary')
+>>> Multicodec.from_json({
+...     'name': 'cidv1', 'tag': 'ipld', 'code': '0x01',
+...     'status': 'permanent', 'description': 'CIDv1'})
+Multicodec(name='cidv1', tag='ipld', code=1,
+           status='permanent', description='CIDv1')
 ```
 
 The `exists` and `get` functions can be used to check whether a multicodec with given name or code is known, and if so to get the corresponding object:

@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="multiformats",
-    version="0.0.0",
+    version="0.1.0",
     author="hashberg",
     author_email="sg495@users.noreply.github.com",
     url="https://github.com/hashberg-io/multiformats",
@@ -16,7 +16,8 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     packages=setuptools.find_packages(exclude=["test"]),
     classifiers=[ # see https://pypi.org/classifiers/
-        "Development Status :: 1 - Planning",
+        "Development Status :: 3 - Alpha",
+        "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.7",
@@ -26,8 +27,11 @@ setuptools.setup(
         "Typing :: Typed",
     ],
     package_data={"": [],
-                  "multiformats": ["multiformats/py.typed"],
+                  "multiformats": ["py.typed"],
                  },
-    install_requires=[],
+    install_requires=[
+        "bases",
+        'importlib-resources; python_version<"3.7"',
+    ],
     include_package_data=True
 )
