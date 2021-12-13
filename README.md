@@ -1,4 +1,4 @@
-# `multiformats`: a Python implementation of [multiformat protocols](https://multiformats.io/).
+# `multiformats`: A Python implementation of [multiformat protocols](https://multiformats.io/)
 
 [![Generic badge](https://img.shields.io/badge/python-3.7+-green.svg)](https://docs.python.org/3.7/)
 ![PyPI version shields.io](https://img.shields.io/pypi/v/multiformats.svg)
