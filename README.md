@@ -22,10 +22,10 @@ This is a fully compliant Python implementation of the [multiformat protocols](h
 
 ## Install
 
-You can install this package with `pip`:
+You can install the latest release from PyPI as follows:
 
 ```
-pip install multiformats
+pip install --upgrade multiformats
 ```
 
 ## Usage
