@@ -193,8 +193,8 @@ Also note that data and digests are all `bytes` objects, represented here as hex
         b'\xc0S^K\xe2\xb7\x9f\xfd\x93)\x13\x05Ck\xf8\x891NJ?'
 >>> multihash_digest
 b'\x12\x14\xc0S^K\xe2\xb7\x9f\xfd\x93)\x13\x05Ck\xf8\x891NJ?'
-# ^^^^^      0x12 -> multihash multicodec "sha2-256"
-#      ^^^^^ 0x14 -> truncated hash length of 20 bytes
+# ^^^^     0x12 -> multihash multicodec "sha2-256"
+#     ^^^^ 0x14 -> truncated hash length of 20 bytes
 ```
 
 For advanced usage, see the [API documentation](https://hashberg-io.github.io/multiformats/multiformats/multihash.html).
