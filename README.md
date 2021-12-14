@@ -1,6 +1,6 @@
 # `multiformats`: A Python implementation of [multiformat protocols](https://multiformats.io/)
 
-[![Generic badge](https://img.shields.io/badge/python-3.6+-green.svg)](https://docs.python.org/3.6/)
+[![Generic badge](https://img.shields.io/badge/python-3.7+-green.svg)](https://docs.python.org/3.7/)
 ![PyPI version shields.io](https://img.shields.io/pypi/v/multiformats.svg)
 [![PyPI status](https://img.shields.io/pypi/status/multiformats.svg)](https://pypi.python.org/pypi/multiformats/)
 [![Checked with Mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](https://github.com/python/mypy)
@@ -86,7 +86,7 @@ The `table` function can be used to iterate through known multicodecs, optionall
 For advanced usage, see the [API documentation](https://hashberg-io.github.io/multiformats/multiformats/multicodec.html).
 
 
-## Multibase
+### Multibase
 
 The `multibase` module implements the [multibase spec](https://github.com/multiformats/multibase). The `Multibase` class provides a container for multibase data:
 
@@ -134,27 +134,44 @@ Multibase(encoding="base16", code="f",
 For advanced usage, see the [API documentation](https://hashberg-io.github.io/multiformats/multiformats/multibase.html).
 
 
-## Multihash
+### Multihash
 
-The `multihash` module implements the [multihash spec](https://github.com/multiformats/multihash). The `exists` and `get` functions can be used to check whether a multihash multicodec with given name or code is known, and if so to get the corresponding object:
+The `multihash` module implements the [multihash spec](https://github.com/multiformats/multihash).
+The `exists` and `get` functions can be used to check whether a multihash multicodec with given name or code is known, and if so to get the corresponding object:
 
 
-Core functionality is provided by the `encode`, `decode` and digest functions, which
-can be used, respectively, to encode a hash digest into a multihash digest, to decode
-a hash digest from a multihash digest, and to create a multihash digest directly from
-binary data:
+Core functionality is provided by the `digest`, `encode`, `decode` functions.
+The `digest` function can be used to create a multihash digest directly from data:
 
 ```py
 >>> data = b"Hello world!"
->>> multihash.digest(data, "sha2-256").hex() # full 32-bytes hash
+>>> multihash_digest = multihash.digest(data, "sha2-256")
+>>> multihash_digest.hex()
 '1220c0535e4be2b79ffd93291305436bf889314e4a3faec05ecffcbb7df31ad9e51a'
+```
+By default, the full digest produced by the hash function is used.
+Optionally, a smaller digest size can be specified to produce truncated hashes:
+
+```py
 >>> multihash_digest = multihash.digest(data, "sha2-256", size=20)
 #                  optional truncated hash size, in bytes ^^^^^^^
->>> multihash_digest.hex() # truncated 20-bytes hash
+>>> multihash_digest.hex()
+'1214c0535e4be2b79ffd93291305436bf889314e4a3f' # 20-bytes truncated hash
+```
+
+The `decode` function can be used to extract the raw hash digest from a multihash digest:
+
+```py
+>>> multihash_digest.hex()
 '1214c0535e4be2b79ffd93291305436bf889314e4a3f'
-#^^   code 0x12 for multihash multicodec "sha2-256"
-#  ^^ truncated hash length 0x14 = 20 bytes
 >>> hash_digest = multihash.decode(multihash_digest)
+>>> hash_digest.hex()
+    'c0535e4be2b79ffd93291305436bf889314e4a3f'
+```
+
+The `encode` function can be used to encode a raw hash digest into a multihash digest:
+
+```py
 >>> hash_digest.hex()
     'c0535e4be2b79ffd93291305436bf889314e4a3f'
 >>> multihash.encode(hash_digest, "sha2-256").hex()
@@ -186,15 +203,15 @@ Multicodec(name='skein1024-1024', tag='multihash', code='0xb3e0',
 128
 ```
 
-Also note that data and digests are all `bytes` objects, represented here as hex strings for clarity:
+Also note that data and digests are all `bytes` objects (above, we represented them as hex strings for clarity):
 
 ```py
 >>> hash_digest
-          b'\\xc0S^K\\xe2\\xb7\\x9f\\xfd\\x93)\\x13\\x05Ck\\xf8\\x891NJ?'
+        b'\xc0S^K\xe2\xb7\x9f\xfd\x93)\x13\x05Ck\xf8\x891NJ?'
 >>> multihash_digest
-b'\\x12\\x14\\xc0S^K\\xe2\\xb7\\x9f\\xfd\\x93)\\x13\\x05Ck\\xf8\\x891NJ?'
-# ^^^^^      0x12 -> multihash multicodec "sha2-256"
-#      ^^^^^ 0x14 -> truncated hash length of 20 bytes
+b'\x12\x14\xc0S^K\xe2\xb7\x9f\xfd\x93)\x13\x05Ck\xf8\x891NJ?'
+# ^^^^     0x12 -> multihash multicodec "sha2-256"
+#     ^^^^ 0x14 -> truncated hash length of 20 bytes
 ```
 
 For advanced usage, see the [API documentation](https://hashberg-io.github.io/multiformats/multiformats/multihash.html).
