@@ -86,7 +86,7 @@ The `table` function can be used to iterate through known multicodecs, optionall
 For advanced usage, see the [API documentation](https://hashberg-io.github.io/multiformats/multiformats/multicodec.html).
 
 
-## Multibase
+### Multibase
 
 The `multibase` module implements the [multibase spec](https://github.com/multiformats/multibase). The `Multibase` class provides a container for multibase data:
 
@@ -134,7 +134,7 @@ Multibase(encoding="base16", code="f",
 For advanced usage, see the [API documentation](https://hashberg-io.github.io/multiformats/multiformats/multibase.html).
 
 
-## Multihash
+### Multihash
 
 The `multihash` module implements the [multihash spec](https://github.com/multiformats/multihash). The `exists` and `get` functions can be used to check whether a multihash multicodec with given name or code is known, and if so to get the corresponding object:
 
