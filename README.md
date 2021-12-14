@@ -203,7 +203,7 @@ Multicodec(name='skein1024-1024', tag='multihash', code='0xb3e0',
 128
 ```
 
-Also note that data and digests are all `bytes` objects, represented here as hex strings for clarity:
+Also note that data and digests are all `bytes` objects (above, we represented them as hex strings for clarity):
 
 ```py
 >>> hash_digest
