@@ -136,25 +136,42 @@ For advanced usage, see the [API documentation](https://hashberg-io.github.io/mu
 
 ### Multihash
 
-The `multihash` module implements the [multihash spec](https://github.com/multiformats/multihash). The `exists` and `get` functions can be used to check whether a multihash multicodec with given name or code is known, and if so to get the corresponding object:
+The `multihash` module implements the [multihash spec](https://github.com/multiformats/multihash).
+The `exists` and `get` functions can be used to check whether a multihash multicodec with given name or code is known, and if so to get the corresponding object:
 
 
-Core functionality is provided by the `encode`, `decode` and digest functions, which
-can be used, respectively, to encode a hash digest into a multihash digest, to decode
-a hash digest from a multihash digest, and to create a multihash digest directly from
-binary data:
+Core functionality is provided by the `digest`, `encode`, `decode` functions.
+The `digest` function can be used to create a multihash digest directly from data:
 
 ```py
 >>> data = b"Hello world!"
->>> multihash.digest(data, "sha2-256").hex() # full 32-bytes hash
+>>> multihash_digest = multihash.digest(data, "sha2-256")
+>>> multihash_digest.hex()
 '1220c0535e4be2b79ffd93291305436bf889314e4a3faec05ecffcbb7df31ad9e51a'
+```
+By default, the full digest produced by the hash function is used.
+Optionally, a smaller digest size can be specified to produce truncated hashes:
+
+```py
 >>> multihash_digest = multihash.digest(data, "sha2-256", size=20)
 #                  optional truncated hash size, in bytes ^^^^^^^
->>> multihash_digest.hex() # truncated 20-bytes hash
+>>> multihash_digest.hex()
+'1214c0535e4be2b79ffd93291305436bf889314e4a3f' # 20-bytes truncated hash
+```
+
+The `decode` function can be used to extract the raw hash digest from a multihash digest:
+
+```py
+>>> multihash_digest.hex()
 '1214c0535e4be2b79ffd93291305436bf889314e4a3f'
-#^^   code 0x12 for multihash multicodec "sha2-256"
-#  ^^ truncated hash length 0x14 = 20 bytes
 >>> hash_digest = multihash.decode(multihash_digest)
+>>> hash_digest.hex()
+    'c0535e4be2b79ffd93291305436bf889314e4a3f'
+```
+
+The `encode` function can be used to encode a raw hash digest into a multihash digest:
+
+```py
 >>> hash_digest.hex()
     'c0535e4be2b79ffd93291305436bf889314e4a3f'
 >>> multihash.encode(hash_digest, "sha2-256").hex()
