@@ -203,7 +203,7 @@ Multicodec(name='skein1024-1024', tag='multihash', code='0xb3e0',
 128
 ```
 
-Also note that data and digests are all `bytes` objects (above, we represented them as hex strings for clarity):
+Data and digests are all `bytes` objects (above, we represented them as hex strings for clarity):
 
 ```py
 >>> hash_digest
@@ -213,6 +213,29 @@ b'\x12\x14\xc0S^K\xe2\xb7\x9f\xfd\x93)\x13\x05Ck\xf8\x891NJ?'
 # ^^^^     0x12 -> multihash multicodec "sha2-256"
 #     ^^^^ 0x14 -> truncated hash length of 20 bytes
 ```
+
+If you wish to produce digests for objects of other types, you should encode them into `bytes` first.
+For example, the `to_bytes(length, byteorder)` method can be used to obtain a `bytes` representation of an integer
+with given number of bytes and byte ordering, while the `encode(encoding)` method can be used to obtain a `bytes`
+representation of a string with given encoding: 
+
+```py
+>>> (400).to_bytes(4, byteorder="big")
+b'\x00\x00\x01\x90'
+>>> (400).to_bytes(4, byteorder="little")
+b'\x90\x01\x00\x00'
+>>> "Hello world!".encode("utf-8")
+b'Hello world!'
+>>> "Hello world!".encode("utf-16")
+b'\xff\xfeH\x00e\x00l\x00l\x00o\x00 \x00w\x00o\x00r\x00l\x00d\x00!\x00'
+>>> "Hello world!".encode("utf-16-le")
+b'H\x00e\x00l\x00l\x00o\x00 \x00w\x00o\x00r\x00l\x00d\x00!\x00'
+>>> "Hello world!".encode("utf-16-be")
+b'\x00H\x00e\x00l\x00l\x00o\x00 \x00w\x00o\x00r\x00l\x00d\x00!'
+```
+
+
+
 
 For advanced usage, see the [API documentation](https://hashberg-io.github.io/multiformats/multiformats/multihash.html).
 
