@@ -1,6 +1,13 @@
+The following items are subject to MIT License by Protocol Labs Inc:
+
+- multibase table, downloaded from https://github.com/multiformats/multibase/raw/master/multibase.csv
+- multicodec table, downloaded from https://github.com/multiformats/multicodec/raw/master/table.csv
+- test vectors for multihash, downloaded from https://github.com/multiformats/multihash/raw/master/tests/values/test_cases.csv on 14 Dec 2021
+
+
 The MIT License (MIT)
 
-Copyright (c) 2018 Protocol Labs Inc.
+Copyright (c) 2016 Protocol Labs Inc.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

@@ -26,13 +26,14 @@
     >>> base16.encode(bytes([0xAB, 0xCD]))
     'abcd'
     >>> base16.decode('abcd')
-    b'\xab\xcd'
+    b'\\xab\\xcd'
     ```
 """
 
 import binascii
 from types import MappingProxyType
 from typing import Callable, Dict, List, Union
+from typing_validation import validate
 
 from bases import (base2, base16, base8, base10, base36, base58btc, base58flickr,
                    base32, base32hex, base32z, base64, base64url,)
@@ -44,12 +45,15 @@ RawDecoder = Callable[[str], bytes]
 class CustomEncoding:
     """
         Class for custom raw encodings, implemented by explicitly passing raw encoding and decoding functions.
+        The raw encoder and decoder are expected to validate their own arguments.
     """
 
     _raw_encoder: Callable[[bytes], str]
     _raw_decoder: Callable[[str], bytes]
 
     def __init__(self, raw_encoder: Callable[[bytes], str], raw_decoder: Callable[[str], bytes]):
+        # validate(raw_encoder, Callable[[bytes], str]) # TODO: not yet supported by typing-validation
+        # validate(raw_decoder, Callable[[str], bytes]) # TODO: not yet supported by typing-validation
         self._raw_encoder = raw_encoder # type: ignore
         self._raw_decoder = raw_decoder # type: ignore
 
@@ -90,6 +94,7 @@ def get(name: str) -> RawEncoding:
             block_nchars=2)
         ```
     """
+    validate(name, str)
     if name not in _raw_encodings:
         raise KeyError(f"No raw encoding named {repr(name)}.")
     return _raw_encodings[name]
@@ -106,6 +111,7 @@ def exists(name: str) -> bool:
         True
         ```
     """
+    validate(name, str)
     return name in _raw_encodings
 
 
@@ -128,6 +134,9 @@ def register(name: str, enc: RawEncoding, *, overwrite: bool = False) -> None:
             block_size={1: 2, 2: 3}, reverse_blocks=True)
         ```
     """
+    validate(name, str)
+    validate(enc, RawEncoding)
+    validate(overwrite, bool)
     if not overwrite and name in _raw_encodings:
         raise ValueError(f"Raw encoding with name {repr(name)} already exists: {_raw_encodings[name]}")
     _raw_encodings[name] = enc
@@ -146,6 +155,7 @@ def unregister(name: str) -> None:
         False
         ```
     """
+    validate(name, str)
     if name not in _raw_encodings:
         raise KeyError(f"Raw encoding with name {repr(name)} does not exist.")
     del _raw_encodings[name]
@@ -155,8 +165,7 @@ def identity_raw_encoder(b: bytes) -> str:
     """
         Implementation of the raw identity encoder according to the [multibase spec](https://github.com/multiformats/multibase/).
     """
-    if not isinstance(b, bytes):
-        raise TypeError()
+    validate(b, bytes)
     return b.decode("utf-8")
 
 identity_raw_encoder.__repr__ = lambda: "identity_raw_encoder" # type: ignore
@@ -166,8 +175,7 @@ def identity_raw_decoder(s: str) -> bytes:
     """
         Implementation of the raw identity decoder according to the [multibase spec](https://github.com/multiformats/multibase/).
     """
-    if not isinstance(s, str):
-        raise TypeError()
+    validate(s, str)
     return s.encode("utf-8")
 
 identity_raw_decoder.__repr__ = lambda: "identity_raw_decoder" # type: ignore
@@ -187,8 +195,7 @@ def proquint_raw_encoder(b: bytes) -> str:
         with additional 'ro-' prefix as prescribed by the [multibase spec](https://github.com/multiformats/multibase/)
         and extended to include odd-length bytestrings (adding a final 3-letter block, using two zero pad bits).
     """
-    if not isinstance(b, bytes):
-        raise TypeError()
+    validate(b, bytes)
     consonants = _proquint_consonants
     vowels = _proquint_vowels
     char_blocks: List[str] = []
@@ -224,6 +231,7 @@ def proquint_raw_decoder(s: str) -> bytes:
         and extended to include odd-length bytestrings (adding a final 3-letter block, using two zero pad bits).
     """
     # pylint: disable = too-many-branches
+    validate(s, str)
     consonants = _proquint_consonants
     vowels = _proquint_vowels
     consonants_set = _proquint_consonants_set
@@ -231,8 +239,6 @@ def proquint_raw_decoder(s: str) -> bytes:
     consonants_revdir = _proquint_consonants_revdir
     vowels_revdir = _proquint_vowels_revdir
     # validate string
-    if not isinstance(s, str):
-        raise TypeError()
     if not s.startswith("ro-"):
         raise binascii.Error("Multibase proquint encoded strings must start with 'ro-'.")
     # remove 'ro-' prefix, return empty bytestring if resultant string is empty

@@ -6,9 +6,12 @@ disable = too-many-ancestors,
           redefined-outer-name,
           useless-super-delegation,
           isinstance-second-argument-not-valid-type,
+          broad-except,
           too-many-lines,
+          wildcard-import,
+          unused-wildcard-import,
           protected-access,
           useless-import-alias,
-          duplicate-code
+          duplicate-code,
 [FORMAT]
 max-line-length=160

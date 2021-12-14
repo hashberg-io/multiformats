@@ -16,6 +16,8 @@
 from io import BufferedIOBase, BytesIO
 from typing import List, Union
 
+from typing_validation import validate
+
 _max_num_bytes: int = 9
 
 def encode(x: int) -> bytes:
@@ -34,6 +36,7 @@ def encode(x: int) -> bytes:
         b'\x80\x01'
         ```
     """
+    validate(x, int)
     if x < 0:
         raise ValueError("Integer is negative.")
     varint_bytelist: List[int] = []
@@ -50,11 +53,11 @@ def encode(x: int) -> bytes:
     return bytes(varint_bytelist)
 
 
-def decode(varint: Union[bytes, bytearray, BufferedIOBase]) -> int:
+def decode(varint: Union[bytes, bytearray, memoryview, BufferedIOBase]) -> int:
     """
         Decodes an unsigned varint from a `bytes` object or a buffered binary stream.
         If a stream is passed, only the bytes encoding the varint are read from it.
-        If a `bytes` or `bytearray` object is passed, the varint encoding must use all bytes.
+        If a `bytes`-like object is passed, the varint encoding must use all bytes.
 
         Raises `ValueError` if:
 
@@ -86,7 +89,8 @@ def decode(varint: Union[bytes, bytearray, BufferedIOBase]) -> int:
         ```
 
     """
-    stream = BytesIO(varint) if isinstance(varint, (bytes, bytearray)) else varint
+    validate(varint, Union[bytes, bytearray, memoryview, BufferedIOBase])
+    stream = BytesIO(varint) if isinstance(varint, (bytes, bytearray, memoryview)) else varint
     expect_next = True
     num_bytes_read = 0
     x = 0

@@ -1,6 +1,7 @@
 """  Tests for the `multiformats.multicodec` module. """
 
 from multiformats import multicodec
+from multiformats.multicodec import Multicodec
 
 def test_exists() -> None:
     """ Tests `multicodec.exists`. """
@@ -18,7 +19,7 @@ def test_get() -> None:
     assert m.description == "raw binary"
 
 def test_multicodec_contructor() -> None:
-    """ Tests `multicodec.Multicodec.from_json`. """
+    """ Tests `Multicodec.from_json`. """
     m_json = {
         "name": "my-codec",
         "tag": "private",
@@ -26,16 +27,16 @@ def test_multicodec_contructor() -> None:
         "status": "draft",
         "description": "my private codec"
     }
-    m = multicodec.Multicodec(**m_json)
+    m = Multicodec(**m_json)
     assert m.name == m_json["name"]
     assert m.code == int(m_json["code"], base=16)
     assert m.hexcode == m_json["code"]
     assert m.status == m_json["status"]
     assert m.description == m_json["description"]
-    assert str(m) == f"Multicodec({', '.join(f'{k}={v}' for k, v in m_json.items())})"
+    assert str(m) == f"Multicodec({', '.join(f'{k}={repr(v)}' for k, v in m_json.items())})"
 
 def test_multicodec_to_json() -> None:
-    """ Tests `multicodec.Multicodec.to_json`. """
+    """ Tests `Multicodec.to_json`. """
     m_json = {
         "name": "my-codec",
         "tag": "private",
@@ -43,7 +44,7 @@ def test_multicodec_to_json() -> None:
         "status": "draft",
         "description": "my private codec"
     }
-    assert multicodec.Multicodec(**m_json).to_json() == m_json
+    assert Multicodec(**m_json).to_json() == m_json
 
 def test_register() -> None:
     """ Tests `multicodec.register`. """
@@ -54,7 +55,7 @@ def test_register() -> None:
         "status": "draft",
         "description": "my private codec"
     }
-    m = multicodec.Multicodec(**m_json)
+    m = Multicodec(**m_json)
     assert not multicodec.exists(m.name)
     assert not multicodec.exists(code=m.code)
     multicodec.register(m)
@@ -71,7 +72,7 @@ def test_unregister() -> None:
         "status": "draft",
         "description": "my private codec"
     }
-    m = multicodec.Multicodec(**m_json)
+    m = Multicodec(**m_json)
     assert multicodec.exists(m.name)
     assert multicodec.exists(code=m.code)
     m2_json = {
@@ -81,7 +82,7 @@ def test_unregister() -> None:
         "status": "draft",
         "description": "my second private codec"
     }
-    m2 = multicodec.Multicodec(**m2_json)
+    m2 = Multicodec(**m2_json)
     assert not multicodec.exists(m2.name)
     assert not multicodec.exists(code=m2.code)
     multicodec.register(m2)
@@ -129,8 +130,8 @@ def test_table_failure_modes() -> None:
     """ Tests failure modes for codec table building. """
     try:
         multicodecs = [
-            multicodec.Multicodec(name="identity", tag="multihash", code=0x00, status="permanent", description="raw binary"),
-            multicodec.Multicodec(name="my-codec", tag="private", code=0x300001, status="draft", description="my private codec"),
+            Multicodec(name="identity", tag="multihash", code=0x00, status="permanent", description="raw binary"),
+            Multicodec(name="my-codec", tag="private", code=0x300001, status="draft", description="my private codec"),
         ]
         multicodec.build_multicodec_tables(multicodecs)
         assert False, "Private use codes not allowed."
@@ -138,8 +139,8 @@ def test_table_failure_modes() -> None:
         pass
     try:
         multicodecs = [
-            multicodec.Multicodec(name="identity", tag="multihash", code=0x00, status="permanent", description="raw binary"),
-            multicodec.Multicodec(name="my-codec", tag="private", code=0x00, status="permanent", description="my private codec"),
+            Multicodec(name="identity", tag="multihash", code=0x00, status="permanent", description="raw binary"),
+            Multicodec(name="my-codec", tag="private", code=0x00, status="permanent", description="my private codec"),
         ]
         multicodec.build_multicodec_tables(multicodecs)
         assert False, "Repeated permanent codes not allowed."
@@ -147,24 +148,24 @@ def test_table_failure_modes() -> None:
         pass
     try:
         multicodecs = [
-            multicodec.Multicodec(name="identity", tag="multihash", code=0x00, status="permanent", description="raw binary"),
-            multicodec.Multicodec(name="my-codec", tag="private", code=0x00, status="draft", description="my private codec"),
+            Multicodec(name="identity", tag="multihash", code=0x00, status="permanent", description="raw binary"),
+            Multicodec(name="my-codec", tag="private", code=0x00, status="draft", description="my private codec"),
         ]
         multicodec.build_multicodec_tables(multicodecs)
     except ValueError:
         assert False, "Repeated codes allowed if exactly one is permanent."
     try:
         multicodecs = [
-            multicodec.Multicodec(name="identity", tag="multihash", code=0x00, status="draft", description="raw binary"),
-            multicodec.Multicodec(name="my-codec", tag="private", code=0x00, status="permanent", description="my private codec"),
+            Multicodec(name="identity", tag="multihash", code=0x00, status="draft", description="raw binary"),
+            Multicodec(name="my-codec", tag="private", code=0x00, status="permanent", description="my private codec"),
         ]
         multicodec.build_multicodec_tables(multicodecs)
     except ValueError:
         assert False, "Repeated codes allowed if exactly one is permanent."
     try:
         multicodecs = [
-            multicodec.Multicodec(name="identity", tag="multihash", code=0x00, status="draft", description="raw binary"),
-            multicodec.Multicodec(name="my-codec", tag="private", code=0x00, status="draft", description="my private codec"),
+            Multicodec(name="identity", tag="multihash", code=0x00, status="draft", description="raw binary"),
+            Multicodec(name="my-codec", tag="private", code=0x00, status="draft", description="my private codec"),
         ]
         multicodec.build_multicodec_tables(multicodecs)
         assert False, "Repeated codes allowed if exactly one is permanent."
@@ -172,8 +173,8 @@ def test_table_failure_modes() -> None:
         pass
     try:
         multicodecs = [
-            multicodec.Multicodec(name="identity", tag="multihash", code=0x00, status="permanent", description="raw binary"),
-            multicodec.Multicodec(name="identity", tag="private", code=0x01, status="draft", description="my private codec"),
+            Multicodec(name="identity", tag="multihash", code=0x00, status="permanent", description="raw binary"),
+            Multicodec(name="identity", tag="private", code=0x01, status="draft", description="my private codec"),
         ]
         print(multicodec.build_multicodec_tables(multicodecs))
         assert False, "Repeated names not allowed."
@@ -183,17 +184,17 @@ def test_table_failure_modes() -> None:
 def test_api_failure_modes() -> None:
     """ Tests failure modes for the multicode API. """
     try:
-        multicodec.Multicodec(name="3my-codec", tag="private", code=0x00, status="draft", description="my private codec")
+        Multicodec(name="3my-codec", tag="private", code=0x00, status="draft", description="my private codec")
         assert False, "This name should not be valid."
     except ValueError:
         pass
     try:
-        multicodec.Multicodec(name="my-codec", tag="private", code=0x00, status="other", description="my private codec")
+        Multicodec(name="my-codec", tag="private", code=0x00, status="other", description="my private codec")
         assert False, "Status must be 'permanent' or 'draft'."
     except ValueError:
         pass
     try:
-        multicodec.Multicodec(name="my-codec", tag="private", code=-1, status="draft", description="my private codec")
+        Multicodec(name="my-codec", tag="private", code=-1, status="draft", description="my private codec")
         assert False, "Code must be non-negative."
     except ValueError:
         pass
@@ -208,13 +209,13 @@ def test_api_failure_modes() -> None:
     except KeyError:
         pass
     try:
-        m = multicodec.Multicodec(name="identity", tag="multihash", code=0x300003, status="permanent", description="")
+        m = Multicodec(name="identity", tag="multihash", code=0x300003, status="permanent", description="")
         multicodec.register(m)
         assert False, "Codec name 'identity' already exists."
     except ValueError:
         pass
     try:
-        m = multicodec.Multicodec(name="my-codec", tag="multihash", code=0x00, status="permanent", description="")
+        m = Multicodec(name="my-codec", tag="multihash", code=0x00, status="permanent", description="")
         multicodec.register(m)
         assert False, "Codec with code 0x00 already exists."
     except ValueError:

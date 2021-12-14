@@ -1,0 +1,13 @@
+# pyproject.toml
+[build-system]
+requires = [
+    "setuptools>=45",
+    "wheel",
+    "setuptools_scm>=6.2"
+]
+build-backend = "setuptools.build_meta"
+
+# see https://github.com/pypa/setuptools_scm
+[tool.setuptools_scm]
+version_scheme = "post-release"   # use post-release scheme (default is pre-release of next version)
+local_scheme = "no-local-version" # interferes with PyPI

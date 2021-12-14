@@ -54,6 +54,8 @@ b''
 from io import BufferedIOBase, BytesIO
 from typing import List, Union
 
+from typing_validation import validate
+
 _max_num_bytes: int = 9
 
 def encode(x: int) -&gt; bytes:
@@ -72,6 +74,7 @@ def encode(x: int) -&gt; bytes:
         b&#39;\x80\x01&#39;
         ```
     &#34;&#34;&#34;
+    validate(x, int)
     if x &lt; 0:
         raise ValueError(&#34;Integer is negative.&#34;)
     varint_bytelist: List[int] = []
@@ -88,11 +91,11 @@ def encode(x: int) -&gt; bytes:
     return bytes(varint_bytelist)
 
 
-def decode(varint: Union[bytes, bytearray, BufferedIOBase]) -&gt; int:
+def decode(varint: Union[bytes, bytearray, memoryview, BufferedIOBase]) -&gt; int:
     &#34;&#34;&#34;
         Decodes an unsigned varint from a `bytes` object or a buffered binary stream.
         If a stream is passed, only the bytes encoding the varint are read from it.
-        If a `bytes` or `bytearray` object is passed, the varint encoding must use all bytes.
+        If a `bytes`-like object is passed, the varint encoding must use all bytes.
 
         Raises `ValueError` if:
 
@@ -124,7 +127,8 @@ def decode(varint: Union[bytes, bytearray, BufferedIOBase]) -&gt; int:
         ```
 
     &#34;&#34;&#34;
-    stream = BytesIO(varint) if isinstance(varint, (bytes, bytearray)) else varint
+    validate(varint, Union[bytes, bytearray, memoryview, BufferedIOBase])
+    stream = BytesIO(varint) if isinstance(varint, (bytes, bytearray, memoryview)) else varint
     expect_next = True
     num_bytes_read = 0
     x = 0
@@ -155,12 +159,12 @@ def decode(varint: Union[bytes, bytearray, BufferedIOBase]) -&gt; int:
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="multiformats.varint.decode"><code class="name flex">
-<span>def <span class="ident">decode</span></span>(<span>varint: Union[bytes, bytearray, io.BufferedIOBase]) ‑> int</span>
+<span>def <span class="ident">decode</span></span>(<span>varint: Union[bytes, bytearray, memoryview, io.BufferedIOBase]) ‑> int</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Decodes an unsigned varint from a <code>bytes</code> object or a buffered binary stream.
 If a stream is passed, only the bytes encoding the varint are read from it.
-If a <code>bytes</code> or <code>bytearray</code> object is passed, the varint encoding must use all bytes.</p>
+If a <code>bytes</code>-like object is passed, the varint encoding must use all bytes.</p>
 <p>Raises <code>ValueError</code> if:</p>
 <ul>
 <li><code>varint</code> contains no bytes (from specs, the number 0 is encoded as 0b0000_0000)</li>
@@ -187,11 +191,11 @@ b'ÿ'
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def decode(varint: Union[bytes, bytearray, BufferedIOBase]) -&gt; int:
+<pre><code class="python">def decode(varint: Union[bytes, bytearray, memoryview, BufferedIOBase]) -&gt; int:
     &#34;&#34;&#34;
         Decodes an unsigned varint from a `bytes` object or a buffered binary stream.
         If a stream is passed, only the bytes encoding the varint are read from it.
-        If a `bytes` or `bytearray` object is passed, the varint encoding must use all bytes.
+        If a `bytes`-like object is passed, the varint encoding must use all bytes.
 
         Raises `ValueError` if:
 
@@ -223,7 +227,8 @@ b'ÿ'
         ```
 
     &#34;&#34;&#34;
-    stream = BytesIO(varint) if isinstance(varint, (bytes, bytearray)) else varint
+    validate(varint, Union[bytes, bytearray, memoryview, BufferedIOBase])
+    stream = BytesIO(varint) if isinstance(varint, (bytes, bytearray, memoryview)) else varint
     expect_next = True
     num_bytes_read = 0
     x = 0
@@ -279,6 +284,7 @@ b''
         b&#39;\x80\x01&#39;
         ```
     &#34;&#34;&#34;
+    validate(x, int)
     if x &lt; 0:
         raise ValueError(&#34;Integer is negative.&#34;)
     varint_bytelist: List[int] = []

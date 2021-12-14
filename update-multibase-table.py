@@ -24,7 +24,7 @@ print("Building new multibase table...")
 reader = csv.DictReader(io.StringIO(new_text))
 clean_rows = ({k.strip(): v.strip() for k, v in row.items()} for row in reader)
 renamed_rows = ({(k if k != "encoding" else "name"): v for k, v in row.items()} for row in clean_rows)
-encodings = (multibase.Encoding(**{k.strip(): v.strip() for k, v in _row.items()})
+encodings = (multibase.Multibase(**{k.strip(): v.strip() for k, v in _row.items()})
              for _row in renamed_rows)
 new_table, _ = multibase.build_multibase_tables(encodings)
 
@@ -35,7 +35,7 @@ with open("multiformats/multibase/multibase-table.csv", "r") as f:
 reader = csv.DictReader(io.StringIO(current_text))
 clean_rows = ({k.strip(): v.strip() for k, v in row.items()} for row in reader)
 renamed_rows = ({(k if k != "encoding" else "name"): v for k, v in row.items()} for row in clean_rows)
-encodings = (multibase.Encoding(**{k.strip(): v.strip() for k, v in _row.items()})
+encodings = (multibase.Multibase(**{k.strip(): v.strip() for k, v in _row.items()})
              for _row in renamed_rows)
 current_table, _ = multibase.build_multibase_tables(encodings)
 
