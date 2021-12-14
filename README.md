@@ -1,4 +1,4 @@
-# `multiformats`: a Python implementation of [multiformat protocols](https://multiformats.io/).
+# `multiformats`: A Python implementation of [multiformat protocols](https://multiformats.io/)
 
 [![Generic badge](https://img.shields.io/badge/python-3.6+-green.svg)](https://docs.python.org/3.6/)
 ![PyPI version shields.io](https://img.shields.io/pypi/v/multiformats.svg)
@@ -22,10 +22,10 @@ This is a fully compliant Python implementation of the [multiformat protocols](h
 
 ## Install
 
-You can install this package with `pip`:
+You can install the latest release from PyPI as follows:
 
 ```
-pip install multiformats
+pip install --upgrade multiformats
 ```
 
 ## Usage
