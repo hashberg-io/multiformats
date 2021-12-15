@@ -3,7 +3,6 @@
 import csv
 import hashlib
 import importlib.resources as importlib_resources
-from typing import Dict
 
 import pytest
 import skein  # type: ignore

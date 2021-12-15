@@ -54,7 +54,7 @@
 
 """
 
-from typing import cast, FrozenSet, Tuple, Type, TypeVar, Union
+from typing import Any, cast, FrozenSet, Tuple, Type, TypeVar, Union
 from typing_extensions import Literal, Final
 from typing_validation import validate
 
@@ -283,7 +283,7 @@ class CID:
             Multibase used to encode the CID:
 
             - if a CIDv1 was decoded from a multibase-encoded string, the encoding multibase is used
-            - if a CIDv1 was decoded from a bytestring, the 'identity' multibase is used
+            - if a CIDv1 was decoded from a bytestring, the 'base58btc' multibase is used
             - for a CIDv0, 'base58btc' is always used
 
             Example usage:
@@ -493,6 +493,14 @@ class CID:
         d = self.digest
         return f"CID({repr(mb)}, {v}, {repr(mc)}, {repr(d.hex())})"
 
+    def __eq__(self, other: Any) -> bool:
+        if self is other:
+            return True
+        if not isinstance(other, CID):
+            return False
+        return (self.base == other.base and self.version == other.version
+                and self.codec == other.codec and self.digest == other.digest)
+
     @staticmethod
     def decode(cid: Union[str, BytesLike]) -> "CID":
         """
@@ -508,14 +516,14 @@ class CID:
             '12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95')
             ```
 
-            Example usage for CIDv1 bytestring (multibase always set to 'identity'):
+            Example usage for CIDv1 bytestring (multibase always set to 'base58btc'):
 
             ```py
             >>> b = bytes.fromhex(
             ... "015512206e6ff7950a36187a801613426e85"
             ... "8dce686cd7d7e3c0fc42ee0330072d245c95")
             >>> CID.decode(b)
-            CID('identity', 1, 'raw',
+            CID('base58btc', 1, 'raw',
             '12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95')
             ```
 
@@ -543,7 +551,7 @@ class CID:
         if isinstance(cid, str):
             cid, mb = _binary_cid_from_str(cid)
         else:
-            mb = multibase.get("identity")
+            mb = multibase.get("base58btc")
         validate(cid, BytesLike)
         cid = memoryview(cid)
         # if len(cid) == 34 and cid.startswith(b"\x12\x20"):
@@ -551,7 +559,6 @@ class CID:
             v = 0 # CID version
             mc_code = 0x70 # multicodec.get("dag-pb")
             digest = cid  # multihash digest is what's left
-            mb = multibase.get("base58btc")
         else:
             v, _, cid = varint.decode_raw(cid) # CID version
             if v == 0:

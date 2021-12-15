@@ -124,7 +124,7 @@ according to the <a href="https://github.com/libp2p/specs/blob/master/peer-ids/p
 
 &#34;&#34;&#34;
 
-from typing import cast, FrozenSet, Tuple, Type, TypeVar, Union
+from typing import Any, cast, FrozenSet, Tuple, Type, TypeVar, Union
 from typing_extensions import Literal, Final
 from typing_validation import validate
 
@@ -353,7 +353,7 @@ class CID:
             Multibase used to encode the CID:
 
             - if a CIDv1 was decoded from a multibase-encoded string, the encoding multibase is used
-            - if a CIDv1 was decoded from a bytestring, the &#39;identity&#39; multibase is used
+            - if a CIDv1 was decoded from a bytestring, the &#39;base58btc&#39; multibase is used
             - for a CIDv0, &#39;base58btc&#39; is always used
 
             Example usage:
@@ -563,6 +563,14 @@ class CID:
         d = self.digest
         return f&#34;CID({repr(mb)}, {v}, {repr(mc)}, {repr(d.hex())})&#34;
 
+    def __eq__(self, other: Any) -&gt; bool:
+        if self is other:
+            return True
+        if not isinstance(other, CID):
+            return False
+        return (self.base == other.base and self.version == other.version
+                and self.codec == other.codec and self.digest == other.digest)
+
     @staticmethod
     def decode(cid: Union[str, BytesLike]) -&gt; &#34;CID&#34;:
         &#34;&#34;&#34;
@@ -578,14 +586,14 @@ class CID:
             &#39;12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;)
             ```
 
-            Example usage for CIDv1 bytestring (multibase always set to &#39;identity&#39;):
+            Example usage for CIDv1 bytestring (multibase always set to &#39;base58btc&#39;):
 
             ```py
             &gt;&gt;&gt; b = bytes.fromhex(
             ... &#34;015512206e6ff7950a36187a801613426e85&#34;
             ... &#34;8dce686cd7d7e3c0fc42ee0330072d245c95&#34;)
             &gt;&gt;&gt; CID.decode(b)
-            CID(&#39;identity&#39;, 1, &#39;raw&#39;,
+            CID(&#39;base58btc&#39;, 1, &#39;raw&#39;,
             &#39;12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;)
             ```
 
@@ -613,7 +621,7 @@ class CID:
         if isinstance(cid, str):
             cid, mb = _binary_cid_from_str(cid)
         else:
-            mb = multibase.get(&#34;identity&#34;)
+            mb = multibase.get(&#34;base58btc&#34;)
         validate(cid, BytesLike)
         cid = memoryview(cid)
         # if len(cid) == 34 and cid.startswith(b&#34;\x12\x20&#34;):
@@ -621,7 +629,6 @@ class CID:
             v = 0 # CID version
             mc_code = 0x70 # multicodec.get(&#34;dag-pb&#34;)
             digest = cid  # multihash digest is what&#39;s left
-            mb = multibase.get(&#34;base58btc&#34;)
         else:
             v, _, cid = varint.decode_raw(cid) # CID version
             if v == 0:
@@ -659,6 +666,8 @@ class CID:
             &#39;00201498b5467a63dffa2dc9d9e069caf075d16fc33fdd4c3b01bfadae6433767d93&#39;)
             #^^   0x00 = &#39;identity&#39; multihash used (public key length &lt;= 42)
             #  ^^ 0x20 = 32-bytes of raw hash digestlength
+            &gt;&gt;&gt; str(peer_id)
+            &#39;bafzaaiautc2um6td375c3soz4bu4v4dv2fx4gp65jq5qdp5nvzsdg5t5sm&#39;
             ```
 
             Snippet showing how to obtain the [Ed25519](https://cryptography.io/en/latest/hazmat/primitives/asymmetric/ed25519/)
@@ -698,6 +707,8 @@ class CID:
             &#39;1220c1a6513ffb14f202f75453c49666a5b9d7ed9a1a068891daf824d477573f829f&#39;)
             #^^   0x12 = &#39;sha2-256&#39; multihash used (public key length &gt; 42)
             #  ^^ 0x20 = 32-bytes of raw hash digest length
+            &gt;&gt;&gt; str(peer_id)
+            &#39;bafzbeigbuzit76yu6ibpovctyslgnjnz27wzugqgrci5v6be2r3vop4ct4&#39;
             ```
 
             Snippet showing how to obtain the [RSA](https://cryptography.io/en/latest/hazmat/primitives/asymmetric/rsa/)
@@ -939,7 +950,7 @@ True
             Multibase used to encode the CID:
 
             - if a CIDv1 was decoded from a multibase-encoded string, the encoding multibase is used
-            - if a CIDv1 was decoded from a bytestring, the &#39;identity&#39; multibase is used
+            - if a CIDv1 was decoded from a bytestring, the &#39;base58btc&#39; multibase is used
             - for a CIDv0, &#39;base58btc&#39; is always used
 
             Example usage:
@@ -1149,6 +1160,14 @@ True
         d = self.digest
         return f&#34;CID({repr(mb)}, {v}, {repr(mc)}, {repr(d.hex())})&#34;
 
+    def __eq__(self, other: Any) -&gt; bool:
+        if self is other:
+            return True
+        if not isinstance(other, CID):
+            return False
+        return (self.base == other.base and self.version == other.version
+                and self.codec == other.codec and self.digest == other.digest)
+
     @staticmethod
     def decode(cid: Union[str, BytesLike]) -&gt; &#34;CID&#34;:
         &#34;&#34;&#34;
@@ -1164,14 +1183,14 @@ True
             &#39;12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;)
             ```
 
-            Example usage for CIDv1 bytestring (multibase always set to &#39;identity&#39;):
+            Example usage for CIDv1 bytestring (multibase always set to &#39;base58btc&#39;):
 
             ```py
             &gt;&gt;&gt; b = bytes.fromhex(
             ... &#34;015512206e6ff7950a36187a801613426e85&#34;
             ... &#34;8dce686cd7d7e3c0fc42ee0330072d245c95&#34;)
             &gt;&gt;&gt; CID.decode(b)
-            CID(&#39;identity&#39;, 1, &#39;raw&#39;,
+            CID(&#39;base58btc&#39;, 1, &#39;raw&#39;,
             &#39;12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;)
             ```
 
@@ -1199,7 +1218,7 @@ True
         if isinstance(cid, str):
             cid, mb = _binary_cid_from_str(cid)
         else:
-            mb = multibase.get(&#34;identity&#34;)
+            mb = multibase.get(&#34;base58btc&#34;)
         validate(cid, BytesLike)
         cid = memoryview(cid)
         # if len(cid) == 34 and cid.startswith(b&#34;\x12\x20&#34;):
@@ -1207,7 +1226,6 @@ True
             v = 0 # CID version
             mc_code = 0x70 # multicodec.get(&#34;dag-pb&#34;)
             digest = cid  # multihash digest is what&#39;s left
-            mb = multibase.get(&#34;base58btc&#34;)
         else:
             v, _, cid = varint.decode_raw(cid) # CID version
             if v == 0:
@@ -1245,6 +1263,8 @@ True
             &#39;00201498b5467a63dffa2dc9d9e069caf075d16fc33fdd4c3b01bfadae6433767d93&#39;)
             #^^   0x00 = &#39;identity&#39; multihash used (public key length &lt;= 42)
             #  ^^ 0x20 = 32-bytes of raw hash digestlength
+            &gt;&gt;&gt; str(peer_id)
+            &#39;bafzaaiautc2um6td375c3soz4bu4v4dv2fx4gp65jq5qdp5nvzsdg5t5sm&#39;
             ```
 
             Snippet showing how to obtain the [Ed25519](https://cryptography.io/en/latest/hazmat/primitives/asymmetric/ed25519/)
@@ -1284,6 +1304,8 @@ True
             &#39;1220c1a6513ffb14f202f75453c49666a5b9d7ed9a1a068891daf824d477573f829f&#39;)
             #^^   0x12 = &#39;sha2-256&#39; multihash used (public key length &gt; 42)
             #  ^^ 0x20 = 32-bytes of raw hash digest length
+            &gt;&gt;&gt; str(peer_id)
+            &#39;bafzbeigbuzit76yu6ibpovctyslgnjnz27wzugqgrci5v6be2r3vop4ct4&#39;
             ```
 
             Snippet showing how to obtain the [RSA](https://cryptography.io/en/latest/hazmat/primitives/asymmetric/rsa/)
@@ -1342,12 +1364,12 @@ using <code>bytes.fromhex</code>). Note: the hex string is not multibase encoded
 CID('base58btc', 1, 'raw',
 '12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95')
 </code></pre>
-<p>Example usage for CIDv1 bytestring (multibase always set to 'identity'):</p>
+<p>Example usage for CIDv1 bytestring (multibase always set to 'base58btc'):</p>
 <pre><code class="language-py">&gt;&gt;&gt; b = bytes.fromhex(
 ... &quot;015512206e6ff7950a36187a801613426e85&quot;
 ... &quot;8dce686cd7d7e3c0fc42ee0330072d245c95&quot;)
 &gt;&gt;&gt; CID.decode(b)
-CID('identity', 1, 'raw',
+CID('base58btc', 1, 'raw',
 '12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95')
 </code></pre>
 <p>Example usage for CIDv0 base58-encoded string:</p>
@@ -1383,14 +1405,14 @@ def decode(cid: Union[str, BytesLike]) -&gt; &#34;CID&#34;:
         &#39;12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;)
         ```
 
-        Example usage for CIDv1 bytestring (multibase always set to &#39;identity&#39;):
+        Example usage for CIDv1 bytestring (multibase always set to &#39;base58btc&#39;):
 
         ```py
         &gt;&gt;&gt; b = bytes.fromhex(
         ... &#34;015512206e6ff7950a36187a801613426e85&#34;
         ... &#34;8dce686cd7d7e3c0fc42ee0330072d245c95&#34;)
         &gt;&gt;&gt; CID.decode(b)
-        CID(&#39;identity&#39;, 1, &#39;raw&#39;,
+        CID(&#39;base58btc&#39;, 1, &#39;raw&#39;,
         &#39;12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;)
         ```
 
@@ -1418,7 +1440,7 @@ def decode(cid: Union[str, BytesLike]) -&gt; &#34;CID&#34;:
     if isinstance(cid, str):
         cid, mb = _binary_cid_from_str(cid)
     else:
-        mb = multibase.get(&#34;identity&#34;)
+        mb = multibase.get(&#34;base58btc&#34;)
     validate(cid, BytesLike)
     cid = memoryview(cid)
     # if len(cid) == 34 and cid.startswith(b&#34;\x12\x20&#34;):
@@ -1426,7 +1448,6 @@ def decode(cid: Union[str, BytesLike]) -&gt; &#34;CID&#34;:
         v = 0 # CID version
         mc_code = 0x70 # multicodec.get(&#34;dag-pb&#34;)
         digest = cid  # multihash digest is what&#39;s left
-        mb = multibase.get(&#34;base58btc&#34;)
     else:
         v, _, cid = varint.decode_raw(cid) # CID version
         if v == 0:
@@ -1462,6 +1483,8 @@ CID('base32', 1, 'libp2p-key',
 '00201498b5467a63dffa2dc9d9e069caf075d16fc33fdd4c3b01bfadae6433767d93')
 #^^   0x00 = 'identity' multihash used (public key length &lt;= 42)
 #  ^^ 0x20 = 32-bytes of raw hash digestlength
+&gt;&gt;&gt; str(peer_id)
+'bafzaaiautc2um6td375c3soz4bu4v4dv2fx4gp65jq5qdp5nvzsdg5t5sm'
 </code></pre>
 <p>Snippet showing how to obtain the <a href="https://cryptography.io/en/latest/hazmat/primitives/asymmetric/ed25519/">Ed25519</a>
 public key bytestring using the <a href="https://github.com/pyca/cryptography"><code>cryptography</code></a> library:</p>
@@ -1495,6 +1518,8 @@ CID('base32', 1, 'libp2p-key',
 '1220c1a6513ffb14f202f75453c49666a5b9d7ed9a1a068891daf824d477573f829f')
 #^^   0x12 = 'sha2-256' multihash used (public key length &gt; 42)
 #  ^^ 0x20 = 32-bytes of raw hash digest length
+&gt;&gt;&gt; str(peer_id)
+'bafzbeigbuzit76yu6ibpovctyslgnjnz27wzugqgrci5v6be2r3vop4ct4'
 </code></pre>
 <p>Snippet showing how to obtain the <a href="https://cryptography.io/en/latest/hazmat/primitives/asymmetric/rsa/">RSA</a>
 public key bytestring using the <a href="https://github.com/pyca/cryptography"><code>cryptography</code></a> library:</p>
@@ -1547,6 +1572,8 @@ def peer_id(pk_bytes: Union[str, BytesLike]) -&gt; &#34;CID&#34;:
         &#39;00201498b5467a63dffa2dc9d9e069caf075d16fc33fdd4c3b01bfadae6433767d93&#39;)
         #^^   0x00 = &#39;identity&#39; multihash used (public key length &lt;= 42)
         #  ^^ 0x20 = 32-bytes of raw hash digestlength
+        &gt;&gt;&gt; str(peer_id)
+        &#39;bafzaaiautc2um6td375c3soz4bu4v4dv2fx4gp65jq5qdp5nvzsdg5t5sm&#39;
         ```
 
         Snippet showing how to obtain the [Ed25519](https://cryptography.io/en/latest/hazmat/primitives/asymmetric/ed25519/)
@@ -1586,6 +1613,8 @@ def peer_id(pk_bytes: Union[str, BytesLike]) -&gt; &#34;CID&#34;:
         &#39;1220c1a6513ffb14f202f75453c49666a5b9d7ed9a1a068891daf824d477573f829f&#39;)
         #^^   0x12 = &#39;sha2-256&#39; multihash used (public key length &gt; 42)
         #  ^^ 0x20 = 32-bytes of raw hash digest length
+        &gt;&gt;&gt; str(peer_id)
+        &#39;bafzbeigbuzit76yu6ibpovctyslgnjnz27wzugqgrci5v6be2r3vop4ct4&#39;
         ```
 
         Snippet showing how to obtain the [RSA](https://cryptography.io/en/latest/hazmat/primitives/asymmetric/rsa/)
@@ -1639,7 +1668,7 @@ def peer_id(pk_bytes: Union[str, BytesLike]) -&gt; &#34;CID&#34;:
 <div class="desc"><p>Multibase used to encode the CID:</p>
 <ul>
 <li>if a CIDv1 was decoded from a multibase-encoded string, the encoding multibase is used</li>
-<li>if a CIDv1 was decoded from a bytestring, the 'identity' multibase is used</li>
+<li>if a CIDv1 was decoded from a bytestring, the 'base58btc' multibase is used</li>
 <li>for a CIDv0, 'base58btc' is always used</li>
 </ul>
 <p>Example usage:</p>
@@ -1659,7 +1688,7 @@ def base(self) -&gt; Multibase:
         Multibase used to encode the CID:
 
         - if a CIDv1 was decoded from a multibase-encoded string, the encoding multibase is used
-        - if a CIDv1 was decoded from a bytestring, the &#39;identity&#39; multibase is used
+        - if a CIDv1 was decoded from a bytestring, the &#39;base58btc&#39; multibase is used
         - for a CIDv0, &#39;base58btc&#39; is always used
 
         Example usage:
