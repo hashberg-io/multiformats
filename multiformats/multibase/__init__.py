@@ -94,6 +94,7 @@ from bases import (base2, base16, base8, base10, base36, base58btc, base58flickr
                    base32, base32hex, base32z, base64, base64url, base45,)
 
 from multiformats.multibase import raw_encoding as raw_encoding
+from multiformats.varint import BytesLike
 from .raw_encoding import RawEncoder, RawDecoder
 
 
@@ -250,7 +251,7 @@ class Multibase:
             raise NotImplementedError(f"Multibase/decoding for {repr(self.name)} is not yet implemented.")
         return enc.decode
 
-    def encode(self, data: bytes) -> str:
+    def encode(self, data: BytesLike) -> str:
         """
             Encodes bytes into a multibase string: it first uses `Multibase.raw_encoder`,
             and then prepends the multibase prefix given by `Multibase.code` and returns
@@ -316,6 +317,8 @@ class Multibase:
         return f"Multibase({', '.join(f'{k}={repr(v)}' for k, v in self.to_json().items())})"
 
     def __eq__(self, other: Any) -> bool:
+        if self is other:
+            return True
         if not isinstance(other, Multibase):
             return NotImplemented
         return self.to_json() == other.to_json()
@@ -416,6 +419,20 @@ def register(enc: Multibase, *, overwrite: bool = False) -> None:
     _name_table[enc.name] = enc
 
 
+def validate_multibase(multibase: Multibase) -> None:
+    """
+        Validates a multibase:
+
+        - raises `KeyError` if no multibase with the given name is registered
+        - raises `ValueError` if a multibase with the given name is registered, but is different from the one given
+        - raises no error if the given multibase is registered
+    """
+    validate(multibase, Multibase)
+    mc = get(multibase.name)
+    if mc != multibase:
+        raise ValueError(f"Multibase named {multibase.name} exists, but is not the one given.")
+
+
 def unregister(name: Optional[str] = None, *, code: Optional[str] = None) -> None:
     """
         Unregisters the multibase encoding with given name (if a string is passed) or code (if an int is passed).
@@ -479,7 +496,7 @@ def from_str(string: str) -> Multibase:
     raise KeyError("No known multibase code is a prefix of the given string.")
 
 
-def encode(data: bytes, enc: Union[str, "Multibase"]) -> str:
+def encode(data: BytesLike, enc: Union[str, "Multibase"]) -> str:
     """
         Encodes the given bytes into a multibase string using the given encoding.
         If the encoding is passed by name or code (i.e. as a string), the `get`

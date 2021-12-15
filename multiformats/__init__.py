@@ -4,7 +4,18 @@
 
 __version__ = "0.1.0"
 
-from . import varint as varint
-from . import multicodec as multicodec
-from . import multibase as multibase
-from . import multihash as multihash
+from . import varint
+from . import multicodec
+from . import multibase
+from . import multihash
+from .cid import CID
+
+__all__ = [
+    "varint",
+    "multicodec",
+    "multibase",
+    "multihash",
+    "CID"
+]
+
+__pdoc__ = {name: False for name in ["CID"]}

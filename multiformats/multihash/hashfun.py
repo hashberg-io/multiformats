@@ -31,8 +31,9 @@ from typing_validation import validate
 import skein # type: ignore
 
 from multiformats import multicodec
+from multiformats.varint import BytesLike
 
-Hashfun = Callable[[bytes], bytes]
+Hashfun = Callable[[BytesLike], bytes]
 _hashfun: Dict[str, Tuple[Hashfun, Optional[int]]] = {}
 
 def get(name: str) -> Tuple[Hashfun, Optional[int]]:
@@ -104,17 +105,17 @@ def unregister(name: str) -> None:
         raise KeyError(f"There is no implementation for multihash multicodec with name {repr(name)}.")
     del _hashfun[name]
 
-def _identity(data: bytes) -> bytes:
-    validate(data, bytes)
-    return data
+def _identity(data: BytesLike) -> bytes:
+    validate(data, BytesLike)
+    return bytes(data)
 
 register("identity", _identity, None)
 
 def _hashlib_sha(version: int, digest_bits: Optional[int] = None) -> Hashfun:
     name = ("sha1", f"sha{digest_bits}", f"sha3_{digest_bits}")[version-1]
     h = getattr(hashlib, name)
-    def hashfun(data: bytes) -> bytes:
-        validate(data, bytes)
+    def hashfun(data: BytesLike) -> bytes:
+        validate(data, BytesLike)
         m: hashlib._Hash = h() # pylint: disable = no-member
         m.update(data)
         return m.digest()
@@ -130,8 +131,8 @@ for digest_bits in (224, 256, 384, 512):
 
 def _hashlib_shake(digest_bits: int) -> Hashfun:
     h = getattr(hashlib, f"shake_{digest_bits//2}")
-    def hashfun(data: bytes) -> bytes:
-        validate(data, bytes)
+    def hashfun(data: BytesLike) -> bytes:
+        validate(data, BytesLike)
         m: hashlib._Hash = h() # pylint: disable = no-member
         m.update(data)
         return m.digest(digest_bits//8) # type: ignore
@@ -142,8 +143,8 @@ for digest_bits in (256, 512):
 
 def _hashlib_blake2(version: str, digest_bits: int) -> Hashfun:
     h = getattr(hashlib, f"blake2{version}")
-    def hashfun(data: bytes) -> bytes:
-        validate(data, bytes)
+    def hashfun(data: BytesLike) -> bytes:
+        validate(data, BytesLike)
         m: hashlib._Hash = h(digest_size=digest_bits//8) # pylint: disable = no-member
         m.update(data)
         return m.digest()
@@ -155,8 +156,8 @@ for blake2_version in ("b", "s"):
 
 def _skein(version: int, digest_bits: int) -> Hashfun:
     h = getattr(skein, f"skein{version}")
-    def hashfun(data: bytes) -> bytes:
-        validate(data, bytes)
+    def hashfun(data: BytesLike) -> bytes:
+        validate(data, BytesLike)
         m: hashlib._Hash = h(digest_bits=digest_bits) # pylint: disable = no-member
         m.update(data)
         return m.digest()

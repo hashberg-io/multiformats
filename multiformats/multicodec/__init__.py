@@ -206,6 +206,8 @@ class Multicodec:
         return f"Multicodec({', '.join(f'{k}={repr(v)}' for k, v in self.to_json().items())})"
 
     def __eq__(self, other: Any) -> bool:
+        if self is other:
+            return True
         if not isinstance(other, Multicodec):
             return NotImplemented
         return self.to_json() == other.to_json()
@@ -241,7 +243,7 @@ def get(name: Optional[str] = None, *, code: Optional[int] = None) -> Multicodec
     return _code_table[code]
 
 
-def exists(name: Optional[str] = None, *, code: Optional[int] = None) -> bool:
+def exists(name: Union[None, str, Multicodec] = None, *, code: Optional[int] = None) -> bool:
     """
         Checks whether there is a multicodec with the given name or code.
         Exactly one of `name` and `code` must be specified.
@@ -263,6 +265,18 @@ def exists(name: Optional[str] = None, *, code: Optional[int] = None) -> bool:
         return name in _name_table
     return code in _code_table
 
+def validate_multicodec(multicodec: Multicodec) -> None:
+    """
+        Validates a multicodec:
+
+        - raises `KeyError` if no multicodec with the given name is registered
+        - raises `ValueError` if a multicodec with the given name is registered, but is different from the one given
+        - raises no error if the given multicodec is registered
+    """
+    validate(multicodec, Multicodec)
+    mc = get(multicodec.name)
+    if mc != multicodec:
+        raise ValueError(f"Multicodec named {multicodec.name} exists, but is not the one given.")
 
 def register(m: Multicodec, *, overwrite: bool = False) -> None:
     """

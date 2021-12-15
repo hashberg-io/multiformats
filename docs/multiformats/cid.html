@@ -1,0 +1,2071 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>multiformats.cid API documentation</title>
+<meta name="description" content="Implementation of the [CID spec](https://github.com/multiformats/cid) …" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}.hljs-meta{user-select:none;-moz-user-select:none;-webkit-user-select:none;-ms-user-select:none;pointer-events:none}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS_CHTML" integrity="sha256-kZafAc6mZvK3W3v1pHOcUix30OHQN6pU/NO2oFkqZVw=" crossorigin></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>multiformats.cid</code></h1>
+</header>
+<section id="section-intro">
+<p>Implementation of the <a href="https://github.com/multiformats/cid">CID spec</a>.</p>
+<p>Core functionality is provided by the <code><a title="multiformats.cid.CID" href="#multiformats.cid.CID">CID</a></code> class:</p>
+<pre><code class="language-py">&gt;&gt;&gt; from multiformats import CID
+
+CIDs can be decoded from bytestrings or (multi)base encoded strings:
+
+```py
+&gt;&gt;&gt; cid = CID.decode(&quot;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&quot;)
+&gt;&gt;&gt; cid
+CID('base58btc', 1, 'raw',
+    '12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95')
+</code></pre>
+<p>CIDs can be created programmatically, and their fields accessed individually:</p>
+<pre><code class="language-py">&gt;&gt;&gt; cid = CID(&quot;base58btc&quot;, 1, &quot;raw&quot;,
+... &quot;12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&quot;)
+&gt;&gt;&gt; cid.base
+Multibase(name='base58btc', code='z',
+          status='default', description='base58 bitcoin')
+&gt;&gt;&gt; cid.codec
+Multicodec(name='raw', tag='ipld', code='0x55',
+           status='permanent', description='raw binary')
+&gt;&gt;&gt; cid.hashfun
+Multicodec(name='sha2-256', tag='multihash', code='0x12',
+           status='permanent', description='')
+&gt;&gt;&gt; cid.digest.hex()
+'12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95'
+&gt;&gt;&gt; cid.raw_digest.hex()
+'6e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95'
+</code></pre>
+<p>CIDs can be converted to bytestrings or (multi)base encoded strings:</p>
+<pre><code class="language-py">&gt;&gt;&gt; str(cid)
+'zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA'
+&gt;&gt;&gt; bytes(cid).hex()
+'015512206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95'
+&gt;&gt;&gt; cid.encode(&quot;base32&quot;) # encode with different multibase
+'bafkreidon73zkcrwdb5iafqtijxildoonbwnpv7dyd6ef3qdgads2jc4su'
+</code></pre>
+<p>Additionally, the <code><a title="multiformats.cid.CID.peer_id" href="#multiformats.cid.CID.peer_id">CID.peer_id()</a></code> static method can be used to pack the raw
+hash of a public key into a CIDv1 <a href="https://docs.libp2p.io/concepts/peer-id/">PeerID</a>,
+according to the <a href="https://github.com/libp2p/specs/blob/master/peer-ids/peer-ids.md">PeerID spec</a>.</p>
+<p>For full details, see the <code><a title="multiformats.cid.CID" href="#multiformats.cid.CID">CID</a></code> documentation below.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;
+    Implementation of the [CID spec](https://github.com/multiformats/cid).
+
+    Core functionality is provided by the `CID` class:
+
+    ```py
+    &gt;&gt;&gt; from multiformats import CID
+
+    CIDs can be decoded from bytestrings or (multi)base encoded strings:
+
+    ```py
+    &gt;&gt;&gt; cid = CID.decode(&#34;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&#34;)
+    &gt;&gt;&gt; cid
+    CID(&#39;base58btc&#39;, 1, &#39;raw&#39;,
+        &#39;12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;)
+    ```
+
+    CIDs can be created programmatically, and their fields accessed individually:
+
+    ```py
+    &gt;&gt;&gt; cid = CID(&#34;base58btc&#34;, 1, &#34;raw&#34;,
+    ... &#34;12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#34;)
+    &gt;&gt;&gt; cid.base
+    Multibase(name=&#39;base58btc&#39;, code=&#39;z&#39;,
+              status=&#39;default&#39;, description=&#39;base58 bitcoin&#39;)
+    &gt;&gt;&gt; cid.codec
+    Multicodec(name=&#39;raw&#39;, tag=&#39;ipld&#39;, code=&#39;0x55&#39;,
+               status=&#39;permanent&#39;, description=&#39;raw binary&#39;)
+    &gt;&gt;&gt; cid.hashfun
+    Multicodec(name=&#39;sha2-256&#39;, tag=&#39;multihash&#39;, code=&#39;0x12&#39;,
+               status=&#39;permanent&#39;, description=&#39;&#39;)
+    &gt;&gt;&gt; cid.digest.hex()
+    &#39;12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;
+    &gt;&gt;&gt; cid.raw_digest.hex()
+    &#39;6e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;
+    ```
+
+    CIDs can be converted to bytestrings or (multi)base encoded strings:
+
+    ```py
+    &gt;&gt;&gt; str(cid)
+    &#39;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&#39;
+    &gt;&gt;&gt; bytes(cid).hex()
+    &#39;015512206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;
+    &gt;&gt;&gt; cid.encode(&#34;base32&#34;) # encode with different multibase
+    &#39;bafkreidon73zkcrwdb5iafqtijxildoonbwnpv7dyd6ef3qdgads2jc4su&#39;
+    ```
+
+    Additionally, the `CID.peer_id` static method can be used to pack the raw
+    hash of a public key into a CIDv1 [PeerID](https://docs.libp2p.io/concepts/peer-id/),
+    according to the [PeerID spec](https://github.com/libp2p/specs/blob/master/peer-ids/peer-ids.md).
+
+    For full details, see the `CID` documentation below.
+
+&#34;&#34;&#34;
+
+from typing import cast, FrozenSet, Tuple, Type, TypeVar, Union
+from typing_extensions import Literal, Final
+from typing_validation import validate
+
+from bases import base58btc
+from multiformats import varint, multicodec, multibase, multihash
+
+from multiformats.multicodec import Multicodec
+from multiformats.multibase import Multibase
+from multiformats.varint import BytesLike, byteslike
+
+_CIDSubclass = TypeVar(&#34;_CIDSubclass&#34;, bound=&#34;CID&#34;)
+
+CIDVersion = Literal[0, 1]
+CIDVersionNumbers: Final[FrozenSet[int]] = frozenset({0, 1})
+
+def _binary_cid_from_str(cid: str) -&gt; Tuple[bytes, Multibase]:
+    if len(cid) == 46 and cid.startswith(&#34;Qm&#34;):
+        # CIDv0 to be decoded as base58btc
+        return base58btc.decode(cid), multibase.get(&#34;base58btc&#34;)
+    b = multibase.decode(cid)
+    mb = multibase.from_str(cid)
+    if b[0] ==  0x12:
+        # CIDv0 may not be multibase encoded (0x12 is the first byte of sha2-256 multihashes)
+        # CIDv18 (first byte 18=0x12) will be skipped to prevent ambiguity
+        raise ValueError(&#34;CIDv0 may not be multibase encoded (found multibase encoded bytes starting with 0x12).&#34;)
+    return b, mb
+
+def _CID_validate_multibase(base: Union[str, Multibase]) -&gt; Multibase:
+    if isinstance(base, str):
+        base = multibase.get(base)
+    else:
+        multibase.validate_multibase(base)
+    return base
+
+def _CID_validate_multicodec(codec: Union[str, int, Multicodec]) -&gt; Multicodec:
+    if isinstance(codec, str):
+        codec = multicodec.get(codec)
+    elif isinstance(codec, int):
+        codec = multicodec.get(code=codec)
+    else:
+        multicodec.validate_multicodec(codec)
+    return codec
+
+def _CID_validate_multihash(hashfun: Union[str, int, Multicodec]) -&gt; Multicodec:
+    if isinstance(hashfun, str):
+        hashfun = multihash.get(hashfun)
+    elif isinstance(hashfun, int):
+        hashfun = multihash.get(code=hashfun)
+    else:
+        multihash.validate_multihash(hashfun)
+    return hashfun
+
+def _CID_validate_raw_digest(raw_digest: Union[str, BytesLike], hashfun: Multicodec) -&gt; bytes:
+    if isinstance(raw_digest, str):
+        raw_digest = bytes.fromhex(raw_digest)
+    else:
+        validate(raw_digest, BytesLike)
+        if not isinstance(raw_digest, bytes):
+            raw_digest = bytes(raw_digest)
+    _, _, max_digest_size = multihash.implementation(hashfun)
+    if max_digest_size is not None and len(raw_digest) &gt; max_digest_size:
+        raise ValueError(f&#34;Digest size {len(raw_digest)} exceeds max digest size {max_digest_size} &#34;
+                         f&#34;for multihash multicodec {hashfun.name}&#34;)
+    return raw_digest
+
+def _CID_validate_multihash_digest(digest: Union[str, BytesLike]) -&gt; Tuple[Multicodec, bytes]:
+    if isinstance(digest, str):
+        digest = bytes.fromhex(digest)
+    raw_digest: BytesLike
+    code, raw_digest = multihash.decode_raw(digest)
+    hashfun = _CID_validate_multihash(code)
+    raw_digest = _CID_validate_raw_digest(raw_digest, hashfun)
+    return hashfun, raw_digest
+
+def _CID_validate_version(version: int, base: Multibase, codec: Multicodec, hashfun: Multicodec) -&gt; int:
+    if version in (2, 3):
+        raise ValueError(&#34;CID versions 2 and 3 are reserved for future use.&#34;)
+    if version not in (0, 1):
+        raise ValueError(f&#34;CID version {version} is not allowed.&#34;)
+    if version == 0:
+        if base.name != &#39;base58btc&#39;:
+            raise ValueError(f&#34;CIDv0 multibase must be &#39;base58btc&#39;, found {repr(base.name)} instead.&#34;)
+        if codec.name != &#34;dag-pb&#34;:
+            raise ValueError(f&#34;CIDv0 multicodec must be &#39;dag-pb&#39;, found {repr(codec.name)} instead.&#34;)
+        if hashfun.name != &#34;sha2-256&#34;:
+            raise ValueError(f&#34;CIDv0 multihash must be &#39;sha2-256&#39;, found {repr(hashfun.name)} instead.&#34;)
+    return version
+
+
+class CID:
+    &#34;&#34;&#34;
+
+    Container class for [Content IDentifiers](https://github.com/multiformats/cid).
+    CIDs can be decoded from a bytestring or a (multi)base encoded string, using `CID.decode`:
+
+    ```py
+    &gt;&gt;&gt; cid = CID.decode(&#34;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&#34;)
+    &gt;&gt;&gt; cid
+    CID(&#39;base58btc&#39;, 1, &#39;raw&#39;,
+        &#39;12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;)
+    ```
+
+    CIDs can be explicitly instantiated by passing the `base`, `version`, `codec` and multihash `digest` to the constructor:
+
+    ```py
+    &gt;&gt;&gt; cid = CID(&#34;base58btc&#34;, 1, &#34;raw&#34;,
+    ... &#34;12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#34;)
+    &gt;&gt;&gt; str(cid)
+    &#39;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&#39;
+    ```
+
+    Alternatively, a `(multihash_codec, raw_digest)` pair can be passed in lieu of `digest`:
+
+    ```py
+    &gt;&gt;&gt; raw_digest = bytes.fromhex(
+    ... &#34;6e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#34;)
+    &gt;&gt;&gt; cid = CID(&#34;base58btc&#34;, 1, &#34;raw&#34;, (&#34;sha2-256&#34;, raw_digest))
+    &gt;&gt;&gt; str(cid)
+    &#39;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&#39;
+    ```
+
+    The `digest` and `raw_digest` parameters can be passed either as `bytes`-like objects
+    or as the corresponding hex strings (which will be converted to `bytes` using `bytes.fromhex`):
+
+    ```py
+    &gt;&gt;&gt; isinstance(raw_digest, bytes)
+    True
+    &gt;&gt;&gt; raw_digest.hex()
+    &#39;6e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;
+    ```
+
+    Note: the hex strings are not multibase encoded.
+
+    Calling `bytes(cid)` returns the binary representation of `cid`, as a `bytes` object:
+
+    ```py
+    &gt;&gt;&gt; cid = CID(&#34;base58btc&#34;, 1, &#34;raw&#34;,
+    ... &#34;12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#34;)
+    &gt;&gt;&gt; raw_digest.hex()
+            &#39;6e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;
+    &gt;&gt;&gt; bytes(cid).hex()
+    &#39;015512206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;
+    #^^   0x01 = CIDv1
+    #  ^^ 0x55 = &#39;raw&#39; codec
+    &gt;&gt;&gt; bytes(cid)
+    ```
+
+    &#34;&#34;&#34;
+
+    _base: Multibase
+    _version: CIDVersion
+    _codec: Multicodec
+    _hashfun: Multicodec
+    _digest: bytes
+
+    __slots__ = (&#34;__weakref__&#34;, &#34;_base&#34;, &#34;_version&#34;, &#34;_codec&#34;, &#34;_hashfun&#34;, &#34;_digest&#34;)
+
+    def __new__(cls: Type[_CIDSubclass],
+                base: Union[str, Multibase],
+                version: int,
+                codec: Union[str, int, Multicodec],
+                digest: Union[str, BytesLike, Tuple[Union[str, int, Multicodec], Union[str, BytesLike]]],
+                ) -&gt; _CIDSubclass:
+        # pylint: disable = too-many-arguments
+        base = _CID_validate_multibase(base)
+        codec = _CID_validate_multicodec(codec)
+        raw_digest: Union[str, bytes]
+        hashfun: Union[str, int, Multicodec]
+        if isinstance(digest, (str,)+byteslike):
+            hashfun, raw_digest = _CID_validate_multihash_digest(digest)
+        else:
+            validate(digest, Tuple[Union[str, int, Multicodec], Union[str, BytesLike]])
+            hashfun, raw_digest = digest
+            hashfun = _CID_validate_multihash(hashfun)
+            raw_digest = _CID_validate_raw_digest(raw_digest, hashfun)
+        version = _CID_validate_version(version, base, codec, hashfun)
+        if isinstance(digest, bytes):
+            return CID._new_instance(cls, base, version, codec, hashfun, digest)
+        return CID._new_instance(cls, base, version, codec, hashfun, (hashfun, raw_digest))
+
+    @staticmethod
+    def _new_instance(CID_subclass: Type[_CIDSubclass],
+                      base: Multibase,
+                      version: int,
+                      codec: Multicodec,
+                      hashfun: Multicodec,
+                      digest: Union[bytes, Tuple[Multicodec, bytes]],
+                     ) -&gt; _CIDSubclass:
+        # pylint: disable = too-many-arguments
+        instance = super().__new__(CID_subclass)
+        instance._base = base
+        instance._version = version
+        instance._codec = codec
+        instance._hashfun = hashfun
+        if isinstance(digest, bytes):
+            instance._digest = digest
+        elif isinstance(digest, byteslike):
+            instance._digest = bytes(digest)
+        else:
+            _hashfun, raw_digest = digest
+            if not isinstance(raw_digest, bytes):
+                raw_digest = bytes(raw_digest)
+            assert _hashfun == hashfun, &#34;You passed different multihashes to a _new_instance call with digest as a pair.&#34;
+            instance._digest = multihash.encode(raw_digest, hashfun)
+        return cast(_CIDSubclass, instance)
+
+    @property
+    def version(self) -&gt; CIDVersion:
+        &#34;&#34;&#34;
+            CID version.
+
+            Example usage:
+
+            ```py
+            &gt;&gt;&gt; s = &#34;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&#34;
+            &gt;&gt;&gt; cid = CID.decode(s)
+            &gt;&gt;&gt; cid.version
+            1
+            ```
+        &#34;&#34;&#34;
+        return self._version
+
+    @property
+    def base(self) -&gt; Multibase:
+        &#34;&#34;&#34;
+            Multibase used to encode the CID:
+
+            - if a CIDv1 was decoded from a multibase-encoded string, the encoding multibase is used
+            - if a CIDv1 was decoded from a bytestring, the &#39;identity&#39; multibase is used
+            - for a CIDv0, &#39;base58btc&#39; is always used
+
+            Example usage:
+
+            ```py
+            &gt;&gt;&gt; s = &#34;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&#34;
+            &gt;&gt;&gt; cid = CID.decode(s)
+            &gt;&gt;&gt; cid.base
+            Multibase(name=&#39;base58btc&#39;, code=&#39;z&#39;,
+                      status=&#39;default&#39;, description=&#39;base58 bitcoin&#39;)
+            ```
+        &#34;&#34;&#34;
+        return self._base
+
+    @property
+    def codec(self) -&gt; Multicodec:
+        &#34;&#34;&#34;
+            Codec that the multihash digest refers to.
+
+            Example usage:
+
+            ```py
+            &gt;&gt;&gt; s = &#34;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&#34;
+            &gt;&gt;&gt; cid = CID.decode(s)
+            &gt;&gt;&gt; cid.codec
+            Multicodec(name=&#39;raw&#39;, tag=&#39;ipld&#39;, code=&#39;0x55&#39;,
+                       status=&#39;permanent&#39;, description=&#39;raw binary&#39;)
+            ```
+        &#34;&#34;&#34;
+        return self._codec
+
+    @property
+    def hashfun(self) -&gt; Multicodec:
+        &#34;&#34;&#34;
+            Multihash codec used to produce the multihash digest.
+
+            Example usage:
+
+            ```py
+            &gt;&gt;&gt; s = &#34;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&#34;
+            &gt;&gt;&gt; cid = CID.decode(s)
+            &gt;&gt;&gt; cid.hashfun
+            Multicodec(name=&#39;sha2-256&#39;, tag=&#39;multihash&#39;, code=&#39;0x12&#39;,
+                       status=&#39;permanent&#39;, description=&#39;&#39;)
+            ```
+        &#34;&#34;&#34;
+        return self._hashfun
+
+    @property
+    def digest(self) -&gt; bytes:
+        &#34;&#34;&#34;
+            Multihash digest.
+
+            Example usage:
+
+            ```py
+            &gt;&gt;&gt; s = &#34;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&#34;
+            &gt;&gt;&gt; cid = CID.decode(s)
+            &gt;&gt;&gt; cid.digest.hex()
+            &#39;12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;
+            ```
+        &#34;&#34;&#34;
+        return self._digest
+
+    @property
+    def raw_digest(self) -&gt; bytes:
+        &#34;&#34;&#34;
+            Raw hash digest, decoded from the multihash digest.
+
+            Example usage:
+
+            ```py
+            &gt;&gt;&gt; s = &#34;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&#34;
+            &gt;&gt;&gt; cid = CID.decode(s)
+            &gt;&gt;&gt; cid.raw_digest.hex()
+            &#39;6e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;
+            ```
+        &#34;&#34;&#34;
+        return multihash.decode(self._digest)
+
+    @property
+    def human_readable(self) -&gt; str:
+        &#34;&#34;&#34;
+            Human-readable representation of the CID.
+
+            Example usage:
+
+            ```py
+            &gt;&gt;&gt; s = &#34;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&#34;
+            &gt;&gt;&gt; cid = CID.decode(s)
+            &gt;&gt;&gt; cid.human_readable
+            &#39;base58btc - cidv1 - raw - (sha2-256 : 256 : 6E6FF7950A36187A801613426E858DCE686CD7D7E3C0FC42EE0330072D245C95)&#39;
+            ```
+        &#34;&#34;&#34;
+        raw_digest = self.raw_digest
+        hashfun_str = f&#34;({self.hashfun.name} : {len(raw_digest)*8} : {raw_digest.hex().upper()})&#34;
+        return f&#34;{self.base.name} - cidv{self.version} - {self.codec.name} - {hashfun_str}&#34;
+
+    def encode(self, base: Union[None, str, Multibase] = None) -&gt; str:
+        &#34;&#34;&#34;
+            Encodes the CID using a given multibase. If no multibase is give,
+            the CID&#39;s own multibase is used by default.
+
+            Example usage:
+
+            ```py
+            &gt;&gt;&gt; s = &#34;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&#34;
+            &gt;&gt;&gt; cid = CID.decode(s)
+            &gt;&gt;&gt; cid.encode() # default: cid.base
+            &#39;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&#39;
+            &gt;&gt;&gt; cid.encode(&#34;base32&#34;)
+            &#39;bafkreidon73zkcrwdb5iafqtijxildoonbwnpv7dyd6ef3qdgads2jc4su&#39;
+            ```
+        &#34;&#34;&#34;
+        if self.version == 0:
+            if base is not None:
+                raise ValueError(&#34;CIDv0 cannot be multibase-encoded, please set multibase=None.&#34;)
+            return base58btc.encode(bytes(self))
+        if base is None or base == self.base:
+            base = self.base # use CID&#39;s own multibase as default
+        else:
+            if isinstance(base, str):
+                base = multibase.get(base)
+            else:
+                multibase.validate_multibase(base)
+        return base.encode(bytes(self))
+
+    def set(self, *,
+            base: Union[None, str, Multibase] = None,
+            version: Union[None, int] = None,
+            codec: Union[None, str, int, Multicodec] = None
+           ) -&gt; &#34;CID&#34;:
+        &#34;&#34;&#34;
+            Returns a new CID obtained by setting new values for one or more of:
+            `base`, `version`, or `codec`.
+
+            Example usage:
+
+            ```py
+            &gt;&gt;&gt; s = &#34;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&#34;
+            &gt;&gt;&gt; cid = CID.decode(s)
+            &gt;&gt;&gt; cid
+            CID(&#39;base58btc&#39;, 1, &#39;raw&#39;,
+            &#39;12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;)
+            &gt;&gt;&gt; cid.set(base=&#34;base32&#34;)
+            CID(&#39;base32&#39;, 1, &#39;raw&#39;,
+            &#39;12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;)
+            &gt;&gt;&gt; cid.set(codec=&#34;dag-cbor&#34;)
+            CID(&#39;base58btc&#39;, 1, &#39;dag-cbor&#39;,
+            &#39;12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;)
+            &gt;&gt;&gt; cid.set(version=0, codec=&#34;dag-pb&#34;)
+            CID(&#39;base58btc&#39;, 0, &#39;dag-pb&#39;,
+            &#39;12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;)
+            &gt;&gt;&gt; cid
+            CID(&#39;base58btc&#39;, 1, &#39;raw&#39;,
+            &#39;12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;)
+            # Note: &#39;CID.set&#39; returns new instances,
+            #       the original &#39;cid&#39; instance is unchanged
+            ```
+
+            If setting `version` to 0, `base` must be &#39;base58btc&#39; and `codec` must be &#39;dag-pb&#39;.
+
+            ```py
+            &gt;&gt;&gt; s = &#34;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&#34;
+            &gt;&gt;&gt; cid = CID.decode(s)
+            &gt;&gt;&gt; cid
+            CID(&#39;base58btc&#39;, 1, &#39;raw&#39;,
+            &#39;12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;)
+            &gt;&gt;&gt; cid.set(version=0, codec=&#34;dag-pb&#34;)
+            CID(&#39;base58btc&#39;, 0, &#39;dag-pb&#39;,
+            &#39;12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;)
+            &gt;&gt;&gt; cid.set(version=0)
+            ValueError: CIDv0 multicodec must be &#39;dag-pb&#39;, found &#39;raw&#39; instead.
+            &gt;&gt;&gt; cid.set(version=0, codec=&#34;dag-pb&#34;, base=&#34;base32&#34;)
+            ValueError: CIDv0 multibase must be &#39;base58btc&#39;, found &#39;base32&#39; instead
+            ```
+
+        &#34;&#34;&#34;
+        hashfun = self.hashfun
+        digest = self.digest
+        if base is not None and base not in (self.base, self.base.name):
+            base = _CID_validate_multibase(base)
+        else:
+            base = self.base
+        if codec is not None and codec not in (self.codec, self.codec.name, self.codec.code):
+            codec = _CID_validate_multicodec(codec)
+        else:
+            codec = self.codec
+        if version is not None and version != self.version:
+            _CID_validate_version(version, base, codec, hashfun)
+        else:
+            version = self.version
+        return CID._new_instance(CID, base, version, codec, hashfun, digest)
+
+    def __bytes__(self) -&gt; bytes:
+        if self.version == 0:
+            return self.digest
+        return varint.encode(self.version)+varint.encode(self.codec.code)+self.digest
+
+    def __str__(self) -&gt; str:
+        return self.encode()
+
+    def __repr__(self) -&gt; str:
+        mb = self.base.name
+        v = self.version
+        mc = self.codec.name
+        d = self.digest
+        return f&#34;CID({repr(mb)}, {v}, {repr(mc)}, {repr(d.hex())})&#34;
+
+    @staticmethod
+    def decode(cid: Union[str, BytesLike]) -&gt; &#34;CID&#34;:
+        &#34;&#34;&#34;
+            Decodes a CID from a bytestring or a hex string (which will be converted to `bytes`
+            using `bytes.fromhex`). Note: the hex string is not multibase encoded.
+
+            Example usage for CIDv1 multibase-encoded string:
+
+            ```py
+            &gt;&gt;&gt; s = &#34;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&#34;
+            &gt;&gt;&gt; CID.decode(s)
+            CID(&#39;base58btc&#39;, 1, &#39;raw&#39;,
+            &#39;12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;)
+            ```
+
+            Example usage for CIDv1 bytestring (multibase always set to &#39;identity&#39;):
+
+            ```py
+            &gt;&gt;&gt; b = bytes.fromhex(
+            ... &#34;015512206e6ff7950a36187a801613426e85&#34;
+            ... &#34;8dce686cd7d7e3c0fc42ee0330072d245c95&#34;)
+            &gt;&gt;&gt; CID.decode(b)
+            CID(&#39;identity&#39;, 1, &#39;raw&#39;,
+            &#39;12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;)
+            ```
+
+            Example usage for CIDv0 base58-encoded string:
+
+            ```py
+            &gt;&gt;&gt; s = &#34;QmbWqxBEKC3P8tqsKc98xmWNzrzDtRLMiMPL8wBuTGsMnR&#34;
+            &gt;&gt;&gt; CID.decode(s)
+            CID(&#39;base58btc&#39;, 0, &#39;dag-pb&#39;,
+            &#39;1220c3c4733ec8affd06cf9e9ff50ffc6bcd2ec85a6170004bb709669c31de94391a&#39;)
+            ```
+
+            Example usage for CIDv0 bytestring (multibase always set to &#39;base58btc&#39;):
+
+            ```py
+            &gt;&gt;&gt; b = bytes.fromhex(
+            ... &#34;1220c3c4733ec8affd06cf9e9ff50ffc6b&#34;
+            ... &#34;cd2ec85a6170004bb709669c31de94391a&#34;)
+            &gt;&gt;&gt; CID.decode(b)
+            CID(&#39;base58btc&#39;, 0, &#39;dag-pb&#39;,
+            &#39;1220c3c4733ec8affd06cf9e9ff50ffc6bcd2ec85a6170004bb709669c31de94391a&#39;)
+            ```
+
+        &#34;&#34;&#34;
+        if isinstance(cid, str):
+            cid, mb = _binary_cid_from_str(cid)
+        else:
+            mb = multibase.get(&#34;identity&#34;)
+        validate(cid, BytesLike)
+        cid = memoryview(cid)
+        # if len(cid) == 34 and cid.startswith(b&#34;\x12\x20&#34;):
+        if len(cid) == 34 and cid[0] == 0x12 and cid[1] == 0x20:
+            v = 0 # CID version
+            mc_code = 0x70 # multicodec.get(&#34;dag-pb&#34;)
+            digest = cid  # multihash digest is what&#39;s left
+            mb = multibase.get(&#34;base58btc&#34;)
+        else:
+            v, _, cid = varint.decode_raw(cid) # CID version
+            if v == 0:
+                raise ValueError(&#34;CIDv0 is malformed.&#34;)
+            if v in (2, 3):
+                raise ValueError(&#34;CID versions 2 and 3 are reserved for future use.&#34;)
+            if v != 1:
+                raise ValueError(f&#34;CIDv{v} is currently not supported.&#34;)
+            mc_code, _, cid = varint.decode_raw(cid) # multicodec
+            digest = cid # multihash digest is what&#39;s left
+        mc = multicodec.get(code=mc_code)
+        mh_code, _ = multihash.decode_raw(digest)
+        mh = multihash.get(code=mh_code)
+        return CID._new_instance(CID, mb, v, mc, mh, digest)
+
+    @staticmethod
+    def peer_id(pk_bytes: Union[str, BytesLike]) -&gt; &#34;CID&#34;:
+        &#34;&#34;&#34;
+            Wraps the raw hash of a public key into a [PeerID](https://docs.libp2p.io/concepts/peer-id/), as a CIDv1.
+
+            The `pk_bytes` argument should be the binary public key, encoded according to the
+            [PeerID spec](https://github.com/libp2p/specs/blob/master/peer-ids/peer-ids.md).
+            This can be passed as a bytestring or as a hex string (which will be converted to `bytes` using `bytes.fromhex`).
+            Note: the hex string is not multibase encoded.
+
+            Example usage with Ed25519 public key:
+
+            ```py
+            &gt;&gt;&gt; pk_bytes = bytes.fromhex(
+            ... &#34;1498b5467a63dffa2dc9d9e069caf075d16fc33fdd4c3b01bfadae6433767d93&#34;)
+            ... # a 32-byte Ed25519 public key
+            &gt;&gt;&gt; peer_id = CID.peer_id(pk_bytes)
+            &gt;&gt;&gt; peer_id
+            CID(&#39;base32&#39;, 1, &#39;libp2p-key&#39;,
+            &#39;00201498b5467a63dffa2dc9d9e069caf075d16fc33fdd4c3b01bfadae6433767d93&#39;)
+            #^^   0x00 = &#39;identity&#39; multihash used (public key length &lt;= 42)
+            #  ^^ 0x20 = 32-bytes of raw hash digestlength
+            ```
+
+            Snippet showing how to obtain the [Ed25519](https://cryptography.io/en/latest/hazmat/primitives/asymmetric/ed25519/)
+            public key bytestring using the [`cryptography`](https://github.com/pyca/cryptography) library:
+
+            ```py
+            &gt;&gt;&gt; from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+            &gt;&gt;&gt; from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
+            &gt;&gt;&gt; private_key = Ed25519PrivateKey.generate()
+            &gt;&gt;&gt; public_key = private_key.public_key()
+            &gt;&gt;&gt; pk_bytes = public_key.public_bytes(
+            ...     encoding=Encoding.Raw,
+            ...     format=PublicFormat.Raw
+            ... )
+            &gt;&gt;&gt; pk_bytes.hex()
+            &#34;1498b5467a63dffa2dc9d9e069caf075d16fc33fdd4c3b01bfadae6433767d93&#34;
+            ```
+
+            Example usage with DER-encoded RSA public key:
+
+            ```py
+            &gt;&gt;&gt; pk_bytes = bytes.fromhex(
+            ... &#34;30820122300d06092a864886f70d01010105000382010f003082010a02820101&#34;
+            ... &#34;009a56a5c11e2705d0bfe0cd1fa66d5e519095cc741b62ed99ddf129c32e046e&#34;
+            ... &#34;5ba3958bb8a068b05a95a6a0623cc3c889b1581793cd84a34cc2307e0dd74c70&#34;
+            ... &#34;b4f230c74e5063ecd8e906d372be4eba13f47d04427a717ac78cb12b4b9c2ab5&#34;
+            ... &#34;591f36f98021a70f84d782c36c51819054228ff35a45efa3f82b27849ec89036&#34;
+            ... &#34;26b4a4c4b40f9f74b79caf55253687124c79cb10cd3bc73f0c44fbd341e5417d&#34;
+            ... &#34;2e85e900d22849d2bc85ca6bf037f1f5b4f9759b4b6942fccdf1140b30ea7557&#34;
+            ... &#34;87deb5c373c5953c14d64b523959a76a32a599903974a98cf38d4aaac7e359f8&#34;
+            ... &#34;6b00a91dcf424bf794592139e7097d7e65889259227c07155770276b6eda4cec&#34;
+            ... &#34;370203010001&#34;)
+            ... # a 294-byte RSA public key
+            &gt;&gt;&gt; peer_id = CID.peer_id(pk_bytes)
+            &gt;&gt;&gt; peer_id
+            CID(&#39;base32&#39;, 1, &#39;libp2p-key&#39;,
+            &#39;1220c1a6513ffb14f202f75453c49666a5b9d7ed9a1a068891daf824d477573f829f&#39;)
+            #^^   0x12 = &#39;sha2-256&#39; multihash used (public key length &gt; 42)
+            #  ^^ 0x20 = 32-bytes of raw hash digest length
+            ```
+
+            Snippet showing how to obtain the [RSA](https://cryptography.io/en/latest/hazmat/primitives/asymmetric/rsa/)
+            public key bytestring using the [`cryptography`](https://github.com/pyca/cryptography) library:
+
+            ```py
+            &gt;&gt;&gt; from cryptography.hazmat.primitives.asymmetric import rsa
+            &gt;&gt;&gt; from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
+            &gt;&gt;&gt; private_key = rsa.generate_private_key(
+            ...     public_exponent=65537,
+            ...     key_size=2048,
+            ... )
+            &gt;&gt;&gt; public_key = private_key.public_key()
+            &gt;&gt;&gt; pk_bytes = public_key.public_bytes(
+            ...     encoding=Encoding.DER,
+            ...     format=PublicFormat.SubjectPublicKeyInfo
+            ... )
+            &gt;&gt;&gt; pk_bytes.hex()
+            &#34;30820122300d06092a864886f70d01010105000382010f003082010a02820101&#34;
+            &#34;009a56a5c11e2705d0bfe0cd1fa66d5e519095cc741b62ed99ddf129c32e046e&#34;
+            &#34;5ba3958bb8a068b05a95a6a0623cc3c889b1581793cd84a34cc2307e0dd74c70&#34;
+            &#34;b4f230c74e5063ecd8e906d372be4eba13f47d04427a717ac78cb12b4b9c2ab5&#34;
+            &#34;591f36f98021a70f84d782c36c51819054228ff35a45efa3f82b27849ec89036&#34;
+            &#34;26b4a4c4b40f9f74b79caf55253687124c79cb10cd3bc73f0c44fbd341e5417d&#34;
+            &#34;2e85e900d22849d2bc85ca6bf037f1f5b4f9759b4b6942fccdf1140b30ea7557&#34;
+            &#34;87deb5c373c5953c14d64b523959a76a32a599903974a98cf38d4aaac7e359f8&#34;
+            &#34;6b00a91dcf424bf794592139e7097d7e65889259227c07155770276b6eda4cec&#34;
+            &#34;370203010001&#34;
+            ```
+        &#34;&#34;&#34;
+        if isinstance(pk_bytes, str):
+            pk_bytes = bytes.fromhex(pk_bytes)
+        else:
+            validate(pk_bytes, BytesLike)
+        if len(pk_bytes) &lt;= 42:
+            mh = multihash.get(&#34;identity&#34;)
+            digest = multihash.digest(pk_bytes, mh)
+        else:
+            mh = multihash.get(&#34;sha2-256&#34;)
+            digest = multihash.digest(pk_bytes, mh)
+        mc = multicodec.get(code=0x72) # multicodec.get(&#34;libp2p-key&#34;)
+        mb = multibase.get(&#34;base32&#34;)
+        return CID._new_instance(CID, mb, 1, mc, mh, digest)</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="multiformats.cid.CID"><code class="flex name class">
+<span>class <span class="ident">CID</span></span>
+<span>(</span><span>base: Union[str, <a title="multiformats.multibase.Multibase" href="multibase/index.html#multiformats.multibase.Multibase">Multibase</a>], version: int, codec: Union[str, int, <a title="multiformats.multicodec.Multicodec" href="multicodec/index.html#multiformats.multicodec.Multicodec">Multicodec</a>], digest: Union[str, bytes, bytearray, memoryview, Tuple[Union[str, int, <a title="multiformats.multicodec.Multicodec" href="multicodec/index.html#multiformats.multicodec.Multicodec">Multicodec</a>], Union[str, bytes, bytearray, memoryview]]])</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Container class for <a href="https://github.com/multiformats/cid">Content IDentifiers</a>.
+CIDs can be decoded from a bytestring or a (multi)base encoded string, using <code><a title="multiformats.cid.CID.decode" href="#multiformats.cid.CID.decode">CID.decode()</a></code>:</p>
+<pre><code class="language-py">&gt;&gt;&gt; cid = CID.decode(&quot;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&quot;)
+&gt;&gt;&gt; cid
+CID('base58btc', 1, 'raw',
+    '12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95')
+</code></pre>
+<p>CIDs can be explicitly instantiated by passing the <code>base</code>, <code>version</code>, <code>codec</code> and multihash <code>digest</code> to the constructor:</p>
+<pre><code class="language-py">&gt;&gt;&gt; cid = CID(&quot;base58btc&quot;, 1, &quot;raw&quot;,
+... &quot;12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&quot;)
+&gt;&gt;&gt; str(cid)
+'zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA'
+</code></pre>
+<p>Alternatively, a <code>(multihash_codec, raw_digest)</code> pair can be passed in lieu of <code>digest</code>:</p>
+<pre><code class="language-py">&gt;&gt;&gt; raw_digest = bytes.fromhex(
+... &quot;6e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&quot;)
+&gt;&gt;&gt; cid = CID(&quot;base58btc&quot;, 1, &quot;raw&quot;, (&quot;sha2-256&quot;, raw_digest))
+&gt;&gt;&gt; str(cid)
+'zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA'
+</code></pre>
+<p>The <code>digest</code> and <code>raw_digest</code> parameters can be passed either as <code>bytes</code>-like objects
+or as the corresponding hex strings (which will be converted to <code>bytes</code> using <code>bytes.fromhex</code>):</p>
+<pre><code class="language-py">&gt;&gt;&gt; isinstance(raw_digest, bytes)
+True
+&gt;&gt;&gt; raw_digest.hex()
+'6e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95'
+</code></pre>
+<p>Note: the hex strings are not multibase encoded.</p>
+<p>Calling <code>bytes(cid)</code> returns the binary representation of <code>cid</code>, as a <code>bytes</code> object:</p>
+<pre><code class="language-py">&gt;&gt;&gt; cid = CID(&quot;base58btc&quot;, 1, &quot;raw&quot;,
+... &quot;12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&quot;)
+&gt;&gt;&gt; raw_digest.hex()
+        '6e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95'
+&gt;&gt;&gt; bytes(cid).hex()
+'015512206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95'
+#^^   0x01 = CIDv1
+#  ^^ 0x55 = 'raw' codec
+&gt;&gt;&gt; bytes(cid)
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class CID:
+    &#34;&#34;&#34;
+
+    Container class for [Content IDentifiers](https://github.com/multiformats/cid).
+    CIDs can be decoded from a bytestring or a (multi)base encoded string, using `CID.decode`:
+
+    ```py
+    &gt;&gt;&gt; cid = CID.decode(&#34;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&#34;)
+    &gt;&gt;&gt; cid
+    CID(&#39;base58btc&#39;, 1, &#39;raw&#39;,
+        &#39;12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;)
+    ```
+
+    CIDs can be explicitly instantiated by passing the `base`, `version`, `codec` and multihash `digest` to the constructor:
+
+    ```py
+    &gt;&gt;&gt; cid = CID(&#34;base58btc&#34;, 1, &#34;raw&#34;,
+    ... &#34;12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#34;)
+    &gt;&gt;&gt; str(cid)
+    &#39;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&#39;
+    ```
+
+    Alternatively, a `(multihash_codec, raw_digest)` pair can be passed in lieu of `digest`:
+
+    ```py
+    &gt;&gt;&gt; raw_digest = bytes.fromhex(
+    ... &#34;6e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#34;)
+    &gt;&gt;&gt; cid = CID(&#34;base58btc&#34;, 1, &#34;raw&#34;, (&#34;sha2-256&#34;, raw_digest))
+    &gt;&gt;&gt; str(cid)
+    &#39;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&#39;
+    ```
+
+    The `digest` and `raw_digest` parameters can be passed either as `bytes`-like objects
+    or as the corresponding hex strings (which will be converted to `bytes` using `bytes.fromhex`):
+
+    ```py
+    &gt;&gt;&gt; isinstance(raw_digest, bytes)
+    True
+    &gt;&gt;&gt; raw_digest.hex()
+    &#39;6e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;
+    ```
+
+    Note: the hex strings are not multibase encoded.
+
+    Calling `bytes(cid)` returns the binary representation of `cid`, as a `bytes` object:
+
+    ```py
+    &gt;&gt;&gt; cid = CID(&#34;base58btc&#34;, 1, &#34;raw&#34;,
+    ... &#34;12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#34;)
+    &gt;&gt;&gt; raw_digest.hex()
+            &#39;6e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;
+    &gt;&gt;&gt; bytes(cid).hex()
+    &#39;015512206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;
+    #^^   0x01 = CIDv1
+    #  ^^ 0x55 = &#39;raw&#39; codec
+    &gt;&gt;&gt; bytes(cid)
+    ```
+
+    &#34;&#34;&#34;
+
+    _base: Multibase
+    _version: CIDVersion
+    _codec: Multicodec
+    _hashfun: Multicodec
+    _digest: bytes
+
+    __slots__ = (&#34;__weakref__&#34;, &#34;_base&#34;, &#34;_version&#34;, &#34;_codec&#34;, &#34;_hashfun&#34;, &#34;_digest&#34;)
+
+    def __new__(cls: Type[_CIDSubclass],
+                base: Union[str, Multibase],
+                version: int,
+                codec: Union[str, int, Multicodec],
+                digest: Union[str, BytesLike, Tuple[Union[str, int, Multicodec], Union[str, BytesLike]]],
+                ) -&gt; _CIDSubclass:
+        # pylint: disable = too-many-arguments
+        base = _CID_validate_multibase(base)
+        codec = _CID_validate_multicodec(codec)
+        raw_digest: Union[str, bytes]
+        hashfun: Union[str, int, Multicodec]
+        if isinstance(digest, (str,)+byteslike):
+            hashfun, raw_digest = _CID_validate_multihash_digest(digest)
+        else:
+            validate(digest, Tuple[Union[str, int, Multicodec], Union[str, BytesLike]])
+            hashfun, raw_digest = digest
+            hashfun = _CID_validate_multihash(hashfun)
+            raw_digest = _CID_validate_raw_digest(raw_digest, hashfun)
+        version = _CID_validate_version(version, base, codec, hashfun)
+        if isinstance(digest, bytes):
+            return CID._new_instance(cls, base, version, codec, hashfun, digest)
+        return CID._new_instance(cls, base, version, codec, hashfun, (hashfun, raw_digest))
+
+    @staticmethod
+    def _new_instance(CID_subclass: Type[_CIDSubclass],
+                      base: Multibase,
+                      version: int,
+                      codec: Multicodec,
+                      hashfun: Multicodec,
+                      digest: Union[bytes, Tuple[Multicodec, bytes]],
+                     ) -&gt; _CIDSubclass:
+        # pylint: disable = too-many-arguments
+        instance = super().__new__(CID_subclass)
+        instance._base = base
+        instance._version = version
+        instance._codec = codec
+        instance._hashfun = hashfun
+        if isinstance(digest, bytes):
+            instance._digest = digest
+        elif isinstance(digest, byteslike):
+            instance._digest = bytes(digest)
+        else:
+            _hashfun, raw_digest = digest
+            if not isinstance(raw_digest, bytes):
+                raw_digest = bytes(raw_digest)
+            assert _hashfun == hashfun, &#34;You passed different multihashes to a _new_instance call with digest as a pair.&#34;
+            instance._digest = multihash.encode(raw_digest, hashfun)
+        return cast(_CIDSubclass, instance)
+
+    @property
+    def version(self) -&gt; CIDVersion:
+        &#34;&#34;&#34;
+            CID version.
+
+            Example usage:
+
+            ```py
+            &gt;&gt;&gt; s = &#34;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&#34;
+            &gt;&gt;&gt; cid = CID.decode(s)
+            &gt;&gt;&gt; cid.version
+            1
+            ```
+        &#34;&#34;&#34;
+        return self._version
+
+    @property
+    def base(self) -&gt; Multibase:
+        &#34;&#34;&#34;
+            Multibase used to encode the CID:
+
+            - if a CIDv1 was decoded from a multibase-encoded string, the encoding multibase is used
+            - if a CIDv1 was decoded from a bytestring, the &#39;identity&#39; multibase is used
+            - for a CIDv0, &#39;base58btc&#39; is always used
+
+            Example usage:
+
+            ```py
+            &gt;&gt;&gt; s = &#34;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&#34;
+            &gt;&gt;&gt; cid = CID.decode(s)
+            &gt;&gt;&gt; cid.base
+            Multibase(name=&#39;base58btc&#39;, code=&#39;z&#39;,
+                      status=&#39;default&#39;, description=&#39;base58 bitcoin&#39;)
+            ```
+        &#34;&#34;&#34;
+        return self._base
+
+    @property
+    def codec(self) -&gt; Multicodec:
+        &#34;&#34;&#34;
+            Codec that the multihash digest refers to.
+
+            Example usage:
+
+            ```py
+            &gt;&gt;&gt; s = &#34;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&#34;
+            &gt;&gt;&gt; cid = CID.decode(s)
+            &gt;&gt;&gt; cid.codec
+            Multicodec(name=&#39;raw&#39;, tag=&#39;ipld&#39;, code=&#39;0x55&#39;,
+                       status=&#39;permanent&#39;, description=&#39;raw binary&#39;)
+            ```
+        &#34;&#34;&#34;
+        return self._codec
+
+    @property
+    def hashfun(self) -&gt; Multicodec:
+        &#34;&#34;&#34;
+            Multihash codec used to produce the multihash digest.
+
+            Example usage:
+
+            ```py
+            &gt;&gt;&gt; s = &#34;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&#34;
+            &gt;&gt;&gt; cid = CID.decode(s)
+            &gt;&gt;&gt; cid.hashfun
+            Multicodec(name=&#39;sha2-256&#39;, tag=&#39;multihash&#39;, code=&#39;0x12&#39;,
+                       status=&#39;permanent&#39;, description=&#39;&#39;)
+            ```
+        &#34;&#34;&#34;
+        return self._hashfun
+
+    @property
+    def digest(self) -&gt; bytes:
+        &#34;&#34;&#34;
+            Multihash digest.
+
+            Example usage:
+
+            ```py
+            &gt;&gt;&gt; s = &#34;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&#34;
+            &gt;&gt;&gt; cid = CID.decode(s)
+            &gt;&gt;&gt; cid.digest.hex()
+            &#39;12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;
+            ```
+        &#34;&#34;&#34;
+        return self._digest
+
+    @property
+    def raw_digest(self) -&gt; bytes:
+        &#34;&#34;&#34;
+            Raw hash digest, decoded from the multihash digest.
+
+            Example usage:
+
+            ```py
+            &gt;&gt;&gt; s = &#34;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&#34;
+            &gt;&gt;&gt; cid = CID.decode(s)
+            &gt;&gt;&gt; cid.raw_digest.hex()
+            &#39;6e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;
+            ```
+        &#34;&#34;&#34;
+        return multihash.decode(self._digest)
+
+    @property
+    def human_readable(self) -&gt; str:
+        &#34;&#34;&#34;
+            Human-readable representation of the CID.
+
+            Example usage:
+
+            ```py
+            &gt;&gt;&gt; s = &#34;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&#34;
+            &gt;&gt;&gt; cid = CID.decode(s)
+            &gt;&gt;&gt; cid.human_readable
+            &#39;base58btc - cidv1 - raw - (sha2-256 : 256 : 6E6FF7950A36187A801613426E858DCE686CD7D7E3C0FC42EE0330072D245C95)&#39;
+            ```
+        &#34;&#34;&#34;
+        raw_digest = self.raw_digest
+        hashfun_str = f&#34;({self.hashfun.name} : {len(raw_digest)*8} : {raw_digest.hex().upper()})&#34;
+        return f&#34;{self.base.name} - cidv{self.version} - {self.codec.name} - {hashfun_str}&#34;
+
+    def encode(self, base: Union[None, str, Multibase] = None) -&gt; str:
+        &#34;&#34;&#34;
+            Encodes the CID using a given multibase. If no multibase is give,
+            the CID&#39;s own multibase is used by default.
+
+            Example usage:
+
+            ```py
+            &gt;&gt;&gt; s = &#34;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&#34;
+            &gt;&gt;&gt; cid = CID.decode(s)
+            &gt;&gt;&gt; cid.encode() # default: cid.base
+            &#39;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&#39;
+            &gt;&gt;&gt; cid.encode(&#34;base32&#34;)
+            &#39;bafkreidon73zkcrwdb5iafqtijxildoonbwnpv7dyd6ef3qdgads2jc4su&#39;
+            ```
+        &#34;&#34;&#34;
+        if self.version == 0:
+            if base is not None:
+                raise ValueError(&#34;CIDv0 cannot be multibase-encoded, please set multibase=None.&#34;)
+            return base58btc.encode(bytes(self))
+        if base is None or base == self.base:
+            base = self.base # use CID&#39;s own multibase as default
+        else:
+            if isinstance(base, str):
+                base = multibase.get(base)
+            else:
+                multibase.validate_multibase(base)
+        return base.encode(bytes(self))
+
+    def set(self, *,
+            base: Union[None, str, Multibase] = None,
+            version: Union[None, int] = None,
+            codec: Union[None, str, int, Multicodec] = None
+           ) -&gt; &#34;CID&#34;:
+        &#34;&#34;&#34;
+            Returns a new CID obtained by setting new values for one or more of:
+            `base`, `version`, or `codec`.
+
+            Example usage:
+
+            ```py
+            &gt;&gt;&gt; s = &#34;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&#34;
+            &gt;&gt;&gt; cid = CID.decode(s)
+            &gt;&gt;&gt; cid
+            CID(&#39;base58btc&#39;, 1, &#39;raw&#39;,
+            &#39;12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;)
+            &gt;&gt;&gt; cid.set(base=&#34;base32&#34;)
+            CID(&#39;base32&#39;, 1, &#39;raw&#39;,
+            &#39;12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;)
+            &gt;&gt;&gt; cid.set(codec=&#34;dag-cbor&#34;)
+            CID(&#39;base58btc&#39;, 1, &#39;dag-cbor&#39;,
+            &#39;12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;)
+            &gt;&gt;&gt; cid.set(version=0, codec=&#34;dag-pb&#34;)
+            CID(&#39;base58btc&#39;, 0, &#39;dag-pb&#39;,
+            &#39;12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;)
+            &gt;&gt;&gt; cid
+            CID(&#39;base58btc&#39;, 1, &#39;raw&#39;,
+            &#39;12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;)
+            # Note: &#39;CID.set&#39; returns new instances,
+            #       the original &#39;cid&#39; instance is unchanged
+            ```
+
+            If setting `version` to 0, `base` must be &#39;base58btc&#39; and `codec` must be &#39;dag-pb&#39;.
+
+            ```py
+            &gt;&gt;&gt; s = &#34;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&#34;
+            &gt;&gt;&gt; cid = CID.decode(s)
+            &gt;&gt;&gt; cid
+            CID(&#39;base58btc&#39;, 1, &#39;raw&#39;,
+            &#39;12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;)
+            &gt;&gt;&gt; cid.set(version=0, codec=&#34;dag-pb&#34;)
+            CID(&#39;base58btc&#39;, 0, &#39;dag-pb&#39;,
+            &#39;12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;)
+            &gt;&gt;&gt; cid.set(version=0)
+            ValueError: CIDv0 multicodec must be &#39;dag-pb&#39;, found &#39;raw&#39; instead.
+            &gt;&gt;&gt; cid.set(version=0, codec=&#34;dag-pb&#34;, base=&#34;base32&#34;)
+            ValueError: CIDv0 multibase must be &#39;base58btc&#39;, found &#39;base32&#39; instead
+            ```
+
+        &#34;&#34;&#34;
+        hashfun = self.hashfun
+        digest = self.digest
+        if base is not None and base not in (self.base, self.base.name):
+            base = _CID_validate_multibase(base)
+        else:
+            base = self.base
+        if codec is not None and codec not in (self.codec, self.codec.name, self.codec.code):
+            codec = _CID_validate_multicodec(codec)
+        else:
+            codec = self.codec
+        if version is not None and version != self.version:
+            _CID_validate_version(version, base, codec, hashfun)
+        else:
+            version = self.version
+        return CID._new_instance(CID, base, version, codec, hashfun, digest)
+
+    def __bytes__(self) -&gt; bytes:
+        if self.version == 0:
+            return self.digest
+        return varint.encode(self.version)+varint.encode(self.codec.code)+self.digest
+
+    def __str__(self) -&gt; str:
+        return self.encode()
+
+    def __repr__(self) -&gt; str:
+        mb = self.base.name
+        v = self.version
+        mc = self.codec.name
+        d = self.digest
+        return f&#34;CID({repr(mb)}, {v}, {repr(mc)}, {repr(d.hex())})&#34;
+
+    @staticmethod
+    def decode(cid: Union[str, BytesLike]) -&gt; &#34;CID&#34;:
+        &#34;&#34;&#34;
+            Decodes a CID from a bytestring or a hex string (which will be converted to `bytes`
+            using `bytes.fromhex`). Note: the hex string is not multibase encoded.
+
+            Example usage for CIDv1 multibase-encoded string:
+
+            ```py
+            &gt;&gt;&gt; s = &#34;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&#34;
+            &gt;&gt;&gt; CID.decode(s)
+            CID(&#39;base58btc&#39;, 1, &#39;raw&#39;,
+            &#39;12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;)
+            ```
+
+            Example usage for CIDv1 bytestring (multibase always set to &#39;identity&#39;):
+
+            ```py
+            &gt;&gt;&gt; b = bytes.fromhex(
+            ... &#34;015512206e6ff7950a36187a801613426e85&#34;
+            ... &#34;8dce686cd7d7e3c0fc42ee0330072d245c95&#34;)
+            &gt;&gt;&gt; CID.decode(b)
+            CID(&#39;identity&#39;, 1, &#39;raw&#39;,
+            &#39;12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;)
+            ```
+
+            Example usage for CIDv0 base58-encoded string:
+
+            ```py
+            &gt;&gt;&gt; s = &#34;QmbWqxBEKC3P8tqsKc98xmWNzrzDtRLMiMPL8wBuTGsMnR&#34;
+            &gt;&gt;&gt; CID.decode(s)
+            CID(&#39;base58btc&#39;, 0, &#39;dag-pb&#39;,
+            &#39;1220c3c4733ec8affd06cf9e9ff50ffc6bcd2ec85a6170004bb709669c31de94391a&#39;)
+            ```
+
+            Example usage for CIDv0 bytestring (multibase always set to &#39;base58btc&#39;):
+
+            ```py
+            &gt;&gt;&gt; b = bytes.fromhex(
+            ... &#34;1220c3c4733ec8affd06cf9e9ff50ffc6b&#34;
+            ... &#34;cd2ec85a6170004bb709669c31de94391a&#34;)
+            &gt;&gt;&gt; CID.decode(b)
+            CID(&#39;base58btc&#39;, 0, &#39;dag-pb&#39;,
+            &#39;1220c3c4733ec8affd06cf9e9ff50ffc6bcd2ec85a6170004bb709669c31de94391a&#39;)
+            ```
+
+        &#34;&#34;&#34;
+        if isinstance(cid, str):
+            cid, mb = _binary_cid_from_str(cid)
+        else:
+            mb = multibase.get(&#34;identity&#34;)
+        validate(cid, BytesLike)
+        cid = memoryview(cid)
+        # if len(cid) == 34 and cid.startswith(b&#34;\x12\x20&#34;):
+        if len(cid) == 34 and cid[0] == 0x12 and cid[1] == 0x20:
+            v = 0 # CID version
+            mc_code = 0x70 # multicodec.get(&#34;dag-pb&#34;)
+            digest = cid  # multihash digest is what&#39;s left
+            mb = multibase.get(&#34;base58btc&#34;)
+        else:
+            v, _, cid = varint.decode_raw(cid) # CID version
+            if v == 0:
+                raise ValueError(&#34;CIDv0 is malformed.&#34;)
+            if v in (2, 3):
+                raise ValueError(&#34;CID versions 2 and 3 are reserved for future use.&#34;)
+            if v != 1:
+                raise ValueError(f&#34;CIDv{v} is currently not supported.&#34;)
+            mc_code, _, cid = varint.decode_raw(cid) # multicodec
+            digest = cid # multihash digest is what&#39;s left
+        mc = multicodec.get(code=mc_code)
+        mh_code, _ = multihash.decode_raw(digest)
+        mh = multihash.get(code=mh_code)
+        return CID._new_instance(CID, mb, v, mc, mh, digest)
+
+    @staticmethod
+    def peer_id(pk_bytes: Union[str, BytesLike]) -&gt; &#34;CID&#34;:
+        &#34;&#34;&#34;
+            Wraps the raw hash of a public key into a [PeerID](https://docs.libp2p.io/concepts/peer-id/), as a CIDv1.
+
+            The `pk_bytes` argument should be the binary public key, encoded according to the
+            [PeerID spec](https://github.com/libp2p/specs/blob/master/peer-ids/peer-ids.md).
+            This can be passed as a bytestring or as a hex string (which will be converted to `bytes` using `bytes.fromhex`).
+            Note: the hex string is not multibase encoded.
+
+            Example usage with Ed25519 public key:
+
+            ```py
+            &gt;&gt;&gt; pk_bytes = bytes.fromhex(
+            ... &#34;1498b5467a63dffa2dc9d9e069caf075d16fc33fdd4c3b01bfadae6433767d93&#34;)
+            ... # a 32-byte Ed25519 public key
+            &gt;&gt;&gt; peer_id = CID.peer_id(pk_bytes)
+            &gt;&gt;&gt; peer_id
+            CID(&#39;base32&#39;, 1, &#39;libp2p-key&#39;,
+            &#39;00201498b5467a63dffa2dc9d9e069caf075d16fc33fdd4c3b01bfadae6433767d93&#39;)
+            #^^   0x00 = &#39;identity&#39; multihash used (public key length &lt;= 42)
+            #  ^^ 0x20 = 32-bytes of raw hash digestlength
+            ```
+
+            Snippet showing how to obtain the [Ed25519](https://cryptography.io/en/latest/hazmat/primitives/asymmetric/ed25519/)
+            public key bytestring using the [`cryptography`](https://github.com/pyca/cryptography) library:
+
+            ```py
+            &gt;&gt;&gt; from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+            &gt;&gt;&gt; from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
+            &gt;&gt;&gt; private_key = Ed25519PrivateKey.generate()
+            &gt;&gt;&gt; public_key = private_key.public_key()
+            &gt;&gt;&gt; pk_bytes = public_key.public_bytes(
+            ...     encoding=Encoding.Raw,
+            ...     format=PublicFormat.Raw
+            ... )
+            &gt;&gt;&gt; pk_bytes.hex()
+            &#34;1498b5467a63dffa2dc9d9e069caf075d16fc33fdd4c3b01bfadae6433767d93&#34;
+            ```
+
+            Example usage with DER-encoded RSA public key:
+
+            ```py
+            &gt;&gt;&gt; pk_bytes = bytes.fromhex(
+            ... &#34;30820122300d06092a864886f70d01010105000382010f003082010a02820101&#34;
+            ... &#34;009a56a5c11e2705d0bfe0cd1fa66d5e519095cc741b62ed99ddf129c32e046e&#34;
+            ... &#34;5ba3958bb8a068b05a95a6a0623cc3c889b1581793cd84a34cc2307e0dd74c70&#34;
+            ... &#34;b4f230c74e5063ecd8e906d372be4eba13f47d04427a717ac78cb12b4b9c2ab5&#34;
+            ... &#34;591f36f98021a70f84d782c36c51819054228ff35a45efa3f82b27849ec89036&#34;
+            ... &#34;26b4a4c4b40f9f74b79caf55253687124c79cb10cd3bc73f0c44fbd341e5417d&#34;
+            ... &#34;2e85e900d22849d2bc85ca6bf037f1f5b4f9759b4b6942fccdf1140b30ea7557&#34;
+            ... &#34;87deb5c373c5953c14d64b523959a76a32a599903974a98cf38d4aaac7e359f8&#34;
+            ... &#34;6b00a91dcf424bf794592139e7097d7e65889259227c07155770276b6eda4cec&#34;
+            ... &#34;370203010001&#34;)
+            ... # a 294-byte RSA public key
+            &gt;&gt;&gt; peer_id = CID.peer_id(pk_bytes)
+            &gt;&gt;&gt; peer_id
+            CID(&#39;base32&#39;, 1, &#39;libp2p-key&#39;,
+            &#39;1220c1a6513ffb14f202f75453c49666a5b9d7ed9a1a068891daf824d477573f829f&#39;)
+            #^^   0x12 = &#39;sha2-256&#39; multihash used (public key length &gt; 42)
+            #  ^^ 0x20 = 32-bytes of raw hash digest length
+            ```
+
+            Snippet showing how to obtain the [RSA](https://cryptography.io/en/latest/hazmat/primitives/asymmetric/rsa/)
+            public key bytestring using the [`cryptography`](https://github.com/pyca/cryptography) library:
+
+            ```py
+            &gt;&gt;&gt; from cryptography.hazmat.primitives.asymmetric import rsa
+            &gt;&gt;&gt; from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
+            &gt;&gt;&gt; private_key = rsa.generate_private_key(
+            ...     public_exponent=65537,
+            ...     key_size=2048,
+            ... )
+            &gt;&gt;&gt; public_key = private_key.public_key()
+            &gt;&gt;&gt; pk_bytes = public_key.public_bytes(
+            ...     encoding=Encoding.DER,
+            ...     format=PublicFormat.SubjectPublicKeyInfo
+            ... )
+            &gt;&gt;&gt; pk_bytes.hex()
+            &#34;30820122300d06092a864886f70d01010105000382010f003082010a02820101&#34;
+            &#34;009a56a5c11e2705d0bfe0cd1fa66d5e519095cc741b62ed99ddf129c32e046e&#34;
+            &#34;5ba3958bb8a068b05a95a6a0623cc3c889b1581793cd84a34cc2307e0dd74c70&#34;
+            &#34;b4f230c74e5063ecd8e906d372be4eba13f47d04427a717ac78cb12b4b9c2ab5&#34;
+            &#34;591f36f98021a70f84d782c36c51819054228ff35a45efa3f82b27849ec89036&#34;
+            &#34;26b4a4c4b40f9f74b79caf55253687124c79cb10cd3bc73f0c44fbd341e5417d&#34;
+            &#34;2e85e900d22849d2bc85ca6bf037f1f5b4f9759b4b6942fccdf1140b30ea7557&#34;
+            &#34;87deb5c373c5953c14d64b523959a76a32a599903974a98cf38d4aaac7e359f8&#34;
+            &#34;6b00a91dcf424bf794592139e7097d7e65889259227c07155770276b6eda4cec&#34;
+            &#34;370203010001&#34;
+            ```
+        &#34;&#34;&#34;
+        if isinstance(pk_bytes, str):
+            pk_bytes = bytes.fromhex(pk_bytes)
+        else:
+            validate(pk_bytes, BytesLike)
+        if len(pk_bytes) &lt;= 42:
+            mh = multihash.get(&#34;identity&#34;)
+            digest = multihash.digest(pk_bytes, mh)
+        else:
+            mh = multihash.get(&#34;sha2-256&#34;)
+            digest = multihash.digest(pk_bytes, mh)
+        mc = multicodec.get(code=0x72) # multicodec.get(&#34;libp2p-key&#34;)
+        mb = multibase.get(&#34;base32&#34;)
+        return CID._new_instance(CID, mb, 1, mc, mh, digest)</code></pre>
+</details>
+<h3>Static methods</h3>
+<dl>
+<dt id="multiformats.cid.CID.decode"><code class="name flex">
+<span>def <span class="ident">decode</span></span>(<span>cid: Union[str, bytes, bytearray, memoryview]) ‑> <a title="multiformats.cid.CID" href="#multiformats.cid.CID">CID</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Decodes a CID from a bytestring or a hex string (which will be converted to <code>bytes</code>
+using <code>bytes.fromhex</code>). Note: the hex string is not multibase encoded.</p>
+<p>Example usage for CIDv1 multibase-encoded string:</p>
+<pre><code class="language-py">&gt;&gt;&gt; s = &quot;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&quot;
+&gt;&gt;&gt; CID.decode(s)
+CID('base58btc', 1, 'raw',
+'12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95')
+</code></pre>
+<p>Example usage for CIDv1 bytestring (multibase always set to 'identity'):</p>
+<pre><code class="language-py">&gt;&gt;&gt; b = bytes.fromhex(
+... &quot;015512206e6ff7950a36187a801613426e85&quot;
+... &quot;8dce686cd7d7e3c0fc42ee0330072d245c95&quot;)
+&gt;&gt;&gt; CID.decode(b)
+CID('identity', 1, 'raw',
+'12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95')
+</code></pre>
+<p>Example usage for CIDv0 base58-encoded string:</p>
+<pre><code class="language-py">&gt;&gt;&gt; s = &quot;QmbWqxBEKC3P8tqsKc98xmWNzrzDtRLMiMPL8wBuTGsMnR&quot;
+&gt;&gt;&gt; CID.decode(s)
+CID('base58btc', 0, 'dag-pb',
+'1220c3c4733ec8affd06cf9e9ff50ffc6bcd2ec85a6170004bb709669c31de94391a')
+</code></pre>
+<p>Example usage for CIDv0 bytestring (multibase always set to 'base58btc'):</p>
+<pre><code class="language-py">&gt;&gt;&gt; b = bytes.fromhex(
+... &quot;1220c3c4733ec8affd06cf9e9ff50ffc6b&quot;
+... &quot;cd2ec85a6170004bb709669c31de94391a&quot;)
+&gt;&gt;&gt; CID.decode(b)
+CID('base58btc', 0, 'dag-pb',
+'1220c3c4733ec8affd06cf9e9ff50ffc6bcd2ec85a6170004bb709669c31de94391a')
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def decode(cid: Union[str, BytesLike]) -&gt; &#34;CID&#34;:
+    &#34;&#34;&#34;
+        Decodes a CID from a bytestring or a hex string (which will be converted to `bytes`
+        using `bytes.fromhex`). Note: the hex string is not multibase encoded.
+
+        Example usage for CIDv1 multibase-encoded string:
+
+        ```py
+        &gt;&gt;&gt; s = &#34;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&#34;
+        &gt;&gt;&gt; CID.decode(s)
+        CID(&#39;base58btc&#39;, 1, &#39;raw&#39;,
+        &#39;12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;)
+        ```
+
+        Example usage for CIDv1 bytestring (multibase always set to &#39;identity&#39;):
+
+        ```py
+        &gt;&gt;&gt; b = bytes.fromhex(
+        ... &#34;015512206e6ff7950a36187a801613426e85&#34;
+        ... &#34;8dce686cd7d7e3c0fc42ee0330072d245c95&#34;)
+        &gt;&gt;&gt; CID.decode(b)
+        CID(&#39;identity&#39;, 1, &#39;raw&#39;,
+        &#39;12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;)
+        ```
+
+        Example usage for CIDv0 base58-encoded string:
+
+        ```py
+        &gt;&gt;&gt; s = &#34;QmbWqxBEKC3P8tqsKc98xmWNzrzDtRLMiMPL8wBuTGsMnR&#34;
+        &gt;&gt;&gt; CID.decode(s)
+        CID(&#39;base58btc&#39;, 0, &#39;dag-pb&#39;,
+        &#39;1220c3c4733ec8affd06cf9e9ff50ffc6bcd2ec85a6170004bb709669c31de94391a&#39;)
+        ```
+
+        Example usage for CIDv0 bytestring (multibase always set to &#39;base58btc&#39;):
+
+        ```py
+        &gt;&gt;&gt; b = bytes.fromhex(
+        ... &#34;1220c3c4733ec8affd06cf9e9ff50ffc6b&#34;
+        ... &#34;cd2ec85a6170004bb709669c31de94391a&#34;)
+        &gt;&gt;&gt; CID.decode(b)
+        CID(&#39;base58btc&#39;, 0, &#39;dag-pb&#39;,
+        &#39;1220c3c4733ec8affd06cf9e9ff50ffc6bcd2ec85a6170004bb709669c31de94391a&#39;)
+        ```
+
+    &#34;&#34;&#34;
+    if isinstance(cid, str):
+        cid, mb = _binary_cid_from_str(cid)
+    else:
+        mb = multibase.get(&#34;identity&#34;)
+    validate(cid, BytesLike)
+    cid = memoryview(cid)
+    # if len(cid) == 34 and cid.startswith(b&#34;\x12\x20&#34;):
+    if len(cid) == 34 and cid[0] == 0x12 and cid[1] == 0x20:
+        v = 0 # CID version
+        mc_code = 0x70 # multicodec.get(&#34;dag-pb&#34;)
+        digest = cid  # multihash digest is what&#39;s left
+        mb = multibase.get(&#34;base58btc&#34;)
+    else:
+        v, _, cid = varint.decode_raw(cid) # CID version
+        if v == 0:
+            raise ValueError(&#34;CIDv0 is malformed.&#34;)
+        if v in (2, 3):
+            raise ValueError(&#34;CID versions 2 and 3 are reserved for future use.&#34;)
+        if v != 1:
+            raise ValueError(f&#34;CIDv{v} is currently not supported.&#34;)
+        mc_code, _, cid = varint.decode_raw(cid) # multicodec
+        digest = cid # multihash digest is what&#39;s left
+    mc = multicodec.get(code=mc_code)
+    mh_code, _ = multihash.decode_raw(digest)
+    mh = multihash.get(code=mh_code)
+    return CID._new_instance(CID, mb, v, mc, mh, digest)</code></pre>
+</details>
+</dd>
+<dt id="multiformats.cid.CID.peer_id"><code class="name flex">
+<span>def <span class="ident">peer_id</span></span>(<span>pk_bytes: Union[str, bytes, bytearray, memoryview]) ‑> <a title="multiformats.cid.CID" href="#multiformats.cid.CID">CID</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Wraps the raw hash of a public key into a <a href="https://docs.libp2p.io/concepts/peer-id/">PeerID</a>, as a CIDv1.</p>
+<p>The <code>pk_bytes</code> argument should be the binary public key, encoded according to the
+<a href="https://github.com/libp2p/specs/blob/master/peer-ids/peer-ids.md">PeerID spec</a>.
+This can be passed as a bytestring or as a hex string (which will be converted to <code>bytes</code> using <code>bytes.fromhex</code>).
+Note: the hex string is not multibase encoded.</p>
+<p>Example usage with Ed25519 public key:</p>
+<pre><code class="language-py">&gt;&gt;&gt; pk_bytes = bytes.fromhex(
+... &quot;1498b5467a63dffa2dc9d9e069caf075d16fc33fdd4c3b01bfadae6433767d93&quot;)
+... # a 32-byte Ed25519 public key
+&gt;&gt;&gt; peer_id = CID.peer_id(pk_bytes)
+&gt;&gt;&gt; peer_id
+CID('base32', 1, 'libp2p-key',
+'00201498b5467a63dffa2dc9d9e069caf075d16fc33fdd4c3b01bfadae6433767d93')
+#^^   0x00 = 'identity' multihash used (public key length &lt;= 42)
+#  ^^ 0x20 = 32-bytes of raw hash digestlength
+</code></pre>
+<p>Snippet showing how to obtain the <a href="https://cryptography.io/en/latest/hazmat/primitives/asymmetric/ed25519/">Ed25519</a>
+public key bytestring using the <a href="https://github.com/pyca/cryptography"><code>cryptography</code></a> library:</p>
+<pre><code class="language-py">&gt;&gt;&gt; from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+&gt;&gt;&gt; from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
+&gt;&gt;&gt; private_key = Ed25519PrivateKey.generate()
+&gt;&gt;&gt; public_key = private_key.public_key()
+&gt;&gt;&gt; pk_bytes = public_key.public_bytes(
+...     encoding=Encoding.Raw,
+...     format=PublicFormat.Raw
+... )
+&gt;&gt;&gt; pk_bytes.hex()
+&quot;1498b5467a63dffa2dc9d9e069caf075d16fc33fdd4c3b01bfadae6433767d93&quot;
+</code></pre>
+<p>Example usage with DER-encoded RSA public key:</p>
+<pre><code class="language-py">&gt;&gt;&gt; pk_bytes = bytes.fromhex(
+... &quot;30820122300d06092a864886f70d01010105000382010f003082010a02820101&quot;
+... &quot;009a56a5c11e2705d0bfe0cd1fa66d5e519095cc741b62ed99ddf129c32e046e&quot;
+... &quot;5ba3958bb8a068b05a95a6a0623cc3c889b1581793cd84a34cc2307e0dd74c70&quot;
+... &quot;b4f230c74e5063ecd8e906d372be4eba13f47d04427a717ac78cb12b4b9c2ab5&quot;
+... &quot;591f36f98021a70f84d782c36c51819054228ff35a45efa3f82b27849ec89036&quot;
+... &quot;26b4a4c4b40f9f74b79caf55253687124c79cb10cd3bc73f0c44fbd341e5417d&quot;
+... &quot;2e85e900d22849d2bc85ca6bf037f1f5b4f9759b4b6942fccdf1140b30ea7557&quot;
+... &quot;87deb5c373c5953c14d64b523959a76a32a599903974a98cf38d4aaac7e359f8&quot;
+... &quot;6b00a91dcf424bf794592139e7097d7e65889259227c07155770276b6eda4cec&quot;
+... &quot;370203010001&quot;)
+... # a 294-byte RSA public key
+&gt;&gt;&gt; peer_id = CID.peer_id(pk_bytes)
+&gt;&gt;&gt; peer_id
+CID('base32', 1, 'libp2p-key',
+'1220c1a6513ffb14f202f75453c49666a5b9d7ed9a1a068891daf824d477573f829f')
+#^^   0x12 = 'sha2-256' multihash used (public key length &gt; 42)
+#  ^^ 0x20 = 32-bytes of raw hash digest length
+</code></pre>
+<p>Snippet showing how to obtain the <a href="https://cryptography.io/en/latest/hazmat/primitives/asymmetric/rsa/">RSA</a>
+public key bytestring using the <a href="https://github.com/pyca/cryptography"><code>cryptography</code></a> library:</p>
+<pre><code class="language-py">&gt;&gt;&gt; from cryptography.hazmat.primitives.asymmetric import rsa
+&gt;&gt;&gt; from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
+&gt;&gt;&gt; private_key = rsa.generate_private_key(
+...     public_exponent=65537,
+...     key_size=2048,
+... )
+&gt;&gt;&gt; public_key = private_key.public_key()
+&gt;&gt;&gt; pk_bytes = public_key.public_bytes(
+...     encoding=Encoding.DER,
+...     format=PublicFormat.SubjectPublicKeyInfo
+... )
+&gt;&gt;&gt; pk_bytes.hex()
+&quot;30820122300d06092a864886f70d01010105000382010f003082010a02820101&quot;
+&quot;009a56a5c11e2705d0bfe0cd1fa66d5e519095cc741b62ed99ddf129c32e046e&quot;
+&quot;5ba3958bb8a068b05a95a6a0623cc3c889b1581793cd84a34cc2307e0dd74c70&quot;
+&quot;b4f230c74e5063ecd8e906d372be4eba13f47d04427a717ac78cb12b4b9c2ab5&quot;
+&quot;591f36f98021a70f84d782c36c51819054228ff35a45efa3f82b27849ec89036&quot;
+&quot;26b4a4c4b40f9f74b79caf55253687124c79cb10cd3bc73f0c44fbd341e5417d&quot;
+&quot;2e85e900d22849d2bc85ca6bf037f1f5b4f9759b4b6942fccdf1140b30ea7557&quot;
+&quot;87deb5c373c5953c14d64b523959a76a32a599903974a98cf38d4aaac7e359f8&quot;
+&quot;6b00a91dcf424bf794592139e7097d7e65889259227c07155770276b6eda4cec&quot;
+&quot;370203010001&quot;
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def peer_id(pk_bytes: Union[str, BytesLike]) -&gt; &#34;CID&#34;:
+    &#34;&#34;&#34;
+        Wraps the raw hash of a public key into a [PeerID](https://docs.libp2p.io/concepts/peer-id/), as a CIDv1.
+
+        The `pk_bytes` argument should be the binary public key, encoded according to the
+        [PeerID spec](https://github.com/libp2p/specs/blob/master/peer-ids/peer-ids.md).
+        This can be passed as a bytestring or as a hex string (which will be converted to `bytes` using `bytes.fromhex`).
+        Note: the hex string is not multibase encoded.
+
+        Example usage with Ed25519 public key:
+
+        ```py
+        &gt;&gt;&gt; pk_bytes = bytes.fromhex(
+        ... &#34;1498b5467a63dffa2dc9d9e069caf075d16fc33fdd4c3b01bfadae6433767d93&#34;)
+        ... # a 32-byte Ed25519 public key
+        &gt;&gt;&gt; peer_id = CID.peer_id(pk_bytes)
+        &gt;&gt;&gt; peer_id
+        CID(&#39;base32&#39;, 1, &#39;libp2p-key&#39;,
+        &#39;00201498b5467a63dffa2dc9d9e069caf075d16fc33fdd4c3b01bfadae6433767d93&#39;)
+        #^^   0x00 = &#39;identity&#39; multihash used (public key length &lt;= 42)
+        #  ^^ 0x20 = 32-bytes of raw hash digestlength
+        ```
+
+        Snippet showing how to obtain the [Ed25519](https://cryptography.io/en/latest/hazmat/primitives/asymmetric/ed25519/)
+        public key bytestring using the [`cryptography`](https://github.com/pyca/cryptography) library:
+
+        ```py
+        &gt;&gt;&gt; from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+        &gt;&gt;&gt; from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
+        &gt;&gt;&gt; private_key = Ed25519PrivateKey.generate()
+        &gt;&gt;&gt; public_key = private_key.public_key()
+        &gt;&gt;&gt; pk_bytes = public_key.public_bytes(
+        ...     encoding=Encoding.Raw,
+        ...     format=PublicFormat.Raw
+        ... )
+        &gt;&gt;&gt; pk_bytes.hex()
+        &#34;1498b5467a63dffa2dc9d9e069caf075d16fc33fdd4c3b01bfadae6433767d93&#34;
+        ```
+
+        Example usage with DER-encoded RSA public key:
+
+        ```py
+        &gt;&gt;&gt; pk_bytes = bytes.fromhex(
+        ... &#34;30820122300d06092a864886f70d01010105000382010f003082010a02820101&#34;
+        ... &#34;009a56a5c11e2705d0bfe0cd1fa66d5e519095cc741b62ed99ddf129c32e046e&#34;
+        ... &#34;5ba3958bb8a068b05a95a6a0623cc3c889b1581793cd84a34cc2307e0dd74c70&#34;
+        ... &#34;b4f230c74e5063ecd8e906d372be4eba13f47d04427a717ac78cb12b4b9c2ab5&#34;
+        ... &#34;591f36f98021a70f84d782c36c51819054228ff35a45efa3f82b27849ec89036&#34;
+        ... &#34;26b4a4c4b40f9f74b79caf55253687124c79cb10cd3bc73f0c44fbd341e5417d&#34;
+        ... &#34;2e85e900d22849d2bc85ca6bf037f1f5b4f9759b4b6942fccdf1140b30ea7557&#34;
+        ... &#34;87deb5c373c5953c14d64b523959a76a32a599903974a98cf38d4aaac7e359f8&#34;
+        ... &#34;6b00a91dcf424bf794592139e7097d7e65889259227c07155770276b6eda4cec&#34;
+        ... &#34;370203010001&#34;)
+        ... # a 294-byte RSA public key
+        &gt;&gt;&gt; peer_id = CID.peer_id(pk_bytes)
+        &gt;&gt;&gt; peer_id
+        CID(&#39;base32&#39;, 1, &#39;libp2p-key&#39;,
+        &#39;1220c1a6513ffb14f202f75453c49666a5b9d7ed9a1a068891daf824d477573f829f&#39;)
+        #^^   0x12 = &#39;sha2-256&#39; multihash used (public key length &gt; 42)
+        #  ^^ 0x20 = 32-bytes of raw hash digest length
+        ```
+
+        Snippet showing how to obtain the [RSA](https://cryptography.io/en/latest/hazmat/primitives/asymmetric/rsa/)
+        public key bytestring using the [`cryptography`](https://github.com/pyca/cryptography) library:
+
+        ```py
+        &gt;&gt;&gt; from cryptography.hazmat.primitives.asymmetric import rsa
+        &gt;&gt;&gt; from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
+        &gt;&gt;&gt; private_key = rsa.generate_private_key(
+        ...     public_exponent=65537,
+        ...     key_size=2048,
+        ... )
+        &gt;&gt;&gt; public_key = private_key.public_key()
+        &gt;&gt;&gt; pk_bytes = public_key.public_bytes(
+        ...     encoding=Encoding.DER,
+        ...     format=PublicFormat.SubjectPublicKeyInfo
+        ... )
+        &gt;&gt;&gt; pk_bytes.hex()
+        &#34;30820122300d06092a864886f70d01010105000382010f003082010a02820101&#34;
+        &#34;009a56a5c11e2705d0bfe0cd1fa66d5e519095cc741b62ed99ddf129c32e046e&#34;
+        &#34;5ba3958bb8a068b05a95a6a0623cc3c889b1581793cd84a34cc2307e0dd74c70&#34;
+        &#34;b4f230c74e5063ecd8e906d372be4eba13f47d04427a717ac78cb12b4b9c2ab5&#34;
+        &#34;591f36f98021a70f84d782c36c51819054228ff35a45efa3f82b27849ec89036&#34;
+        &#34;26b4a4c4b40f9f74b79caf55253687124c79cb10cd3bc73f0c44fbd341e5417d&#34;
+        &#34;2e85e900d22849d2bc85ca6bf037f1f5b4f9759b4b6942fccdf1140b30ea7557&#34;
+        &#34;87deb5c373c5953c14d64b523959a76a32a599903974a98cf38d4aaac7e359f8&#34;
+        &#34;6b00a91dcf424bf794592139e7097d7e65889259227c07155770276b6eda4cec&#34;
+        &#34;370203010001&#34;
+        ```
+    &#34;&#34;&#34;
+    if isinstance(pk_bytes, str):
+        pk_bytes = bytes.fromhex(pk_bytes)
+    else:
+        validate(pk_bytes, BytesLike)
+    if len(pk_bytes) &lt;= 42:
+        mh = multihash.get(&#34;identity&#34;)
+        digest = multihash.digest(pk_bytes, mh)
+    else:
+        mh = multihash.get(&#34;sha2-256&#34;)
+        digest = multihash.digest(pk_bytes, mh)
+    mc = multicodec.get(code=0x72) # multicodec.get(&#34;libp2p-key&#34;)
+    mb = multibase.get(&#34;base32&#34;)
+    return CID._new_instance(CID, mb, 1, mc, mh, digest)</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Instance variables</h3>
+<dl>
+<dt id="multiformats.cid.CID.base"><code class="name">var <span class="ident">base</span> : <a title="multiformats.multibase.Multibase" href="multibase/index.html#multiformats.multibase.Multibase">Multibase</a></code></dt>
+<dd>
+<div class="desc"><p>Multibase used to encode the CID:</p>
+<ul>
+<li>if a CIDv1 was decoded from a multibase-encoded string, the encoding multibase is used</li>
+<li>if a CIDv1 was decoded from a bytestring, the 'identity' multibase is used</li>
+<li>for a CIDv0, 'base58btc' is always used</li>
+</ul>
+<p>Example usage:</p>
+<pre><code class="language-py">&gt;&gt;&gt; s = &quot;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&quot;
+&gt;&gt;&gt; cid = CID.decode(s)
+&gt;&gt;&gt; cid.base
+Multibase(name='base58btc', code='z',
+          status='default', description='base58 bitcoin')
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def base(self) -&gt; Multibase:
+    &#34;&#34;&#34;
+        Multibase used to encode the CID:
+
+        - if a CIDv1 was decoded from a multibase-encoded string, the encoding multibase is used
+        - if a CIDv1 was decoded from a bytestring, the &#39;identity&#39; multibase is used
+        - for a CIDv0, &#39;base58btc&#39; is always used
+
+        Example usage:
+
+        ```py
+        &gt;&gt;&gt; s = &#34;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&#34;
+        &gt;&gt;&gt; cid = CID.decode(s)
+        &gt;&gt;&gt; cid.base
+        Multibase(name=&#39;base58btc&#39;, code=&#39;z&#39;,
+                  status=&#39;default&#39;, description=&#39;base58 bitcoin&#39;)
+        ```
+    &#34;&#34;&#34;
+    return self._base</code></pre>
+</details>
+</dd>
+<dt id="multiformats.cid.CID.codec"><code class="name">var <span class="ident">codec</span> : <a title="multiformats.multicodec.Multicodec" href="multicodec/index.html#multiformats.multicodec.Multicodec">Multicodec</a></code></dt>
+<dd>
+<div class="desc"><p>Codec that the multihash digest refers to.</p>
+<p>Example usage:</p>
+<pre><code class="language-py">&gt;&gt;&gt; s = &quot;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&quot;
+&gt;&gt;&gt; cid = CID.decode(s)
+&gt;&gt;&gt; cid.codec
+Multicodec(name='raw', tag='ipld', code='0x55',
+           status='permanent', description='raw binary')
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def codec(self) -&gt; Multicodec:
+    &#34;&#34;&#34;
+        Codec that the multihash digest refers to.
+
+        Example usage:
+
+        ```py
+        &gt;&gt;&gt; s = &#34;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&#34;
+        &gt;&gt;&gt; cid = CID.decode(s)
+        &gt;&gt;&gt; cid.codec
+        Multicodec(name=&#39;raw&#39;, tag=&#39;ipld&#39;, code=&#39;0x55&#39;,
+                   status=&#39;permanent&#39;, description=&#39;raw binary&#39;)
+        ```
+    &#34;&#34;&#34;
+    return self._codec</code></pre>
+</details>
+</dd>
+<dt id="multiformats.cid.CID.digest"><code class="name">var <span class="ident">digest</span> : bytes</code></dt>
+<dd>
+<div class="desc"><p>Multihash digest.</p>
+<p>Example usage:</p>
+<pre><code class="language-py">&gt;&gt;&gt; s = &quot;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&quot;
+&gt;&gt;&gt; cid = CID.decode(s)
+&gt;&gt;&gt; cid.digest.hex()
+'12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95'
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def digest(self) -&gt; bytes:
+    &#34;&#34;&#34;
+        Multihash digest.
+
+        Example usage:
+
+        ```py
+        &gt;&gt;&gt; s = &#34;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&#34;
+        &gt;&gt;&gt; cid = CID.decode(s)
+        &gt;&gt;&gt; cid.digest.hex()
+        &#39;12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;
+        ```
+    &#34;&#34;&#34;
+    return self._digest</code></pre>
+</details>
+</dd>
+<dt id="multiformats.cid.CID.hashfun"><code class="name">var <span class="ident">hashfun</span> : <a title="multiformats.multicodec.Multicodec" href="multicodec/index.html#multiformats.multicodec.Multicodec">Multicodec</a></code></dt>
+<dd>
+<div class="desc"><p>Multihash codec used to produce the multihash digest.</p>
+<p>Example usage:</p>
+<pre><code class="language-py">&gt;&gt;&gt; s = &quot;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&quot;
+&gt;&gt;&gt; cid = CID.decode(s)
+&gt;&gt;&gt; cid.hashfun
+Multicodec(name='sha2-256', tag='multihash', code='0x12',
+           status='permanent', description='')
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def hashfun(self) -&gt; Multicodec:
+    &#34;&#34;&#34;
+        Multihash codec used to produce the multihash digest.
+
+        Example usage:
+
+        ```py
+        &gt;&gt;&gt; s = &#34;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&#34;
+        &gt;&gt;&gt; cid = CID.decode(s)
+        &gt;&gt;&gt; cid.hashfun
+        Multicodec(name=&#39;sha2-256&#39;, tag=&#39;multihash&#39;, code=&#39;0x12&#39;,
+                   status=&#39;permanent&#39;, description=&#39;&#39;)
+        ```
+    &#34;&#34;&#34;
+    return self._hashfun</code></pre>
+</details>
+</dd>
+<dt id="multiformats.cid.CID.human_readable"><code class="name">var <span class="ident">human_readable</span> : str</code></dt>
+<dd>
+<div class="desc"><p>Human-readable representation of the CID.</p>
+<p>Example usage:</p>
+<pre><code class="language-py">&gt;&gt;&gt; s = &quot;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&quot;
+&gt;&gt;&gt; cid = CID.decode(s)
+&gt;&gt;&gt; cid.human_readable
+'base58btc - cidv1 - raw - (sha2-256 : 256 : 6E6FF7950A36187A801613426E858DCE686CD7D7E3C0FC42EE0330072D245C95)'
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def human_readable(self) -&gt; str:
+    &#34;&#34;&#34;
+        Human-readable representation of the CID.
+
+        Example usage:
+
+        ```py
+        &gt;&gt;&gt; s = &#34;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&#34;
+        &gt;&gt;&gt; cid = CID.decode(s)
+        &gt;&gt;&gt; cid.human_readable
+        &#39;base58btc - cidv1 - raw - (sha2-256 : 256 : 6E6FF7950A36187A801613426E858DCE686CD7D7E3C0FC42EE0330072D245C95)&#39;
+        ```
+    &#34;&#34;&#34;
+    raw_digest = self.raw_digest
+    hashfun_str = f&#34;({self.hashfun.name} : {len(raw_digest)*8} : {raw_digest.hex().upper()})&#34;
+    return f&#34;{self.base.name} - cidv{self.version} - {self.codec.name} - {hashfun_str}&#34;</code></pre>
+</details>
+</dd>
+<dt id="multiformats.cid.CID.raw_digest"><code class="name">var <span class="ident">raw_digest</span> : bytes</code></dt>
+<dd>
+<div class="desc"><p>Raw hash digest, decoded from the multihash digest.</p>
+<p>Example usage:</p>
+<pre><code class="language-py">&gt;&gt;&gt; s = &quot;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&quot;
+&gt;&gt;&gt; cid = CID.decode(s)
+&gt;&gt;&gt; cid.raw_digest.hex()
+'6e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95'
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def raw_digest(self) -&gt; bytes:
+    &#34;&#34;&#34;
+        Raw hash digest, decoded from the multihash digest.
+
+        Example usage:
+
+        ```py
+        &gt;&gt;&gt; s = &#34;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&#34;
+        &gt;&gt;&gt; cid = CID.decode(s)
+        &gt;&gt;&gt; cid.raw_digest.hex()
+        &#39;6e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;
+        ```
+    &#34;&#34;&#34;
+    return multihash.decode(self._digest)</code></pre>
+</details>
+</dd>
+<dt id="multiformats.cid.CID.version"><code class="name">var <span class="ident">version</span> : Literal[0, 1]</code></dt>
+<dd>
+<div class="desc"><p>CID version.</p>
+<p>Example usage:</p>
+<pre><code class="language-py">&gt;&gt;&gt; s = &quot;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&quot;
+&gt;&gt;&gt; cid = CID.decode(s)
+&gt;&gt;&gt; cid.version
+1
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def version(self) -&gt; CIDVersion:
+    &#34;&#34;&#34;
+        CID version.
+
+        Example usage:
+
+        ```py
+        &gt;&gt;&gt; s = &#34;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&#34;
+        &gt;&gt;&gt; cid = CID.decode(s)
+        &gt;&gt;&gt; cid.version
+        1
+        ```
+    &#34;&#34;&#34;
+    return self._version</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="multiformats.cid.CID.encode"><code class="name flex">
+<span>def <span class="ident">encode</span></span>(<span>self, base: Union[ForwardRef(None), str, <a title="multiformats.multibase.Multibase" href="multibase/index.html#multiformats.multibase.Multibase">Multibase</a>] = None) ‑> str</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Encodes the CID using a given multibase. If no multibase is give,
+the CID's own multibase is used by default.</p>
+<p>Example usage:</p>
+<pre><code class="language-py">&gt;&gt;&gt; s = &quot;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&quot;
+&gt;&gt;&gt; cid = CID.decode(s)
+&gt;&gt;&gt; cid.encode() # default: cid.base
+'zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA'
+&gt;&gt;&gt; cid.encode(&quot;base32&quot;)
+'bafkreidon73zkcrwdb5iafqtijxildoonbwnpv7dyd6ef3qdgads2jc4su'
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def encode(self, base: Union[None, str, Multibase] = None) -&gt; str:
+    &#34;&#34;&#34;
+        Encodes the CID using a given multibase. If no multibase is give,
+        the CID&#39;s own multibase is used by default.
+
+        Example usage:
+
+        ```py
+        &gt;&gt;&gt; s = &#34;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&#34;
+        &gt;&gt;&gt; cid = CID.decode(s)
+        &gt;&gt;&gt; cid.encode() # default: cid.base
+        &#39;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&#39;
+        &gt;&gt;&gt; cid.encode(&#34;base32&#34;)
+        &#39;bafkreidon73zkcrwdb5iafqtijxildoonbwnpv7dyd6ef3qdgads2jc4su&#39;
+        ```
+    &#34;&#34;&#34;
+    if self.version == 0:
+        if base is not None:
+            raise ValueError(&#34;CIDv0 cannot be multibase-encoded, please set multibase=None.&#34;)
+        return base58btc.encode(bytes(self))
+    if base is None or base == self.base:
+        base = self.base # use CID&#39;s own multibase as default
+    else:
+        if isinstance(base, str):
+            base = multibase.get(base)
+        else:
+            multibase.validate_multibase(base)
+    return base.encode(bytes(self))</code></pre>
+</details>
+</dd>
+<dt id="multiformats.cid.CID.set"><code class="name flex">
+<span>def <span class="ident">set</span></span>(<span>self, *, base: Union[ForwardRef(None), str, <a title="multiformats.multibase.Multibase" href="multibase/index.html#multiformats.multibase.Multibase">Multibase</a>] = None, version: Optional[None] = None, codec: Union[ForwardRef(None), str, int, <a title="multiformats.multicodec.Multicodec" href="multicodec/index.html#multiformats.multicodec.Multicodec">Multicodec</a>] = None) ‑> <a title="multiformats.cid.CID" href="#multiformats.cid.CID">CID</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Returns a new CID obtained by setting new values for one or more of:
+<code>base</code>, <code>version</code>, or <code>codec</code>.</p>
+<p>Example usage:</p>
+<pre><code class="language-py">&gt;&gt;&gt; s = &quot;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&quot;
+&gt;&gt;&gt; cid = CID.decode(s)
+&gt;&gt;&gt; cid
+CID('base58btc', 1, 'raw',
+'12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95')
+&gt;&gt;&gt; cid.set(base=&quot;base32&quot;)
+CID('base32', 1, 'raw',
+'12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95')
+&gt;&gt;&gt; cid.set(codec=&quot;dag-cbor&quot;)
+CID('base58btc', 1, 'dag-cbor',
+'12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95')
+&gt;&gt;&gt; cid.set(version=0, codec=&quot;dag-pb&quot;)
+CID('base58btc', 0, 'dag-pb',
+'12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95')
+&gt;&gt;&gt; cid
+CID('base58btc', 1, 'raw',
+'12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95')
+# Note: 'CID.set' returns new instances,
+#       the original 'cid' instance is unchanged
+</code></pre>
+<p>If setting <code>version</code> to 0, <code>base</code> must be 'base58btc' and <code>codec</code> must be 'dag-pb'.</p>
+<pre><code class="language-py">&gt;&gt;&gt; s = &quot;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&quot;
+&gt;&gt;&gt; cid = CID.decode(s)
+&gt;&gt;&gt; cid
+CID('base58btc', 1, 'raw',
+'12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95')
+&gt;&gt;&gt; cid.set(version=0, codec=&quot;dag-pb&quot;)
+CID('base58btc', 0, 'dag-pb',
+'12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95')
+&gt;&gt;&gt; cid.set(version=0)
+ValueError: CIDv0 multicodec must be 'dag-pb', found 'raw' instead.
+&gt;&gt;&gt; cid.set(version=0, codec=&quot;dag-pb&quot;, base=&quot;base32&quot;)
+ValueError: CIDv0 multibase must be 'base58btc', found 'base32' instead
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set(self, *,
+        base: Union[None, str, Multibase] = None,
+        version: Union[None, int] = None,
+        codec: Union[None, str, int, Multicodec] = None
+       ) -&gt; &#34;CID&#34;:
+    &#34;&#34;&#34;
+        Returns a new CID obtained by setting new values for one or more of:
+        `base`, `version`, or `codec`.
+
+        Example usage:
+
+        ```py
+        &gt;&gt;&gt; s = &#34;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&#34;
+        &gt;&gt;&gt; cid = CID.decode(s)
+        &gt;&gt;&gt; cid
+        CID(&#39;base58btc&#39;, 1, &#39;raw&#39;,
+        &#39;12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;)
+        &gt;&gt;&gt; cid.set(base=&#34;base32&#34;)
+        CID(&#39;base32&#39;, 1, &#39;raw&#39;,
+        &#39;12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;)
+        &gt;&gt;&gt; cid.set(codec=&#34;dag-cbor&#34;)
+        CID(&#39;base58btc&#39;, 1, &#39;dag-cbor&#39;,
+        &#39;12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;)
+        &gt;&gt;&gt; cid.set(version=0, codec=&#34;dag-pb&#34;)
+        CID(&#39;base58btc&#39;, 0, &#39;dag-pb&#39;,
+        &#39;12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;)
+        &gt;&gt;&gt; cid
+        CID(&#39;base58btc&#39;, 1, &#39;raw&#39;,
+        &#39;12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;)
+        # Note: &#39;CID.set&#39; returns new instances,
+        #       the original &#39;cid&#39; instance is unchanged
+        ```
+
+        If setting `version` to 0, `base` must be &#39;base58btc&#39; and `codec` must be &#39;dag-pb&#39;.
+
+        ```py
+        &gt;&gt;&gt; s = &#34;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&#34;
+        &gt;&gt;&gt; cid = CID.decode(s)
+        &gt;&gt;&gt; cid
+        CID(&#39;base58btc&#39;, 1, &#39;raw&#39;,
+        &#39;12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;)
+        &gt;&gt;&gt; cid.set(version=0, codec=&#34;dag-pb&#34;)
+        CID(&#39;base58btc&#39;, 0, &#39;dag-pb&#39;,
+        &#39;12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;)
+        &gt;&gt;&gt; cid.set(version=0)
+        ValueError: CIDv0 multicodec must be &#39;dag-pb&#39;, found &#39;raw&#39; instead.
+        &gt;&gt;&gt; cid.set(version=0, codec=&#34;dag-pb&#34;, base=&#34;base32&#34;)
+        ValueError: CIDv0 multibase must be &#39;base58btc&#39;, found &#39;base32&#39; instead
+        ```
+
+    &#34;&#34;&#34;
+    hashfun = self.hashfun
+    digest = self.digest
+    if base is not None and base not in (self.base, self.base.name):
+        base = _CID_validate_multibase(base)
+    else:
+        base = self.base
+    if codec is not None and codec not in (self.codec, self.codec.name, self.codec.code):
+        codec = _CID_validate_multicodec(codec)
+    else:
+        codec = self.codec
+    if version is not None and version != self.version:
+        _CID_validate_version(version, base, codec, hashfun)
+    else:
+        version = self.version
+    return CID._new_instance(CID, base, version, codec, hashfun, digest)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="multiformats" href="index.html">multiformats</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="multiformats.cid.CID" href="#multiformats.cid.CID">CID</a></code></h4>
+<ul class="two-column">
+<li><code><a title="multiformats.cid.CID.base" href="#multiformats.cid.CID.base">base</a></code></li>
+<li><code><a title="multiformats.cid.CID.codec" href="#multiformats.cid.CID.codec">codec</a></code></li>
+<li><code><a title="multiformats.cid.CID.decode" href="#multiformats.cid.CID.decode">decode</a></code></li>
+<li><code><a title="multiformats.cid.CID.digest" href="#multiformats.cid.CID.digest">digest</a></code></li>
+<li><code><a title="multiformats.cid.CID.encode" href="#multiformats.cid.CID.encode">encode</a></code></li>
+<li><code><a title="multiformats.cid.CID.hashfun" href="#multiformats.cid.CID.hashfun">hashfun</a></code></li>
+<li><code><a title="multiformats.cid.CID.human_readable" href="#multiformats.cid.CID.human_readable">human_readable</a></code></li>
+<li><code><a title="multiformats.cid.CID.peer_id" href="#multiformats.cid.CID.peer_id">peer_id</a></code></li>
+<li><code><a title="multiformats.cid.CID.raw_digest" href="#multiformats.cid.CID.raw_digest">raw_digest</a></code></li>
+<li><code><a title="multiformats.cid.CID.set" href="#multiformats.cid.CID.set">set</a></code></li>
+<li><code><a title="multiformats.cid.CID.version" href="#multiformats.cid.CID.version">version</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>

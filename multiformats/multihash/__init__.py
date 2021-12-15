@@ -120,14 +120,17 @@
 """
 
 from io import BytesIO, BufferedIOBase
-from typing import AbstractSet, Any, Dict, Iterator, Mapping, Optional, Union, Sequence, Tuple
+from typing import AbstractSet, Any, cast, Dict, Iterator, Mapping, Optional, overload, Union, Sequence, Tuple, TypeVar
 from typing_validation import validate
 
 from multiformats import multicodec, varint
 from multiformats.multicodec import Multicodec
+from multiformats.varint import BytesLike
 
 from . import hashfun
 from .hashfun import Hashfun
+
+
 
 def get(name: Optional[str] = None, *, code: Optional[int] = None) -> Multicodec:
     """
@@ -182,7 +185,21 @@ def exists(name: Optional[str] = None, *, code: Optional[int] = None) -> bool:
     return multihash.tag == "multihash"
 
 
-def from_digest(multihash_digest: Union[bytes, bytearray, memoryview]) -> Multicodec:
+def validate_multihash(multihash: Multicodec) -> None:
+    """
+        Validates a multihash:
+
+        - raises `KeyError` if no multihash with the given name is registered
+        - raises `ValueError` if a multihash with the given name is registered, but is different from the one given
+        - raises no error if the given multihash is registered
+    """
+    validate(multihash, Multicodec)
+    mc = get(multihash.name)
+    if mc != multihash:
+        raise ValueError(f"Multihash multicodec named {multihash.name} exists, but is not the one given.")
+
+
+def from_digest(multihash_digest: Union[BytesLike, memoryview]) -> Multicodec:
     """
         Returns the multihash multicodec for the given digest,
         according to the code specified by its prefix.
@@ -197,8 +214,7 @@ def from_digest(multihash_digest: Union[bytes, bytearray, memoryview]) -> Multic
                    status='permanent', description='')
         ```
     """
-    stream = BytesIO(multihash_digest)
-    code = varint.decode(stream)
+    code, _, _ = varint.decode_raw(multihash_digest)
     return get(code=code)
 
 
@@ -256,7 +272,7 @@ def implementation(multihash: Union[str, int, Multicodec]) -> Tuple[Multicodec, 
     return multihash, hash_function, digest_size
 
 
-def encode(hash_digest: bytes, multihash: Union[str, int, Multicodec]) -> bytes:
+def encode(hash_digest: BytesLike, multihash: Union[str, int, Multicodec]) -> bytes:
     """
         Encodes the given bytes into a multihash digest using the given multihash:
 
@@ -293,7 +309,7 @@ def encode(hash_digest: bytes, multihash: Union[str, int, Multicodec]) -> bytes:
         ```
 
     """
-    validate(hash_digest, bytes)
+    validate(hash_digest, BytesLike)
     multihash, _, digest_size = implementation(multihash)
     size = len(hash_digest)
     if digest_size is not None and size > digest_size:
@@ -302,7 +318,7 @@ def encode(hash_digest: bytes, multihash: Union[str, int, Multicodec]) -> bytes:
     return varint.encode(multihash.code)+varint.encode(size)+hash_digest
 
 
-def digest(data: bytes, multihash: Union[str, int, Multicodec], *, size: Optional[int] = None) -> bytes:
+def digest(data: BytesLike, multihash: Union[str, int, Multicodec], *, size: Optional[int] = None) -> bytes:
     """
         Computes and returns the multihash digest of the given data.
 
@@ -354,7 +370,7 @@ def digest(data: bytes, multihash: Union[str, int, Multicodec], *, size: Optiona
     return varint.encode(multihash.code)+varint.encode(len(hash_digest))+hash_digest
 
 
-def decode(multihash_digest: Union[bytes, bytearray, memoryview, BufferedIOBase],
+def decode(multihash_digest: Union[BytesLike, BufferedIOBase],
            multihash: Union[None, str, int, Multicodec]=None) -> bytes:
     """
         Decodes a multihash digest into a hash digest:
@@ -363,10 +379,11 @@ def decode(multihash_digest: Union[bytes, bytearray, memoryview, BufferedIOBase]
         <code><size><hash digest> -> <hash digest>
         ```
 
-        If `multihash_digest` is one of bytes, bytearray, or memoryview, the method also checks
+        If `multihash_digest` is one of bytes, bytearray or memoryview, the method also checks
         that the actual hash digest size matches the size listed by the multihash digest.
         If `multihash` is not `None`, the function additionally enforces that the code from the
         multihash digest matches the code of the multihash codec.
+        Regardless, the function checks that the multihash with code specified by the digest exists.
 
         Example usage:
 
@@ -377,21 +394,73 @@ def decode(multihash_digest: Union[bytes, bytearray, memoryview, BufferedIOBase]
         ```
 
     """
-    validate(multihash_digest, Union[bytes, bytearray, memoryview, BufferedIOBase])
+    # if multihash multicodec is specified, obtain max ditest size
     if multihash is not None:
-        multihash, _, digest_size = implementation(multihash)
-    stream = BytesIO(multihash_digest) if isinstance(multihash_digest, (bytes, bytearray, memoryview)) else multihash_digest
-    code = varint.decode(stream)
-    if multihash is not None and multihash.code != code:
-        raise ValueError(f"Expected multihash code {code}, found code {code} instead.")
-    size = varint.decode(stream)
-    if isinstance(multihash_digest, (bytes, bytearray, memoryview)):
-        hash_digest = stream.read()
+        multihash, _, max_digest_size = implementation(multihash)
+    code, digest = decode_raw(multihash_digest)
+    decoded_multihash = get(code=code)
+    if multihash is None:
+        multihash, _, max_digest_size = implementation(decoded_multihash)
+    elif decoded_multihash != multihash:
+        raise ValueError(f"A multihash multicodec with code {multihash.code} exists, but is not the one given.")
+    if max_digest_size is not None and len(digest) > max_digest_size:
+        raise ValueError(f"Multihash {multihash.name} has max digest size {max_digest_size}, "
+                         f"but a digest of larger size {len(digest)} was decoded instead.")
+    return digest
+
+_BufferedIOT = TypeVar("_BufferedIOT", bound=BufferedIOBase)
+
+@overload
+def decode_raw(multihash_digest: BufferedIOBase) -> Tuple[int, bytes]:
+    ...
+
+@overload
+def decode_raw(multihash_digest: BytesLike) -> Tuple[int, memoryview]:
+    ...
+
+def decode_raw(multihash_digest: Union[BytesLike, BufferedIOBase]) -> Tuple[int, Union[bytes, memoryview]]:
+    """
+        Decodes a multihash digest into a hash digest and code:
+
+        ```
+        <code><size><hash digest> -> (<code>, <hash digest>)
+        ```
+
+        Unlike `decode`, this function performs no checks involving the multihash code,
+        which is simply returned as an integer.
+
+        Example usage:
+
+        ```py
+        >>> multihash_digest = bytes.fromhex("1214c0535e4be2b79ffd93291305436bf889314e4a3f")
+        >>> code, digest = multihash.decode_raw(multihash_digest, "sha2-256")
+        >>> code
+        18 # the code 0x12 of 'sha2-256'
+        >>> digest.hex()
+        'c0535e4be2b79ffd93291305436bf889314e4a3f'
+        ```
+
+    """
+    # switch between memoryview mode and stream mode
+    if isinstance(multihash_digest, BufferedIOBase):
+        stream_mode = True
+        validate(multihash_digest, BufferedIOBase)
+        stream: Union[memoryview, BufferedIOBase] = multihash_digest
     else:
-        hash_digest = stream.read(size)
-    if size != len(hash_digest):
-        raise ValueError(f"Multihash digest lists size {size}, but the hash digest has size {len(hash_digest)} instead.")
-    if multihash is not None and digest_size is not None and size > digest_size:
-        raise ValueError(f"Digest size {digest_size} is listed for {multihash.name}, "
-                         f"but a digest of larger size {size} was decoded instead.")
-    return hash_digest
+        stream_mode = False
+        stream = memoryview(multihash_digest)
+    # extract multihash code
+    multihash_code, _, stream = varint.decode_raw(multihash_digest)
+    # extract hash digest size
+    digest_size, _, stream = varint.decode_raw(stream)
+    # extract hash digest
+    if stream_mode:
+        # use only the number of bytes specified by the multihash
+        hash_digest = cast(BufferedIOBase, stream).read(digest_size)
+    else:
+        # use all remaining bytes
+        hash_digest = cast(memoryview, stream)
+    # check that the hash digest size is valid
+    if digest_size != len(hash_digest):
+        raise ValueError(f"Multihash digest lists size {digest_size}, but the hash digest has size {len(hash_digest)} instead.")
+    return multihash_code, hash_digest

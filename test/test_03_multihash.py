@@ -59,6 +59,12 @@ def _test(hash_fn: str, data: bytes, hash_digest: bytes) -> None:
     trunc_multihash_digest = encode(trunc_hash_digest, hash_fn)
     assert trunc_hash_digest == decode(trunc_multihash_digest)
     assert trunc_hash_digest == decode(trunc_multihash_digest, hash_fn)
+    multihash_digest = digest(bytearray(data), hash_fn)
+    assert encode(bytearray(hash_digest), hash_fn) == multihash_digest
+    assert hash_digest == decode(bytearray(multihash_digest))
+    multihash_digest = digest(memoryview(data), hash_fn)
+    assert encode(memoryview(hash_digest), hash_fn) == multihash_digest
+    assert hash_digest == decode(memoryview(multihash_digest))
 
 data = b"Test data to be encoded."
 

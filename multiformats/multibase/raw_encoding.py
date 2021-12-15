@@ -39,8 +39,10 @@ from bases import (base2, base16, base8, base10, base36, base58btc, base58flickr
                    base32, base32hex, base32z, base64, base64url,)
 from bases.encoding import BaseEncoding
 
-RawEncoder = Callable[[bytes], str]
-RawDecoder = Callable[[str], bytes]
+from multiformats.varint import BytesLike
+
+RawEncoder = Callable[[BytesLike], str]
+RawDecoder = Callable[[str], BytesLike]
 
 class CustomEncoding:
     """
@@ -57,11 +59,11 @@ class CustomEncoding:
         self._raw_encoder = raw_encoder # type: ignore
         self._raw_decoder = raw_decoder # type: ignore
 
-    def encode(self, b: bytes) -> str:
+    def encode(self, b: BytesLike) -> str:
         """
             Calls the custom raw encoder.
         """
-        raw_encoder: Callable[[bytes], str] = self._raw_encoder # type: ignore
+        raw_encoder: Callable[[BytesLike], str] = self._raw_encoder # type: ignore
         return raw_encoder(b)
 
     def decode(self, s: str) -> bytes:
@@ -161,12 +163,14 @@ def unregister(name: str) -> None:
     del _raw_encodings[name]
 
 
-def identity_raw_encoder(b: bytes) -> str:
+def identity_raw_encoder(b: BytesLike) -> str:
     """
         Implementation of the raw identity encoder according to the [multibase spec](https://github.com/multiformats/multibase/).
     """
-    validate(b, bytes)
-    return b.decode("utf-8")
+    if isinstance(b, (bytes, bytearray)):
+        return b.decode("utf-8") # type: ignore
+    validate(b, memoryview)
+    return bytes(b).decode("utf-8")
 
 identity_raw_encoder.__repr__ = lambda: "identity_raw_encoder" # type: ignore
 
@@ -189,13 +193,14 @@ _proquint_consonants_revdir = MappingProxyType({char: idx for idx, char in enume
 _proquint_vowels_revdir = MappingProxyType({char: idx for idx, char in enumerate(_proquint_vowels)})
 
 
-def proquint_raw_encoder(b: bytes) -> str:
+def proquint_raw_encoder(b: BytesLike) -> str:
     """
         Implementation of the proquint encoder according to the [proquint spec](https://arxiv.org/html/0901.4016),
         with additional 'ro-' prefix as prescribed by the [multibase spec](https://github.com/multiformats/multibase/)
         and extended to include odd-length bytestrings (adding a final 3-letter block, using two zero pad bits).
     """
-    validate(b, bytes)
+    validate(b, BytesLike)
+    b = memoryview(b) # makes slicing cheap
     consonants = _proquint_consonants
     vowels = _proquint_vowels
     char_blocks: List[str] = []
