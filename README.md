@@ -15,6 +15,12 @@ This is a fully compliant Python implementation of the [multiformat protocols](h
 
 - [Install](#install)
 - [Usage](#usage)
+    - [Varint](#varint)
+    - [Multicodec](#multicodec)
+    - [Multibase](#multibase)
+    - [Multihash](#multihash)
+    - [CID](#cid)
+    - [Multiaddr](#multiaddr)
 - [API](#api)
 - [Contributing](#contributing)
 - [License](#license)
