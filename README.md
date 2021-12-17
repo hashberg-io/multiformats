@@ -234,10 +234,146 @@ b'H\x00e\x00l\x00l\x00o\x00 \x00w\x00o\x00r\x00l\x00d\x00!\x00'
 b'\x00H\x00e\x00l\x00l\x00o\x00 \x00w\x00o\x00r\x00l\x00d\x00!'
 ```
 
-
-
-
 For advanced usage, see the [API documentation](https://hashberg-io.github.io/multiformats/multiformats/multihash.html).
+
+
+### CID
+
+The `cid` module implements the [CID spec](https://github.com/multiformats/cid).
+
+Core functionality is provided by the `CID` class, which can be imported directly from `multiformats`:
+
+```py
+>>> from multiformats import CID
+```
+
+CIDs can be decoded from bytestrings or (multi)base encoded strings:
+
+```py
+>>> cid = CID.decode("zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA")
+>>> cid
+CID('base58btc', 1, 'raw',
+    '12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95')
+```
+
+CIDs can be created programmatically, and their fields accessed individually:
+
+```py
+>>> cid = CID("base58btc", 1, "raw",
+... "12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95")
+>>> cid.base
+Multibase(name='base58btc', code='z',
+          status='default', description='base58 bitcoin')
+>>> cid.codec
+Multicodec(name='raw', tag='ipld', code='0x55',
+           status='permanent', description='raw binary')
+>>> cid.hashfun
+Multicodec(name='sha2-256', tag='multihash', code='0x12',
+           status='permanent', description='')
+>>> cid.digest.hex()
+'12206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95'
+>>> cid.raw_digest.hex()
+    '6e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95'
+```
+
+CIDs can be converted to bytestrings or (multi)base encoded strings:
+
+```py
+>>> str(cid)
+'zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA'
+>>> bytes(cid).hex()
+'015512206e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95'
+>>> cid.encode("base32") # encode with different multibase
+'bafkreidon73zkcrwdb5iafqtijxildoonbwnpv7dyd6ef3qdgads2jc4su'
+```
+
+Additionally, the `CID.peer_id` static method can be used to pack the raw hash of a public key into
+a CIDv1 [PeerID](https://docs.libp2p.io/concepts/peer-id/), according to the [PeerID spec](https://github.com/libp2p/specs/blob/master/peer-ids/peer-ids.md):
+
+```py
+>>> pk_bytes = bytes.fromhex(
+... "1498b5467a63dffa2dc9d9e069caf075d16fc33fdd4c3b01bfadae6433767d93")
+... # a 32-byte Ed25519 public key
+>>> peer_id = CID.peer_id(pk_bytes)
+>>> peer_id
+CID('base32', 1, 'libp2p-key',
+'00201498b5467a63dffa2dc9d9e069caf075d16fc33fdd4c3b01bfadae6433767d93')
+#^^   0x00 = 'identity' multihash used (public key length <= 42)
+#  ^^ 0x20 = 32-bytes of raw hash digestlength
+>>> str(peer_id)
+'bafzaaiautc2um6td375c3soz4bu4v4dv2fx4gp65jq5qdp5nvzsdg5t5sm'
+```
+
+For advanced usage, see the [API documentation](https://hashberg-io.github.io/multiformats/multiformats/cid.html).
+
+
+### Multiaddr
+
+The `multiaddr` module implements the [multiaddr spec](https://github.com/multiformats/multiaddr).
+
+Core functionality is provided by the `Proto` class:
+
+```py
+>>> from multiformats import Proto
+>>> ip4 = Proto("ip4")
+>>> ip4
+Proto("ip4")
+>>> str(ip4)
+'/ip4'
+>>> ip4.codec
+Multicodec(name='ip4', tag='multiaddr', code='0x04',
+           status='permanent', description='')
+```
+
+Slash notation is used to attach address values to protocols:
+
+```py
+>>> a = ip4/"192.168.1.1"
+>>> a
+Addr('ip4', '192.168.1.1')
+>>> str(a)
+'/ip4/192.168.1.1'
+>>> bytes(a).hex()
+'04c0a80101'
+```
+
+Address values can be specified as strings, integers, or `bytes`-like objects:
+
+```py
+>>> ip4/"192.168.1.1"
+Addr('ip4', '192.168.1.1')
+>>> ip4/bytes([192, 168, 1, 1])
+Addr('ip4', '192.168.1.1')
+>>> udp = Proto("udp")
+>>> udp/9090 # int 9090 is converted to str "9090"
+Addr('udp', '9090')
+```
+
+Slash notation is also used to encapsulate multiple protocol/address segments into a [multiaddr](https://multiformats.io/multiaddr/):
+
+```py
+>>> quic = Proto("quic") # no addr required
+>>> ma = ip4/"127.0.0.1"/udp/9090/quic
+>>> ma
+Multiaddr(Addr('ip4', '127.0.0.1'), Addr('udp', '9090'), Addr('quic'))
+>>> str(ma)
+'/ip4/127.0.0.1/udp/9090/quic'
+```
+
+Bytes for multiaddrs are computed according to the `(TLV)+` [multiaddr encoding](https://multiformats.io/multiaddr/):
+
+```py
+>>> bytes(ip4/"127.0.0.1").hex()
+'047f000001'
+>>> bytes(udp/9090).hex()
+          '91022382'
+>>> bytes(quic).hex()
+                  'cc03'
+>>> bytes(ma).hex()
+'047f00000191022382cc03'
+```
+
+For advanced usage, see the [API documentation](https://hashberg-io.github.io/multiformats/multiformats/multiaddr.html).
 
 
 ## API

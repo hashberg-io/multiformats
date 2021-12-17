@@ -10,14 +10,16 @@ from . import multibase
 from . import multihash
 from .cid import CID
 from . import multiaddr
+from .multiaddr import Proto
 
 __all__ = [
     "varint",
     "multicodec",
     "multibase",
     "multihash",
+    "multiaddr",
     "CID",
-    "multiaddr"
+    "Proto",
 ]
 
-__pdoc__ = {name: False for name in ["CID"]}
+__pdoc__ = {name: False for name in ["CID", "Proto"]}

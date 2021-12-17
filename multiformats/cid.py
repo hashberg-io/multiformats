@@ -5,6 +5,7 @@
 
     ```py
     >>> from multiformats import CID
+    ```
 
     CIDs can be decoded from bytestrings or (multi)base encoded strings:
 
