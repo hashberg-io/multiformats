@@ -242,9 +242,10 @@ class CID:
                       digest: Union[bytes, Tuple[Multihash, bytes]],
                      ) -> _CIDSubclass:
         # pylint: disable = too-many-arguments
-        instance = super().__new__(CID_subclass)
+        instance: _CIDSubclass = super().__new__(CID_subclass)
         instance._base = base
-        instance._version = version
+        assert version in (0, 1)
+        instance._version = cast(Literal[0, 1], version)
         instance._codec = codec
         instance._hashfun = hashfun
         if isinstance(digest, bytes):
@@ -257,7 +258,7 @@ class CID:
                 raw_digest = bytes(raw_digest)
             assert _hashfun == hashfun, "You passed different multihashes to a _new_instance call with digest as a pair."
             instance._digest = hashfun.encode(raw_digest)
-        return cast(_CIDSubclass, instance)
+        return instance
 
     @property
     def version(self) -> CIDVersion:
