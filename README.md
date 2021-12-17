@@ -366,7 +366,7 @@ Multiaddr(Addr('ip4', '127.0.0.1'), Addr('udp', '9090'), Addr('quic'))
 '/ip4/127.0.0.1/udp/9090/quic'
 ```
 
-Bytes for multiaddrs are computed according to the `(TLV)+` [multiaddr encoding](https://multiformats.io/multiaddr/):
+Bytes for multiaddrs are computed according to the [`(TLV)+` multiaddr encoding](https://multiformats.io/multiaddr/):
 
 ```py
 >>> bytes(ip4/"127.0.0.1").hex()

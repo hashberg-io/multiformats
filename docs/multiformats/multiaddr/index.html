@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
 <title>multiformats.multiaddr API documentation</title>
-<meta name="description" content="Implementation of the [multiaddr spec](https://github.com/multiformats/multiaddr)." />
+<meta name="description" content="Implementation of the [multiaddr spec](https://github.com/multiformats/multiaddr) …" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -24,12 +24,121 @@
 </header>
 <section id="section-intro">
 <p>Implementation of the <a href="https://github.com/multiformats/multiaddr">multiaddr spec</a>.</p>
+<p>Core functionality is provided by the <code><a title="multiformats.multiaddr.Proto" href="#multiformats.multiaddr.Proto">Proto</a></code> class:</p>
+<pre><code class="language-py">&gt;&gt;&gt; from multiformats import Proto
+&gt;&gt;&gt; ip4 = Proto(&quot;ip4&quot;)
+&gt;&gt;&gt; ip4
+Proto(&quot;ip4&quot;)
+&gt;&gt;&gt; str(ip4)
+'/ip4'
+&gt;&gt;&gt; ip4.codec
+Multicodec(name='ip4', tag='multiaddr', code='0x04',
+           status='permanent', description='')
+</code></pre>
+<p>Slash notation is used to attach address values to protocols:</p>
+<pre><code class="language-py">&gt;&gt;&gt; a = ip4/&quot;192.168.1.1&quot;
+&gt;&gt;&gt; a
+Addr('ip4', '192.168.1.1')
+&gt;&gt;&gt; str(a)
+'/ip4/192.168.1.1'
+&gt;&gt;&gt; bytes(a)
+b'\x04\xc0\xa8\x01\x01'
+</code></pre>
+<p>Address values can be specified as strings, integers, or <code>bytes</code>-like objects:</p>
+<pre><code class="language-py">&gt;&gt;&gt; ip4/&quot;192.168.1.1&quot;
+Addr('ip4', '192.168.1.1')
+&gt;&gt;&gt; ip4/b'\xc0\xa8\x01\x01' # ip4/bytes([192, 168, 1, 1])
+Addr('ip4', '192.168.1.1')
+&gt;&gt;&gt; udp = Proto(&quot;udp&quot;)
+&gt;&gt;&gt; udp/9090 # udp/&quot;9090&quot;
+Addr('udp', '9090')
+</code></pre>
+<p>Slash notation is also used to encapsulate multiple protocol/address segments into a <a href="https://multiformats.io/multiaddr/">multiaddr</a>:</p>
+<pre><code class="language-py">&gt;&gt;&gt; quic = Proto(&quot;quic&quot;)
+&gt;&gt;&gt; ma = ip4/&quot;127.0.0.1&quot;/udp/9090/quic
+&gt;&gt;&gt; ma
+Multiaddr(Addr('ip4', '127.0.0.1'), Addr('udp', '9090'), Addr('quic'))
+&gt;&gt;&gt; str(ma)
+'/ip4/127.0.0.1/udp/9090/quic'
+</code></pre>
+<p>Bytes for multiaddrs are computed according to the <a href="https://multiformats.io/multiaddr/"><code>(TLV)+</code> multiaddr encoding</a>:</p>
+<pre><code class="language-py">&gt;&gt;&gt; bytes(ip4/&quot;127.0.0.1&quot;).hex()
+'047f000001'
+&gt;&gt;&gt; bytes(udp/9090).hex()
+          '91022382'
+&gt;&gt;&gt; bytes(quic).hex()
+                  'cc03'
+&gt;&gt;&gt; bytes(ma).hex()
+'047f00000191022382cc03'
+</code></pre>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">&#34;&#34;&#34;
     Implementation of the [multiaddr spec](https://github.com/multiformats/multiaddr).
+
+    Core functionality is provided by the `Proto` class:
+
+    ```py
+    &gt;&gt;&gt; from multiformats import Proto
+    &gt;&gt;&gt; ip4 = Proto(&#34;ip4&#34;)
+    &gt;&gt;&gt; ip4
+    Proto(&#34;ip4&#34;)
+    &gt;&gt;&gt; str(ip4)
+    &#39;/ip4&#39;
+    &gt;&gt;&gt; ip4.codec
+    Multicodec(name=&#39;ip4&#39;, tag=&#39;multiaddr&#39;, code=&#39;0x04&#39;,
+               status=&#39;permanent&#39;, description=&#39;&#39;)
+    ```
+
+    Slash notation is used to attach address values to protocols:
+
+    ```py
+    &gt;&gt;&gt; a = ip4/&#34;192.168.1.1&#34;
+    &gt;&gt;&gt; a
+    Addr(&#39;ip4&#39;, &#39;192.168.1.1&#39;)
+    &gt;&gt;&gt; str(a)
+    &#39;/ip4/192.168.1.1&#39;
+    &gt;&gt;&gt; bytes(a)
+    b&#39;\\x04\\xc0\\xa8\\x01\\x01&#39;
+    ```
+
+    Address values can be specified as strings, integers, or `bytes`-like objects:
+
+    ```py
+    &gt;&gt;&gt; ip4/&#34;192.168.1.1&#34;
+    Addr(&#39;ip4&#39;, &#39;192.168.1.1&#39;)
+    &gt;&gt;&gt; ip4/b&#39;\\xc0\\xa8\\x01\\x01&#39; # ip4/bytes([192, 168, 1, 1])
+    Addr(&#39;ip4&#39;, &#39;192.168.1.1&#39;)
+    &gt;&gt;&gt; udp = Proto(&#34;udp&#34;)
+    &gt;&gt;&gt; udp/9090 # udp/&#34;9090&#34;
+    Addr(&#39;udp&#39;, &#39;9090&#39;)
+    ```
+
+    Slash notation is also used to encapsulate multiple protocol/address segments into a [multiaddr](https://multiformats.io/multiaddr/):
+
+    ```py
+    &gt;&gt;&gt; quic = Proto(&#34;quic&#34;)
+    &gt;&gt;&gt; ma = ip4/&#34;127.0.0.1&#34;/udp/9090/quic
+    &gt;&gt;&gt; ma
+    Multiaddr(Addr(&#39;ip4&#39;, &#39;127.0.0.1&#39;), Addr(&#39;udp&#39;, &#39;9090&#39;), Addr(&#39;quic&#39;))
+    &gt;&gt;&gt; str(ma)
+    &#39;/ip4/127.0.0.1/udp/9090/quic&#39;
+    ```
+
+    Bytes for multiaddrs are computed according to the [`(TLV)+` multiaddr encoding](https://multiformats.io/multiaddr/):
+
+    ```py
+    &gt;&gt;&gt; bytes(ip4/&#34;127.0.0.1&#34;).hex()
+    &#39;047f000001&#39;
+    &gt;&gt;&gt; bytes(udp/9090).hex()
+              &#39;91022382&#39;
+    &gt;&gt;&gt; bytes(quic).hex()
+                      &#39;cc03&#39;
+    &gt;&gt;&gt; bytes(ma).hex()
+    &#39;047f00000191022382cc03&#39;
+    ```
 &#34;&#34;&#34;
 
 from ipaddress import AddressValueError
@@ -510,7 +619,7 @@ class Multiaddr(Sequence[Union[Addr, Proto]]):
         &#39;/ip4/127.0.0.1/udp/9090/quic&#39;
         ```
 
-        Bytes for protocol addresses are computed according to the (TLV)+ [multiaddr format](https://multiformats.io/multiaddr/):
+        Bytes for multiaddrs are computed according to the (TLV)+ [multiaddr format](https://multiformats.io/multiaddr/):
 
         ```py
         &gt;&gt;&gt; bytes(ip4/&#34;127.0.0.1&#34;).hex()
@@ -1009,7 +1118,7 @@ Multiaddr(Addr('ip4', '127.0.0.1'), Addr('udp', '9090'), Addr('quic'))
 &gt;&gt;&gt; str(ma)
 '/ip4/127.0.0.1/udp/9090/quic'
 </code></pre>
-<p>Bytes for protocol addresses are computed according to the (TLV)+ <a href="https://multiformats.io/multiaddr/">multiaddr format</a>:</p>
+<p>Bytes for multiaddrs are computed according to the (TLV)+ <a href="https://multiformats.io/multiaddr/">multiaddr format</a>:</p>
 <pre><code class="language-py">&gt;&gt;&gt; bytes(ip4/&quot;127.0.0.1&quot;).hex()
 '047f000001'
 &gt;&gt;&gt; bytes(udp/9090).hex()
@@ -1040,7 +1149,7 @@ Multiaddr(Addr('ip4', '127.0.0.1'), Addr('udp', '9090'), Addr('quic'))
         &#39;/ip4/127.0.0.1/udp/9090/quic&#39;
         ```
 
-        Bytes for protocol addresses are computed according to the (TLV)+ [multiaddr format](https://multiformats.io/multiaddr/):
+        Bytes for multiaddrs are computed according to the (TLV)+ [multiaddr format](https://multiformats.io/multiaddr/):
 
         ```py
         &gt;&gt;&gt; bytes(ip4/&#34;127.0.0.1&#34;).hex()
