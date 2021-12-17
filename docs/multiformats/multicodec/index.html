@@ -102,11 +102,11 @@ to one or more tags and/or statuses:</p>
 
 &#34;&#34;&#34;
 
-import csv
 import importlib.resources as importlib_resources
+import json
 import re
 import sys
-from typing import AbstractSet, Any, cast, Dict, Iterable, Iterator, Mapping, Optional, Set, Sequence, Tuple, Union
+from typing import AbstractSet, Any, cast, Dict, Iterable, Iterator, Mapping, Optional, Set, Sequence, Tuple, Type, Union
 from typing_extensions import Literal
 from typing_validation import validate
 
@@ -132,6 +132,8 @@ class Multicodec:
     _code: int
     _status: Literal[&#34;draft&#34;, &#34;permanent&#34;]
     _description: str
+
+    __slots__ = (&#34;__weakref__&#34;, &#34;_name&#34;, &#34;_tag&#34;, &#34;_code&#34;, &#34;_status&#34;, &#34;_description&#34;)
 
     def __init__(self, *,
                  name: str,
@@ -265,12 +267,19 @@ class Multicodec:
     def __repr__(self) -&gt; str:
         return f&#34;Multicodec({&#39;, &#39;.join(f&#39;{k}={repr(v)}&#39; for k, v in self.to_json().items())})&#34;
 
+    @property
+    def _as_tuple(self) -&gt; Tuple[Type[&#34;Multicodec&#34;], str, str, int, Literal[&#34;draft&#34;, &#34;permanent&#34;]]:
+        return (Multicodec, self.name, self.tag, self.code, self.status)
+
+    def __hash__(self) -&gt; int:
+        return hash(self._as_tuple)
+
     def __eq__(self, other: Any) -&gt; bool:
         if self is other:
             return True
         if not isinstance(other, Multicodec):
             return NotImplemented
-        return self.to_json() == other.to_json()
+        return self._as_tuple == other._as_tuple
 
 
 def get(name: Optional[str] = None, *, code: Optional[int] = None) -&gt; Multicodec:
@@ -482,13 +491,11 @@ def build_multicodec_tables(multicodecs: Iterable[Multicodec], *,
     return code_table, name_table
 
 # Create the global code-&gt;multicodec and name-&gt;multicodec mappings.
-# _code_table: Dict[int, Multicodec] = {}
-# _name_table: Dict[str, Multicodec] = {}
-with importlib_resources.open_text(&#34;multiformats.multicodec&#34;, &#34;multicodec-table.csv&#34;) as csv_table:
-    reader = csv.DictReader(csv_table)
-    multicodecs = (Multicodec(**{k.strip(): v.strip() for k, v in _row.items()})
-                   for _row in reader)
-    _code_table, _name_table = build_multicodec_tables(multicodecs)
+_code_table: Dict[int, Multicodec]
+_name_table: Dict[str, Multicodec]
+with importlib_resources.open_text(&#34;multiformats.multicodec&#34;, &#34;multicodec-table.json&#34;) as table_f:
+    table_json = json.load(table_f)
+    _code_table, _name_table = build_multicodec_tables(Multicodec(**row) for row in table_json)
 
 
 # additional docs info
@@ -816,6 +823,8 @@ False
     _status: Literal[&#34;draft&#34;, &#34;permanent&#34;]
     _description: str
 
+    __slots__ = (&#34;__weakref__&#34;, &#34;_name&#34;, &#34;_tag&#34;, &#34;_code&#34;, &#34;_status&#34;, &#34;_description&#34;)
+
     def __init__(self, *,
                  name: str,
                  tag: str,
@@ -948,12 +957,19 @@ False
     def __repr__(self) -&gt; str:
         return f&#34;Multicodec({&#39;, &#39;.join(f&#39;{k}={repr(v)}&#39; for k, v in self.to_json().items())})&#34;
 
+    @property
+    def _as_tuple(self) -&gt; Tuple[Type[&#34;Multicodec&#34;], str, str, int, Literal[&#34;draft&#34;, &#34;permanent&#34;]]:
+        return (Multicodec, self.name, self.tag, self.code, self.status)
+
+    def __hash__(self) -&gt; int:
+        return hash(self._as_tuple)
+
     def __eq__(self, other: Any) -&gt; bool:
         if self is other:
             return True
         if not isinstance(other, Multicodec):
             return NotImplemented
-        return self.to_json() == other.to_json()</code></pre>
+        return self._as_tuple == other._as_tuple</code></pre>
 </details>
 <h3>Static methods</h3>
 <dl>

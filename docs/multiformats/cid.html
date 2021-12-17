@@ -133,6 +133,7 @@ from multiformats import varint, multicodec, multibase, multihash
 
 from multiformats.multicodec import Multicodec
 from multiformats.multibase import Multibase
+from multiformats.multihash import Multihash, _validate_raw_digest_size
 from multiformats.varint import BytesLike, byteslike
 
 _CIDSubclass = TypeVar(&#34;_CIDSubclass&#34;, bound=&#34;CID&#34;)
@@ -144,8 +145,7 @@ def _binary_cid_from_str(cid: str) -&gt; Tuple[bytes, Multibase]:
     if len(cid) == 46 and cid.startswith(&#34;Qm&#34;):
         # CIDv0 to be decoded as base58btc
         return base58btc.decode(cid), multibase.get(&#34;base58btc&#34;)
-    b = multibase.decode(cid)
-    mb = multibase.from_str(cid)
+    mb, b = multibase.decode_raw(cid)
     if b[0] ==  0x12:
         # CIDv0 may not be multibase encoded (0x12 is the first byte of sha2-256 multihashes)
         # CIDv18 (first byte 18=0x12) will be skipped to prevent ambiguity
@@ -168,29 +168,27 @@ def _CID_validate_multicodec(codec: Union[str, int, Multicodec]) -&gt; Multicode
         multicodec.validate_multicodec(codec)
     return codec
 
-def _CID_validate_multihash(hashfun: Union[str, int, Multicodec]) -&gt; Multicodec:
+def _CID_validate_multihash(hashfun: Union[str, int, Multihash]) -&gt; Multihash:
     if isinstance(hashfun, str):
         hashfun = multihash.get(hashfun)
     elif isinstance(hashfun, int):
         hashfun = multihash.get(code=hashfun)
     else:
-        multihash.validate_multihash(hashfun)
+        pass
     return hashfun
 
-def _CID_validate_raw_digest(raw_digest: Union[str, BytesLike], hashfun: Multicodec) -&gt; bytes:
+def _CID_validate_raw_digest(raw_digest: Union[str, BytesLike], hashfun: Multihash) -&gt; bytes:
     if isinstance(raw_digest, str):
         raw_digest = bytes.fromhex(raw_digest)
     else:
         validate(raw_digest, BytesLike)
         if not isinstance(raw_digest, bytes):
             raw_digest = bytes(raw_digest)
-    _, _, max_digest_size = multihash.implementation(hashfun)
-    if max_digest_size is not None and len(raw_digest) &gt; max_digest_size:
-        raise ValueError(f&#34;Digest size {len(raw_digest)} exceeds max digest size {max_digest_size} &#34;
-                         f&#34;for multihash multicodec {hashfun.name}&#34;)
+    _, max_digest_size = hashfun.implementation
+    _validate_raw_digest_size(hashfun.name, raw_digest, max_digest_size)
     return raw_digest
 
-def _CID_validate_multihash_digest(digest: Union[str, BytesLike]) -&gt; Tuple[Multicodec, bytes]:
+def _CID_validate_multihash_digest(digest: Union[str, BytesLike]) -&gt; Tuple[Multihash, bytes]:
     if isinstance(digest, str):
         digest = bytes.fromhex(digest)
     raw_digest: BytesLike
@@ -199,7 +197,7 @@ def _CID_validate_multihash_digest(digest: Union[str, BytesLike]) -&gt; Tuple[Mu
     raw_digest = _CID_validate_raw_digest(raw_digest, hashfun)
     return hashfun, raw_digest
 
-def _CID_validate_version(version: int, base: Multibase, codec: Multicodec, hashfun: Multicodec) -&gt; int:
+def _CID_validate_version(version: int, base: Multibase, codec: Multicodec, hashfun: Multihash) -&gt; int:
     if version in (2, 3):
         raise ValueError(&#34;CID versions 2 and 3 are reserved for future use.&#34;)
     if version not in (0, 1):
@@ -277,7 +275,7 @@ class CID:
     _base: Multibase
     _version: CIDVersion
     _codec: Multicodec
-    _hashfun: Multicodec
+    _hashfun: Multihash
     _digest: bytes
 
     __slots__ = (&#34;__weakref__&#34;, &#34;_base&#34;, &#34;_version&#34;, &#34;_codec&#34;, &#34;_hashfun&#34;, &#34;_digest&#34;)
@@ -286,17 +284,17 @@ class CID:
                 base: Union[str, Multibase],
                 version: int,
                 codec: Union[str, int, Multicodec],
-                digest: Union[str, BytesLike, Tuple[Union[str, int, Multicodec], Union[str, BytesLike]]],
+                digest: Union[str, BytesLike, Tuple[Union[str, int, Multihash], Union[str, BytesLike]]],
                 ) -&gt; _CIDSubclass:
         # pylint: disable = too-many-arguments
         base = _CID_validate_multibase(base)
         codec = _CID_validate_multicodec(codec)
         raw_digest: Union[str, bytes]
-        hashfun: Union[str, int, Multicodec]
+        hashfun: Union[str, int, Multihash]
         if isinstance(digest, (str,)+byteslike):
             hashfun, raw_digest = _CID_validate_multihash_digest(digest)
         else:
-            validate(digest, Tuple[Union[str, int, Multicodec], Union[str, BytesLike]])
+            validate(digest, Tuple[Union[str, int, Multihash], Union[str, BytesLike]])
             hashfun, raw_digest = digest
             hashfun = _CID_validate_multihash(hashfun)
             raw_digest = _CID_validate_raw_digest(raw_digest, hashfun)
@@ -310,8 +308,8 @@ class CID:
                       base: Multibase,
                       version: int,
                       codec: Multicodec,
-                      hashfun: Multicodec,
-                      digest: Union[bytes, Tuple[Multicodec, bytes]],
+                      hashfun: Multihash,
+                      digest: Union[bytes, Tuple[Multihash, bytes]],
                      ) -&gt; _CIDSubclass:
         # pylint: disable = too-many-arguments
         instance = super().__new__(CID_subclass)
@@ -328,7 +326,7 @@ class CID:
             if not isinstance(raw_digest, bytes):
                 raw_digest = bytes(raw_digest)
             assert _hashfun == hashfun, &#34;You passed different multihashes to a _new_instance call with digest as a pair.&#34;
-            instance._digest = multihash.encode(raw_digest, hashfun)
+            instance._digest = hashfun.encode(raw_digest)
         return cast(_CIDSubclass, instance)
 
     @property
@@ -386,9 +384,9 @@ class CID:
         return self._codec
 
     @property
-    def hashfun(self) -&gt; Multicodec:
+    def hashfun(self) -&gt; Multihash:
         &#34;&#34;&#34;
-            Multihash codec used to produce the multihash digest.
+            Multihash used to produce the multihash digest.
 
             Example usage:
 
@@ -563,13 +561,19 @@ class CID:
         d = self.digest
         return f&#34;CID({repr(mb)}, {v}, {repr(mc)}, {repr(d.hex())})&#34;
 
+    @property
+    def _as_tuple(self) -&gt; Tuple[Type[&#34;CID&#34;], Multibase, int, Multicodec, bytes]:
+        return (CID, self.base, self.version, self.codec, self.digest)
+
+    def __hash__(self) -&gt; int:
+        return hash(self._as_tuple)
+
     def __eq__(self, other: Any) -&gt; bool:
         if self is other:
             return True
         if not isinstance(other, CID):
-            return False
-        return (self.base == other.base and self.version == other.version
-                and self.codec == other.codec and self.digest == other.digest)
+            return NotImplemented
+        return self._as_tuple == other._as_tuple
 
     @staticmethod
     def decode(cid: Union[str, BytesLike]) -&gt; &#34;CID&#34;:
@@ -765,7 +769,7 @@ class CID:
 <dl>
 <dt id="multiformats.cid.CID"><code class="flex name class">
 <span>class <span class="ident">CID</span></span>
-<span>(</span><span>base: Union[str, <a title="multiformats.multibase.Multibase" href="multibase/index.html#multiformats.multibase.Multibase">Multibase</a>], version: int, codec: Union[str, int, <a title="multiformats.multicodec.Multicodec" href="multicodec/index.html#multiformats.multicodec.Multicodec">Multicodec</a>], digest: Union[str, bytes, bytearray, memoryview, Tuple[Union[str, int, <a title="multiformats.multicodec.Multicodec" href="multicodec/index.html#multiformats.multicodec.Multicodec">Multicodec</a>], Union[str, bytes, bytearray, memoryview]]])</span>
+<span>(</span><span>base: Union[str, <a title="multiformats.multibase.Multibase" href="multibase/index.html#multiformats.multibase.Multibase">Multibase</a>], version: int, codec: Union[str, int, <a title="multiformats.multicodec.Multicodec" href="multicodec/index.html#multiformats.multicodec.Multicodec">Multicodec</a>], digest: Union[str, bytes, bytearray, memoryview, Tuple[Union[str, int, <a title="multiformats.multihash.Multihash" href="multihash/index.html#multiformats.multihash.Multihash">Multihash</a>], Union[str, bytes, bytearray, memoryview]]])</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Container class for <a href="https://github.com/multiformats/cid">Content IDentifiers</a>.
@@ -874,7 +878,7 @@ True
     _base: Multibase
     _version: CIDVersion
     _codec: Multicodec
-    _hashfun: Multicodec
+    _hashfun: Multihash
     _digest: bytes
 
     __slots__ = (&#34;__weakref__&#34;, &#34;_base&#34;, &#34;_version&#34;, &#34;_codec&#34;, &#34;_hashfun&#34;, &#34;_digest&#34;)
@@ -883,17 +887,17 @@ True
                 base: Union[str, Multibase],
                 version: int,
                 codec: Union[str, int, Multicodec],
-                digest: Union[str, BytesLike, Tuple[Union[str, int, Multicodec], Union[str, BytesLike]]],
+                digest: Union[str, BytesLike, Tuple[Union[str, int, Multihash], Union[str, BytesLike]]],
                 ) -&gt; _CIDSubclass:
         # pylint: disable = too-many-arguments
         base = _CID_validate_multibase(base)
         codec = _CID_validate_multicodec(codec)
         raw_digest: Union[str, bytes]
-        hashfun: Union[str, int, Multicodec]
+        hashfun: Union[str, int, Multihash]
         if isinstance(digest, (str,)+byteslike):
             hashfun, raw_digest = _CID_validate_multihash_digest(digest)
         else:
-            validate(digest, Tuple[Union[str, int, Multicodec], Union[str, BytesLike]])
+            validate(digest, Tuple[Union[str, int, Multihash], Union[str, BytesLike]])
             hashfun, raw_digest = digest
             hashfun = _CID_validate_multihash(hashfun)
             raw_digest = _CID_validate_raw_digest(raw_digest, hashfun)
@@ -907,8 +911,8 @@ True
                       base: Multibase,
                       version: int,
                       codec: Multicodec,
-                      hashfun: Multicodec,
-                      digest: Union[bytes, Tuple[Multicodec, bytes]],
+                      hashfun: Multihash,
+                      digest: Union[bytes, Tuple[Multihash, bytes]],
                      ) -&gt; _CIDSubclass:
         # pylint: disable = too-many-arguments
         instance = super().__new__(CID_subclass)
@@ -925,7 +929,7 @@ True
             if not isinstance(raw_digest, bytes):
                 raw_digest = bytes(raw_digest)
             assert _hashfun == hashfun, &#34;You passed different multihashes to a _new_instance call with digest as a pair.&#34;
-            instance._digest = multihash.encode(raw_digest, hashfun)
+            instance._digest = hashfun.encode(raw_digest)
         return cast(_CIDSubclass, instance)
 
     @property
@@ -983,9 +987,9 @@ True
         return self._codec
 
     @property
-    def hashfun(self) -&gt; Multicodec:
+    def hashfun(self) -&gt; Multihash:
         &#34;&#34;&#34;
-            Multihash codec used to produce the multihash digest.
+            Multihash used to produce the multihash digest.
 
             Example usage:
 
@@ -1160,13 +1164,19 @@ True
         d = self.digest
         return f&#34;CID({repr(mb)}, {v}, {repr(mc)}, {repr(d.hex())})&#34;
 
+    @property
+    def _as_tuple(self) -&gt; Tuple[Type[&#34;CID&#34;], Multibase, int, Multicodec, bytes]:
+        return (CID, self.base, self.version, self.codec, self.digest)
+
+    def __hash__(self) -&gt; int:
+        return hash(self._as_tuple)
+
     def __eq__(self, other: Any) -&gt; bool:
         if self is other:
             return True
         if not isinstance(other, CID):
-            return False
-        return (self.base == other.base and self.version == other.version
-                and self.codec == other.codec and self.digest == other.digest)
+            return NotImplemented
+        return self._as_tuple == other._as_tuple
 
     @staticmethod
     def decode(cid: Union[str, BytesLike]) -&gt; &#34;CID&#34;:
@@ -1766,9 +1776,9 @@ def digest(self) -&gt; bytes:
     return self._digest</code></pre>
 </details>
 </dd>
-<dt id="multiformats.cid.CID.hashfun"><code class="name">var <span class="ident">hashfun</span> : <a title="multiformats.multicodec.Multicodec" href="multicodec/index.html#multiformats.multicodec.Multicodec">Multicodec</a></code></dt>
+<dt id="multiformats.cid.CID.hashfun"><code class="name">var <span class="ident">hashfun</span> : <a title="multiformats.multihash.Multihash" href="multihash/index.html#multiformats.multihash.Multihash">Multihash</a></code></dt>
 <dd>
-<div class="desc"><p>Multihash codec used to produce the multihash digest.</p>
+<div class="desc"><p>Multihash used to produce the multihash digest.</p>
 <p>Example usage:</p>
 <pre><code class="language-py">&gt;&gt;&gt; s = &quot;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&quot;
 &gt;&gt;&gt; cid = CID.decode(s)
@@ -1781,9 +1791,9 @@ Multicodec(name='sha2-256', tag='multihash', code='0x12',
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property
-def hashfun(self) -&gt; Multicodec:
+def hashfun(self) -&gt; Multihash:
     &#34;&#34;&#34;
-        Multihash codec used to produce the multihash digest.
+        Multihash used to produce the multihash digest.
 
         Example usage:
 

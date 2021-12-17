@@ -42,11 +42,11 @@
 
 """
 
-import csv
 import importlib.resources as importlib_resources
+import json
 import re
 import sys
-from typing import AbstractSet, Any, cast, Dict, Iterable, Iterator, Mapping, Optional, Set, Sequence, Tuple, Union
+from typing import AbstractSet, Any, cast, Dict, Iterable, Iterator, Mapping, Optional, Set, Sequence, Tuple, Type, Union
 from typing_extensions import Literal
 from typing_validation import validate
 
@@ -72,6 +72,8 @@ class Multicodec:
     _code: int
     _status: Literal["draft", "permanent"]
     _description: str
+
+    __slots__ = ("__weakref__", "_name", "_tag", "_code", "_status", "_description")
 
     def __init__(self, *,
                  name: str,
@@ -205,12 +207,19 @@ class Multicodec:
     def __repr__(self) -> str:
         return f"Multicodec({', '.join(f'{k}={repr(v)}' for k, v in self.to_json().items())})"
 
+    @property
+    def _as_tuple(self) -> Tuple[Type["Multicodec"], str, str, int, Literal["draft", "permanent"]]:
+        return (Multicodec, self.name, self.tag, self.code, self.status)
+
+    def __hash__(self) -> int:
+        return hash(self._as_tuple)
+
     def __eq__(self, other: Any) -> bool:
         if self is other:
             return True
         if not isinstance(other, Multicodec):
             return NotImplemented
-        return self.to_json() == other.to_json()
+        return self._as_tuple == other._as_tuple
 
 
 def get(name: Optional[str] = None, *, code: Optional[int] = None) -> Multicodec:
@@ -422,13 +431,11 @@ def build_multicodec_tables(multicodecs: Iterable[Multicodec], *,
     return code_table, name_table
 
 # Create the global code->multicodec and name->multicodec mappings.
-# _code_table: Dict[int, Multicodec] = {}
-# _name_table: Dict[str, Multicodec] = {}
-with importlib_resources.open_text("multiformats.multicodec", "multicodec-table.csv") as csv_table:
-    reader = csv.DictReader(csv_table)
-    multicodecs = (Multicodec(**{k.strip(): v.strip() for k, v in _row.items()})
-                   for _row in reader)
-    _code_table, _name_table = build_multicodec_tables(multicodecs)
+_code_table: Dict[int, Multicodec]
+_name_table: Dict[str, Multicodec]
+with importlib_resources.open_text("multiformats.multicodec", "multicodec-table.json") as table_f:
+    table_json = json.load(table_f)
+    _code_table, _name_table = build_multicodec_tables(Multicodec(**row) for row in table_json)
 
 
 # additional docs info

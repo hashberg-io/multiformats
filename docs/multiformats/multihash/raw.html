@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>multiformats.multihash.raw API documentation</title>
+<meta name="description" content="Implementation of raw hash functions used by multihash multicodecs …" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}.hljs-meta{user-select:none;-moz-user-select:none;-webkit-user-select:none;-ms-user-select:none;pointer-events:none}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS_CHTML" integrity="sha256-kZafAc6mZvK3W3v1pHOcUix30OHQN6pU/NO2oFkqZVw=" crossorigin></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>multiformats.multihash.raw</code></h1>
+</header>
+<section id="section-intro">
+<p>Implementation of raw hash functions used by multihash multicodecs.</p>
+<p>Hash functions are implemented using the following libraries:</p>
+<ul>
+<li><a href="https://docs.python.org/3/library/hashlib.html"><code>hashlib</code></a></li>
+<li><a href="https://pythonhosted.org/pyskein/"><code>pyskein</code></a></li>
+</ul>
+<p>Core functionality is provided by the <code><a title="multiformats.multihash.raw.exists" href="#multiformats.multihash.raw.exists">exists()</a></code> and <code><a title="multiformats.multihash.raw.get" href="#multiformats.multihash.raw.get">get()</a></code> functions, which can be used to check
+whether an implementatino with given name is known, and if so to get the corresponding pair
+of hash function and max digest size:</p>
+<pre><code class="language-py">&gt;&gt;&gt; multihash.hashfun.exists(&quot;sha2-256&quot;)
+True
+&gt;&gt;&gt; multihash.hashfun.get(&quot;sha2-256&quot;)
+(&lt;function _hashlib_sha.&lt;locals&gt;.hashfun at 0x0000013F4A3C6160&gt;, 32)
+</code></pre>
+<p>The hash functions take a single <code>bytes</code> input (the data) and return a <code>bytes</code> output (the hash digest).
+The max digest sizes (if not <code>None</code>) are used to sense-check hash digests passed to <code><a title="multiformats.multihash.encode" href="index.html#multiformats.multihash.encode">encode()</a></code>
+and/or obtained from <code><a title="multiformats.multihash.decode" href="index.html#multiformats.multihash.decode">decode()</a></code>: telling whether a digest has been generated by a hash function
+is deemed to be computationally unfeasible in general, but hash digests of length greater than the max digest size
+can always be discounted as invalid.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;
+    Implementation of raw hash functions used by multihash multicodecs.
+
+    Hash functions are implemented using the following libraries:
+
+    - [`hashlib`](https://docs.python.org/3/library/hashlib.html)
+    - [`pyskein`](https://pythonhosted.org/pyskein/)
+
+    Core functionality is provided by the `exists` and `get` functions, which can be used to check
+    whether an implementatino with given name is known, and if so to get the corresponding pair
+    of hash function and max digest size:
+
+    ```py
+    &gt;&gt;&gt; multihash.hashfun.exists(&#34;sha2-256&#34;)
+    True
+    &gt;&gt;&gt; multihash.hashfun.get(&#34;sha2-256&#34;)
+    (&lt;function _hashlib_sha.&lt;locals&gt;.hashfun at 0x0000013F4A3C6160&gt;, 32)
+    ```
+
+    The hash functions take a single `bytes` input (the data) and return a `bytes` output (the hash digest).
+    The max digest sizes (if not `None`) are used to sense-check hash digests passed to `multiformats.multihash.encode`
+    and/or obtained from `multiformats.multihash.decode`: telling whether a digest has been generated by a hash function
+    is deemed to be computationally unfeasible in general, but hash digests of length greater than the max digest size
+    can always be discounted as invalid.
+&#34;&#34;&#34;
+
+import hashlib
+from typing import Callable, Dict, Optional, Tuple
+from typing_validation import validate
+
+import skein # type: ignore
+
+from multiformats import multicodec
+from multiformats.varint import BytesLike
+
+Hashfun = Callable[[BytesLike], bytes]
+_hashfun: Dict[str, Tuple[Hashfun, Optional[int]]] = {}
+
+def get(name: str) -&gt; Tuple[Hashfun, Optional[int]]:
+    &#34;&#34;&#34;
+        Given a multihash multicodec name, returns its implementation as a pair of a hash function
+        and a max digest size (possibly `None`).
+        Raises `KeyError` if no implementation is available for this name.
+
+        ```py
+        &gt;&gt;&gt; multihash.hashfun.get(&#34;sha2-256&#34;)
+        (&lt;function _hashlib_sha.&lt;locals&gt;.hashfun at 0x0000013F4A3C6160&gt;, 32)
+        ```
+    &#34;&#34;&#34;
+    validate(name, str)
+    if name not in _hashfun:
+        raise KeyError(f&#34;No implementation for multihash multicodec {repr(name)}.&#34;)
+    return _hashfun[name]
+
+def exists(name: str) -&gt; bool:
+    &#34;&#34;&#34;
+        Checks whether the multihash multicodec with given name has an implementation.
+
+        ```py
+        &gt;&gt;&gt; multihash.hashfun.exists(&#34;sha2-256&#34;)
+        True
+        ```
+    &#34;&#34;&#34;
+    validate(name, str)
+    return name in _hashfun
+
+
+def register(name: str, hashfun: Hashfun, digest_size: Optional[int], *, overwrite: bool = False) -&gt; None:
+    &#34;&#34;&#34;
+        Registers a hash function and hash digest size implementing the multihash multicodec with given name,
+        which must already exist.
+
+        The optional keyword argument `overwrite` (default: `False`) can be used to overwrite an existing implementation.
+        If `overwrite` is `False`, raises `ValueError` if an implementation the same name already exists.
+
+        Example usage (from the source code of this module):
+
+        ```py
+        register(&#34;sha1&#34;, _hashlib_sha(1), 20) # max digest size is 20 bytes, i.e. 160 bits
+        register(f&#34;sha2-256&#34;, _hashlib_sha(2, 256), 256//8)
+        ```
+    &#34;&#34;&#34;
+    validate(name, str)
+    # validate(hashfun, Hashfun) # TODO: not yet supported by typing-validation
+    validate(digest_size, Optional[int])
+    validate(overwrite, bool)
+    if digest_size is not None and digest_size &lt;= 0:
+        raise ValueError(&#34;Digest size must be positive or None.&#34;)
+    if not overwrite and name in _hashfun:
+        raise ValueError(f&#34;An implementation for the multihash multicodec named {repr(name)} already exists.&#34;)
+    if name not in _hashfun:
+        multihash = multicodec.get(name)
+        if multihash.tag != &#34;multihash&#34;:
+            raise ValueError(f&#34;Multicodec &#39;{multihash.name}&#39; exists, but it is not a multihash multicodec.&#34;)
+    _hashfun[name] = (hashfun, digest_size)
+
+
+def unregister(name: str) -&gt; None:
+    &#34;&#34;&#34;
+        Unregisters a raw encoding by name.
+        Raises `KeyError` if no such raw encoding exists.
+    &#34;&#34;&#34;
+    validate(name, str)
+    if name not in _hashfun:
+        raise KeyError(f&#34;There is no implementation for multihash multicodec with name {repr(name)}.&#34;)
+    del _hashfun[name]
+
+def _identity(data: BytesLike) -&gt; bytes:
+    validate(data, BytesLike)
+    return bytes(data)
+
+register(&#34;identity&#34;, _identity, None)
+
+def _hashlib_sha(version: int, digest_bits: Optional[int] = None) -&gt; Hashfun:
+    name = (&#34;sha1&#34;, f&#34;sha{digest_bits}&#34;, f&#34;sha3_{digest_bits}&#34;)[version-1]
+    h = getattr(hashlib, name)
+    def hashfun(data: BytesLike) -&gt; bytes:
+        validate(data, BytesLike)
+        m: hashlib._Hash = h() # pylint: disable = no-member
+        m.update(data)
+        return m.digest()
+    return hashfun
+
+register(&#34;sha1&#34;, _hashlib_sha(1), 20) # 20B = 160 bits
+
+for digest_bits in (256, 512):
+    register(f&#34;sha2-{digest_bits}&#34;, _hashlib_sha(2, digest_bits), digest_bits//8)
+
+for digest_bits in (224, 256, 384, 512):
+    register(f&#34;sha3-{digest_bits}&#34;, _hashlib_sha(3, digest_bits), digest_bits//8)
+
+def _hashlib_shake(digest_bits: int) -&gt; Hashfun:
+    h = getattr(hashlib, f&#34;shake_{digest_bits//2}&#34;)
+    def hashfun(data: BytesLike) -&gt; bytes:
+        validate(data, BytesLike)
+        m: hashlib._Hash = h() # pylint: disable = no-member
+        m.update(data)
+        return m.digest(digest_bits//8) # type: ignore
+    return hashfun
+
+for digest_bits in (256, 512):
+    register(f&#34;shake-{digest_bits//2}&#34;, _hashlib_shake(digest_bits), digest_bits//8)
+
+def _hashlib_blake2(version: str, digest_bits: int) -&gt; Hashfun:
+    h = getattr(hashlib, f&#34;blake2{version}&#34;)
+    def hashfun(data: BytesLike) -&gt; bytes:
+        validate(data, BytesLike)
+        m: hashlib._Hash = h(digest_size=digest_bits//8) # pylint: disable = no-member
+        m.update(data)
+        return m.digest()
+    return hashfun
+
+for blake2_version in (&#34;b&#34;, &#34;s&#34;):
+    for digest_bits in range(8, 513 if blake2_version == &#34;b&#34; else 257, 8):
+        register(f&#34;blake2{blake2_version}-{digest_bits}&#34;, _hashlib_blake2(blake2_version, digest_bits), digest_bits//8)
+
+def _skein(version: int, digest_bits: int) -&gt; Hashfun:
+    h = getattr(skein, f&#34;skein{version}&#34;)
+    def hashfun(data: BytesLike) -&gt; bytes:
+        validate(data, BytesLike)
+        m: hashlib._Hash = h(digest_bits=digest_bits) # pylint: disable = no-member
+        m.update(data)
+        return m.digest()
+    return hashfun
+
+for skein_version in (256, 512, 1024):
+    for digest_bits in range(8, skein_version+1, 8):
+        register(f&#34;skein{skein_version}-{digest_bits}&#34;, _skein(skein_version, digest_bits), digest_bits//8)</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="multiformats.multihash.raw.exists"><code class="name flex">
+<span>def <span class="ident">exists</span></span>(<span>name: str) ‑> bool</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Checks whether the multihash multicodec with given name has an implementation.</p>
+<pre><code class="language-py">&gt;&gt;&gt; multihash.hashfun.exists(&quot;sha2-256&quot;)
+True
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def exists(name: str) -&gt; bool:
+    &#34;&#34;&#34;
+        Checks whether the multihash multicodec with given name has an implementation.
+
+        ```py
+        &gt;&gt;&gt; multihash.hashfun.exists(&#34;sha2-256&#34;)
+        True
+        ```
+    &#34;&#34;&#34;
+    validate(name, str)
+    return name in _hashfun</code></pre>
+</details>
+</dd>
+<dt id="multiformats.multihash.raw.get"><code class="name flex">
+<span>def <span class="ident">get</span></span>(<span>name: str) ‑> Tuple[Callable[[Union[bytes, bytearray, memoryview]], bytes], Optional[int]]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Given a multihash multicodec name, returns its implementation as a pair of a hash function
+and a max digest size (possibly <code>None</code>).
+Raises <code>KeyError</code> if no implementation is available for this name.</p>
+<pre><code class="language-py">&gt;&gt;&gt; multihash.hashfun.get(&quot;sha2-256&quot;)
+(&lt;function _hashlib_sha.&lt;locals&gt;.hashfun at 0x0000013F4A3C6160&gt;, 32)
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get(name: str) -&gt; Tuple[Hashfun, Optional[int]]:
+    &#34;&#34;&#34;
+        Given a multihash multicodec name, returns its implementation as a pair of a hash function
+        and a max digest size (possibly `None`).
+        Raises `KeyError` if no implementation is available for this name.
+
+        ```py
+        &gt;&gt;&gt; multihash.hashfun.get(&#34;sha2-256&#34;)
+        (&lt;function _hashlib_sha.&lt;locals&gt;.hashfun at 0x0000013F4A3C6160&gt;, 32)
+        ```
+    &#34;&#34;&#34;
+    validate(name, str)
+    if name not in _hashfun:
+        raise KeyError(f&#34;No implementation for multihash multicodec {repr(name)}.&#34;)
+    return _hashfun[name]</code></pre>
+</details>
+</dd>
+<dt id="multiformats.multihash.raw.register"><code class="name flex">
+<span>def <span class="ident">register</span></span>(<span>name: str, hashfun: Callable[[Union[bytes, bytearray, memoryview]], bytes], digest_size: Optional[None], *, overwrite: bool = False) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Registers a hash function and hash digest size implementing the multihash multicodec with given name,
+which must already exist.</p>
+<p>The optional keyword argument <code>overwrite</code> (default: <code>False</code>) can be used to overwrite an existing implementation.
+If <code>overwrite</code> is <code>False</code>, raises <code>ValueError</code> if an implementation the same name already exists.</p>
+<p>Example usage (from the source code of this module):</p>
+<pre><code class="language-py">register(&quot;sha1&quot;, _hashlib_sha(1), 20) # max digest size is 20 bytes, i.e. 160 bits
+register(f&quot;sha2-256&quot;, _hashlib_sha(2, 256), 256//8)
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def register(name: str, hashfun: Hashfun, digest_size: Optional[int], *, overwrite: bool = False) -&gt; None:
+    &#34;&#34;&#34;
+        Registers a hash function and hash digest size implementing the multihash multicodec with given name,
+        which must already exist.
+
+        The optional keyword argument `overwrite` (default: `False`) can be used to overwrite an existing implementation.
+        If `overwrite` is `False`, raises `ValueError` if an implementation the same name already exists.
+
+        Example usage (from the source code of this module):
+
+        ```py
+        register(&#34;sha1&#34;, _hashlib_sha(1), 20) # max digest size is 20 bytes, i.e. 160 bits
+        register(f&#34;sha2-256&#34;, _hashlib_sha(2, 256), 256//8)
+        ```
+    &#34;&#34;&#34;
+    validate(name, str)
+    # validate(hashfun, Hashfun) # TODO: not yet supported by typing-validation
+    validate(digest_size, Optional[int])
+    validate(overwrite, bool)
+    if digest_size is not None and digest_size &lt;= 0:
+        raise ValueError(&#34;Digest size must be positive or None.&#34;)
+    if not overwrite and name in _hashfun:
+        raise ValueError(f&#34;An implementation for the multihash multicodec named {repr(name)} already exists.&#34;)
+    if name not in _hashfun:
+        multihash = multicodec.get(name)
+        if multihash.tag != &#34;multihash&#34;:
+            raise ValueError(f&#34;Multicodec &#39;{multihash.name}&#39; exists, but it is not a multihash multicodec.&#34;)
+    _hashfun[name] = (hashfun, digest_size)</code></pre>
+</details>
+</dd>
+<dt id="multiformats.multihash.raw.unregister"><code class="name flex">
+<span>def <span class="ident">unregister</span></span>(<span>name: str) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Unregisters a raw encoding by name.
+Raises <code>KeyError</code> if no such raw encoding exists.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def unregister(name: str) -&gt; None:
+    &#34;&#34;&#34;
+        Unregisters a raw encoding by name.
+        Raises `KeyError` if no such raw encoding exists.
+    &#34;&#34;&#34;
+    validate(name, str)
+    if name not in _hashfun:
+        raise KeyError(f&#34;There is no implementation for multihash multicodec with name {repr(name)}.&#34;)
+    del _hashfun[name]</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="multiformats.multihash" href="index.html">multiformats.multihash</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="multiformats.multihash.raw.exists" href="#multiformats.multihash.raw.exists">exists</a></code></li>
+<li><code><a title="multiformats.multihash.raw.get" href="#multiformats.multihash.raw.get">get</a></code></li>
+<li><code><a title="multiformats.multihash.raw.register" href="#multiformats.multihash.raw.register">register</a></code></li>
+<li><code><a title="multiformats.multihash.raw.unregister" href="#multiformats.multihash.raw.unregister">unregister</a></code></li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>

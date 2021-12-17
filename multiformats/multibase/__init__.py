@@ -79,12 +79,12 @@
 
 from abc import ABC, abstractmethod
 import binascii
-import csv
 import importlib.resources as importlib_resources
 from itertools import product
+import json
 import math
 import re
-from typing import Any, Callable, cast, Dict, Iterable, Iterator, List, Mapping, Optional, Tuple, Union
+from typing import Any, Callable, cast, Dict, Iterable, Iterator, List, Mapping, Optional, Tuple, Type, Union
 import sys
 
 from typing_extensions import Literal
@@ -93,9 +93,9 @@ from typing_validation import validate
 from bases import (base2, base16, base8, base10, base36, base58btc, base58flickr, base58ripple,
                    base32, base32hex, base32z, base64, base64url, base45,)
 
-from multiformats.multibase import raw_encoding as raw_encoding
+from multiformats.multibase import raw
 from multiformats.varint import BytesLike
-from .raw_encoding import RawEncoder, RawDecoder
+from .raw import RawEncoder, RawDecoder
 
 
 class Multibase:
@@ -114,6 +114,8 @@ class Multibase:
     _code: str
     _status: Literal["draft", "candidate", "default"]
     _description: str
+
+    __slots__ = ("__weakref__", "_name", "_code", "_status", "_description")
 
     def __init__(self, *,
                  name: str,
@@ -235,7 +237,7 @@ class Multibase:
             Returns the raw encoder for this encoding:
             given bytes, it produces the encoded string without the multibase prefix.
         """
-        enc = raw_encoding.get(self.name)
+        enc = raw.get(self.name)
         if enc is None:
             raise NotImplementedError(f"Multibase/decoding for {repr(self.name)} is not yet implemented.")
         return enc.encode
@@ -246,7 +248,7 @@ class Multibase:
             Returns the raw encoder for this encoding:
             given a string without the multibase prefix, it produces the decoded data.
         """
-        enc = raw_encoding.get(self.name)
+        enc = raw.get(self.name)
         if enc is None:
             raise NotImplementedError(f"Multibase/decoding for {repr(self.name)} is not yet implemented.")
         return enc.decode
@@ -316,12 +318,19 @@ class Multibase:
     def __repr__(self) -> str:
         return f"Multibase({', '.join(f'{k}={repr(v)}' for k, v in self.to_json().items())})"
 
+    @property
+    def _as_tuple(self) -> Tuple[Type["Multibase"], str, str, Literal["draft", "candidate", "default"]]:
+        return (Multibase, self.name, self.code, self.status)
+
+    def __hash__(self) -> int:
+        return hash(self._as_tuple)
+
     def __eq__(self, other: Any) -> bool:
         if self is other:
             return True
         if not isinstance(other, Multibase):
             return NotImplemented
-        return self.to_json() == other.to_json()
+        return self._as_tuple == other._as_tuple
 
 
 def get(name: Optional[str] = None, *, code: Optional[str] = None) -> Multibase:
@@ -490,6 +499,8 @@ def from_str(string: str) -> Multibase:
     validate(string, str)
     if len(string) == 0:
         raise ValueError("Empty string is not valid for encoded data.")
+    if string[0] in _code_table:
+        return _code_table[string[0]]
     for code in _code_table:
         if string.startswith(code):
             return get(code=code)
@@ -532,6 +543,26 @@ def decode(string: str) -> bytes:
     return enc.decode(string)
 
 
+def decode_raw(string: str) -> Tuple[Multibase, bytes]:
+    """
+        Similar to `decode`, but returns a `(base, bytestr)` pair
+        of the multibase and decoded bytestring.
+
+        Example usage:
+
+        ```py
+        >>> base, bytestr = multibase.decode_raw("mSGVsbG8gd29ybGQh")
+        >>> base
+        Multibase(name='base64', code='m',
+                  status='default', description='rfc4648 no padding')
+        >>> bytestr
+        b'Hello world!'
+        ```
+    """
+    enc = from_str(string)
+    return enc, enc.decode(string)
+
+
 def build_multibase_tables(encodings: Iterable[Multibase]) -> Tuple[Dict[str, Multibase], Dict[str, Multibase]]:
     """
         Creates code->encoding and name->encoding mappings from a finite iterable of encodings, returning the mappings.
@@ -556,16 +587,12 @@ def build_multibase_tables(encodings: Iterable[Multibase]) -> Tuple[Dict[str, Mu
         name_table[e.name] = e
     return code_table, name_table
 
-# Create the global code->multicodec and name->multicodec mappings.
-# _code_table: Dict[str, Multibase] = {}
-# _name_table: Dict[str, Multibase] = {}
-with importlib_resources.open_text("multiformats.multibase", "multibase-table.csv") as csv_table:
-    reader = csv.DictReader(csv_table)
-    clean_rows = ({k.strip(): v.strip() for k, v in row.items()} for row in reader)
-    renamed_rows = ({(k if k != "encoding" else "name"): v for k, v in row.items()} for row in clean_rows)
-    multicodecs = (Multibase(**row) for row in renamed_rows)
-    _code_table, _name_table = build_multibase_tables(multicodecs)
-
+# Create the global code->multibase and name->multibase mappings.
+_code_table: Dict[str, Multibase]
+_name_table: Dict[str, Multibase]
+with importlib_resources.open_text("multiformats.multibase", "multibase-table.json") as table_f:
+    table_json = json.load(table_f)
+    _code_table, _name_table = build_multibase_tables(Multibase(**row) for row in table_json)
 
 # additional docs info
 __pdoc__ = {

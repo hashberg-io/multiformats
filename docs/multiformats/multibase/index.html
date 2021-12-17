@@ -164,12 +164,12 @@ ValueError: Expected 'base32' encoding, found 'base32upper' encoding instead.
 
 from abc import ABC, abstractmethod
 import binascii
-import csv
 import importlib.resources as importlib_resources
 from itertools import product
+import json
 import math
 import re
-from typing import Any, Callable, cast, Dict, Iterable, Iterator, List, Mapping, Optional, Tuple, Union
+from typing import Any, Callable, cast, Dict, Iterable, Iterator, List, Mapping, Optional, Tuple, Type, Union
 import sys
 
 from typing_extensions import Literal
@@ -178,9 +178,9 @@ from typing_validation import validate
 from bases import (base2, base16, base8, base10, base36, base58btc, base58flickr, base58ripple,
                    base32, base32hex, base32z, base64, base64url, base45,)
 
-from multiformats.multibase import raw_encoding as raw_encoding
+from multiformats.multibase import raw
 from multiformats.varint import BytesLike
-from .raw_encoding import RawEncoder, RawDecoder
+from .raw import RawEncoder, RawDecoder
 
 
 class Multibase:
@@ -199,6 +199,8 @@ class Multibase:
     _code: str
     _status: Literal[&#34;draft&#34;, &#34;candidate&#34;, &#34;default&#34;]
     _description: str
+
+    __slots__ = (&#34;__weakref__&#34;, &#34;_name&#34;, &#34;_code&#34;, &#34;_status&#34;, &#34;_description&#34;)
 
     def __init__(self, *,
                  name: str,
@@ -320,7 +322,7 @@ class Multibase:
             Returns the raw encoder for this encoding:
             given bytes, it produces the encoded string without the multibase prefix.
         &#34;&#34;&#34;
-        enc = raw_encoding.get(self.name)
+        enc = raw.get(self.name)
         if enc is None:
             raise NotImplementedError(f&#34;Multibase/decoding for {repr(self.name)} is not yet implemented.&#34;)
         return enc.encode
@@ -331,7 +333,7 @@ class Multibase:
             Returns the raw encoder for this encoding:
             given a string without the multibase prefix, it produces the decoded data.
         &#34;&#34;&#34;
-        enc = raw_encoding.get(self.name)
+        enc = raw.get(self.name)
         if enc is None:
             raise NotImplementedError(f&#34;Multibase/decoding for {repr(self.name)} is not yet implemented.&#34;)
         return enc.decode
@@ -401,12 +403,19 @@ class Multibase:
     def __repr__(self) -&gt; str:
         return f&#34;Multibase({&#39;, &#39;.join(f&#39;{k}={repr(v)}&#39; for k, v in self.to_json().items())})&#34;
 
+    @property
+    def _as_tuple(self) -&gt; Tuple[Type[&#34;Multibase&#34;], str, str, Literal[&#34;draft&#34;, &#34;candidate&#34;, &#34;default&#34;]]:
+        return (Multibase, self.name, self.code, self.status)
+
+    def __hash__(self) -&gt; int:
+        return hash(self._as_tuple)
+
     def __eq__(self, other: Any) -&gt; bool:
         if self is other:
             return True
         if not isinstance(other, Multibase):
             return NotImplemented
-        return self.to_json() == other.to_json()
+        return self._as_tuple == other._as_tuple
 
 
 def get(name: Optional[str] = None, *, code: Optional[str] = None) -&gt; Multibase:
@@ -575,6 +584,8 @@ def from_str(string: str) -&gt; Multibase:
     validate(string, str)
     if len(string) == 0:
         raise ValueError(&#34;Empty string is not valid for encoded data.&#34;)
+    if string[0] in _code_table:
+        return _code_table[string[0]]
     for code in _code_table:
         if string.startswith(code):
             return get(code=code)
@@ -617,6 +628,26 @@ def decode(string: str) -&gt; bytes:
     return enc.decode(string)
 
 
+def decode_raw(string: str) -&gt; Tuple[Multibase, bytes]:
+    &#34;&#34;&#34;
+        Similar to `decode`, but returns a `(base, bytestr)` pair
+        of the multibase and decoded bytestring.
+
+        Example usage:
+
+        ```py
+        &gt;&gt;&gt; base, bytestr = multibase.decode_raw(&#34;mSGVsbG8gd29ybGQh&#34;)
+        &gt;&gt;&gt; base
+        Multibase(name=&#39;base64&#39;, code=&#39;m&#39;,
+                  status=&#39;default&#39;, description=&#39;rfc4648 no padding&#39;)
+        &gt;&gt;&gt; bytestr
+        b&#39;Hello world!&#39;
+        ```
+    &#34;&#34;&#34;
+    enc = from_str(string)
+    return enc, enc.decode(string)
+
+
 def build_multibase_tables(encodings: Iterable[Multibase]) -&gt; Tuple[Dict[str, Multibase], Dict[str, Multibase]]:
     &#34;&#34;&#34;
         Creates code-&gt;encoding and name-&gt;encoding mappings from a finite iterable of encodings, returning the mappings.
@@ -641,16 +672,12 @@ def build_multibase_tables(encodings: Iterable[Multibase]) -&gt; Tuple[Dict[str,
         name_table[e.name] = e
     return code_table, name_table
 
-# Create the global code-&gt;multicodec and name-&gt;multicodec mappings.
-# _code_table: Dict[str, Multibase] = {}
-# _name_table: Dict[str, Multibase] = {}
-with importlib_resources.open_text(&#34;multiformats.multibase&#34;, &#34;multibase-table.csv&#34;) as csv_table:
-    reader = csv.DictReader(csv_table)
-    clean_rows = ({k.strip(): v.strip() for k, v in row.items()} for row in reader)
-    renamed_rows = ({(k if k != &#34;encoding&#34; else &#34;name&#34;): v for k, v in row.items()} for row in clean_rows)
-    multicodecs = (Multibase(**row) for row in renamed_rows)
-    _code_table, _name_table = build_multibase_tables(multicodecs)
-
+# Create the global code-&gt;multibase and name-&gt;multibase mappings.
+_code_table: Dict[str, Multibase]
+_name_table: Dict[str, Multibase]
+with importlib_resources.open_text(&#34;multiformats.multibase&#34;, &#34;multibase-table.json&#34;) as table_f:
+    table_json = json.load(table_f)
+    _code_table, _name_table = build_multibase_tables(Multibase(**row) for row in table_json)
 
 # additional docs info
 __pdoc__ = {
@@ -661,7 +688,7 @@ __pdoc__ = {
 <section>
 <h2 class="section-title" id="header-submodules">Sub-modules</h2>
 <dl>
-<dt><code class="name"><a title="multiformats.multibase.raw_encoding" href="raw_encoding.html">multiformats.multibase.raw_encoding</a></code></dt>
+<dt><code class="name"><a title="multiformats.multibase.raw" href="raw.html">multiformats.multibase.raw</a></code></dt>
 <dd>
 <div class="desc"><p>Implementation of raw data encodings used by multibase encodings …</p></div>
 </dd>
@@ -702,6 +729,44 @@ b'Hello world!'
     &#34;&#34;&#34;
     enc = from_str(string)
     return enc.decode(string)</code></pre>
+</details>
+</dd>
+<dt id="multiformats.multibase.decode_raw"><code class="name flex">
+<span>def <span class="ident">decode_raw</span></span>(<span>string: str) ‑> Tuple[<a title="multiformats.multibase.Multibase" href="#multiformats.multibase.Multibase">Multibase</a>, bytes]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Similar to <code><a title="multiformats.multibase.decode" href="#multiformats.multibase.decode">decode()</a></code>, but returns a <code>(base, bytestr)</code> pair
+of the multibase and decoded bytestring.</p>
+<p>Example usage:</p>
+<pre><code class="language-py">&gt;&gt;&gt; base, bytestr = multibase.decode_raw(&quot;mSGVsbG8gd29ybGQh&quot;)
+&gt;&gt;&gt; base
+Multibase(name='base64', code='m',
+          status='default', description='rfc4648 no padding')
+&gt;&gt;&gt; bytestr
+b'Hello world!'
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def decode_raw(string: str) -&gt; Tuple[Multibase, bytes]:
+    &#34;&#34;&#34;
+        Similar to `decode`, but returns a `(base, bytestr)` pair
+        of the multibase and decoded bytestring.
+
+        Example usage:
+
+        ```py
+        &gt;&gt;&gt; base, bytestr = multibase.decode_raw(&#34;mSGVsbG8gd29ybGQh&#34;)
+        &gt;&gt;&gt; base
+        Multibase(name=&#39;base64&#39;, code=&#39;m&#39;,
+                  status=&#39;default&#39;, description=&#39;rfc4648 no padding&#39;)
+        &gt;&gt;&gt; bytestr
+        b&#39;Hello world!&#39;
+        ```
+    &#34;&#34;&#34;
+    enc = from_str(string)
+    return enc, enc.decode(string)</code></pre>
 </details>
 </dd>
 <dt id="multiformats.multibase.encode"><code class="name flex">
@@ -821,6 +886,8 @@ Multibase(encoding='base64', code='m', status='default',
     validate(string, str)
     if len(string) == 0:
         raise ValueError(&#34;Empty string is not valid for encoded data.&#34;)
+    if string[0] in _code_table:
+        return _code_table[string[0]]
     for code in _code_table:
         if string.startswith(code):
             return get(code=code)
@@ -1078,6 +1145,8 @@ False
     _status: Literal[&#34;draft&#34;, &#34;candidate&#34;, &#34;default&#34;]
     _description: str
 
+    __slots__ = (&#34;__weakref__&#34;, &#34;_name&#34;, &#34;_code&#34;, &#34;_status&#34;, &#34;_description&#34;)
+
     def __init__(self, *,
                  name: str,
                  code: str,
@@ -1198,7 +1267,7 @@ False
             Returns the raw encoder for this encoding:
             given bytes, it produces the encoded string without the multibase prefix.
         &#34;&#34;&#34;
-        enc = raw_encoding.get(self.name)
+        enc = raw.get(self.name)
         if enc is None:
             raise NotImplementedError(f&#34;Multibase/decoding for {repr(self.name)} is not yet implemented.&#34;)
         return enc.encode
@@ -1209,7 +1278,7 @@ False
             Returns the raw encoder for this encoding:
             given a string without the multibase prefix, it produces the decoded data.
         &#34;&#34;&#34;
-        enc = raw_encoding.get(self.name)
+        enc = raw.get(self.name)
         if enc is None:
             raise NotImplementedError(f&#34;Multibase/decoding for {repr(self.name)} is not yet implemented.&#34;)
         return enc.decode
@@ -1279,12 +1348,19 @@ False
     def __repr__(self) -&gt; str:
         return f&#34;Multibase({&#39;, &#39;.join(f&#39;{k}={repr(v)}&#39; for k, v in self.to_json().items())})&#34;
 
+    @property
+    def _as_tuple(self) -&gt; Tuple[Type[&#34;Multibase&#34;], str, str, Literal[&#34;draft&#34;, &#34;candidate&#34;, &#34;default&#34;]]:
+        return (Multibase, self.name, self.code, self.status)
+
+    def __hash__(self) -&gt; int:
+        return hash(self._as_tuple)
+
     def __eq__(self, other: Any) -&gt; bool:
         if self is other:
             return True
         if not isinstance(other, Multibase):
             return NotImplemented
-        return self.to_json() == other.to_json()</code></pre>
+        return self._as_tuple == other._as_tuple</code></pre>
 </details>
 <h3>Static methods</h3>
 <dl>
@@ -1436,7 +1512,7 @@ def name(self) -&gt; str:
     return self._name</code></pre>
 </details>
 </dd>
-<dt id="multiformats.multibase.Multibase.raw_decoder"><code class="name">var <span class="ident">raw_decoder</span> : Callable[[str], Union[bytes, bytearray, memoryview]]</code></dt>
+<dt id="multiformats.multibase.Multibase.raw_decoder"><code class="name">var <span class="ident">raw_decoder</span> : Callable[[str], bytes]</code></dt>
 <dd>
 <div class="desc"><p>Returns the raw encoder for this encoding:
 given a string without the multibase prefix, it produces the decoded data.</p></div>
@@ -1450,7 +1526,7 @@ def raw_decoder(self) -&gt; RawDecoder:
         Returns the raw encoder for this encoding:
         given a string without the multibase prefix, it produces the decoded data.
     &#34;&#34;&#34;
-    enc = raw_encoding.get(self.name)
+    enc = raw.get(self.name)
     if enc is None:
         raise NotImplementedError(f&#34;Multibase/decoding for {repr(self.name)} is not yet implemented.&#34;)
     return enc.decode</code></pre>
@@ -1470,7 +1546,7 @@ def raw_encoder(self) -&gt; RawEncoder:
         Returns the raw encoder for this encoding:
         given bytes, it produces the encoded string without the multibase prefix.
     &#34;&#34;&#34;
-    enc = raw_encoding.get(self.name)
+    enc = raw.get(self.name)
     if enc is None:
         raise NotImplementedError(f&#34;Multibase/decoding for {repr(self.name)} is not yet implemented.&#34;)
     return enc.encode</code></pre>
@@ -1618,12 +1694,13 @@ the resulting multibase string.</p>
 </li>
 <li><h3><a href="#header-submodules">Sub-modules</a></h3>
 <ul>
-<li><code><a title="multiformats.multibase.raw_encoding" href="raw_encoding.html">multiformats.multibase.raw_encoding</a></code></li>
+<li><code><a title="multiformats.multibase.raw" href="raw.html">multiformats.multibase.raw</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="two-column">
 <li><code><a title="multiformats.multibase.decode" href="#multiformats.multibase.decode">decode</a></code></li>
+<li><code><a title="multiformats.multibase.decode_raw" href="#multiformats.multibase.decode_raw">decode_raw</a></code></li>
 <li><code><a title="multiformats.multibase.encode" href="#multiformats.multibase.encode">encode</a></code></li>
 <li><code><a title="multiformats.multibase.exists" href="#multiformats.multibase.exists">exists</a></code></li>
 <li><code><a title="multiformats.multibase.from_str" href="#multiformats.multibase.from_str">from_str</a></code></li>

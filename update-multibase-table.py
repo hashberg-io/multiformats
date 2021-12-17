@@ -4,6 +4,7 @@
 
 import csv
 import io
+import json
 import pprint
 import textwrap
 
@@ -93,5 +94,13 @@ if added or removed or changed:
     if answer.lower().startswith("y"):
         with open("multiformats/multibase/multibase-table.csv", "w") as f:
             f.write(new_text)
+        with open("multiformats/multibase/multibase-table.json", "w") as f:
+            table = [new_table[code].to_json() for code in sorted(new_table.keys())]
+            json.dump(table, f, indent=4)
 else:
     print("Nothing to update, exiting.")
+
+
+with open("multiformats/multibase/multibase-table.json", "w") as f:
+    table = [new_table[code].to_json() for code in sorted(new_table.keys())]
+    json.dump(table, f, indent=4)

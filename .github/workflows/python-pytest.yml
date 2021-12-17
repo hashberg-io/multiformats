@@ -38,4 +38,4 @@ jobs:
     - name: Lint with pylint
       run: |
         pylint --errors-only --rcfile=.pylintrc multiformats
-        pylint --exit-zero --rcfile=.pylintrc multiformats
+        pylint --exit-zero --rcfile=.pylintrc --disable=fixme multiformats

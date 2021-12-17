@@ -42,7 +42,7 @@ from bases.encoding import BaseEncoding
 from multiformats.varint import BytesLike
 
 RawEncoder = Callable[[BytesLike], str]
-RawDecoder = Callable[[str], BytesLike]
+RawDecoder = Callable[[str], bytes]
 
 class CustomEncoding:
     """
