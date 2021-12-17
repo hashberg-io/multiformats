@@ -1,5 +1,7 @@
 """
     Implementation of raw encodings used by multiaddr protocols.
+
+    For expected address bytestring sizes, see the [multiaddr table](https://github.com/multiformats/multiaddr/blob/master/protocols.csv).
 """
 
 from ipaddress import IPv4Address, IPv6Address, AddressValueError
@@ -175,4 +177,34 @@ def tcp_udp_decoder(b: BytesLike) -> str:
 register("tcp", tcp_udp_encoder, tcp_udp_decoder, 2)
 register("udp", tcp_udp_encoder, tcp_udp_decoder, 2)
 
+# TODO: dccp, 2 bytes
+# TODO: ip6zone, variable, rfc4007 IPv6 zone
+# TODO: dns, variable
+# TODO: dns4, variable
+# TODO: dns6, variable
+# TODO: dnsaddr, variable
+# TODO: sctp, 2 bytes
+# TODO: unix, variable
+# TODO: p2p, variable
+# TODO: ipfs, variable, backwards compatibility; equivalent to /p2p
+# TODO: onion, 12 bytes
+# TODO: onion3, 37 bytes
+# TODO: garlic64, variable
+# TODO: garlic32, variable
+# TODO: memory, variable, in memory transport for self-dialing and testing; arbitrary
+
+# Protocols without address value:
+register("udt", None, None, 0)
+register("utp", None, None, 0)
+register("tls", None, None, 0)
+register("noise", None, None, 0)
 register("quic", None, None, 0)
+register("http", None, None, 0)
+register("https", None, None, 0) # deprecated alias for /tls/http
+register("ws", None, None, 0) # WebSockets
+register("wss", None, None, 0) # deprecated alias for /tls/ws
+register("p2p-websocket-star", None, None, 0)
+register("p2p-stardust", None, None, 0)
+register("p2p-webrtc-star", None, None, 0)
+register("p2p-webrtc-direct", None, None, 0)
+register("p2p-circuit", None, None, 0)

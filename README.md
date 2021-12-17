@@ -379,6 +379,26 @@ Bytes for multiaddrs are computed according to the [`(TLV)+` multiaddr encoding]
 '047f00000191022382cc03'
 ```
 
+The `parse` and `decode` functions create multiaddrs from their human-readable strings and encoded bytes respectively:
+
+```py
+    >>> from multiformats import multiaddr
+    >>> s = '/ip4/127.0.0.1/udp/9090/quic'
+    >>> multiaddr.parse(s)
+    Multiaddr(Addr('ip4', '127.0.0.1'), Addr('udp', '9090'), Proto('quic'))
+    >>> b = bytes.fromhex('047f00000191022382cc03')
+    >>> multiaddr.decode(b)
+    Multiaddr(Addr('ip4', '127.0.0.1'), Addr('udp', '9090'), Proto('quic'))
+```
+
+For uniformity of API, the same functionality as the `Proto` class is provided by the `proto` function:
+
+```py
+>>> ip4 = multiaddr.proto("ip4")
+>>> ip4
+Proto("ip4")
+```
+
 For advanced usage, see the [API documentation](https://hashberg-io.github.io/multiformats/multiformats/multiaddr.html).
 
 

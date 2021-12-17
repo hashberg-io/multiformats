@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
 <title>multiformats.multiaddr.raw API documentation</title>
-<meta name="description" content="Implementation of raw encodings used by multiaddr protocols." />
+<meta name="description" content="Implementation of raw encodings used by multiaddr protocols …" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -24,12 +24,15 @@
 </header>
 <section id="section-intro">
 <p>Implementation of raw encodings used by multiaddr protocols.</p>
+<p>For expected address bytestring sizes, see the <a href="https://github.com/multiformats/multiaddr/blob/master/protocols.csv">multiaddr table</a>.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">&#34;&#34;&#34;
     Implementation of raw encodings used by multiaddr protocols.
+
+    For expected address bytestring sizes, see the [multiaddr table](https://github.com/multiformats/multiaddr/blob/master/protocols.csv).
 &#34;&#34;&#34;
 
 from ipaddress import IPv4Address, IPv6Address, AddressValueError
@@ -205,7 +208,37 @@ def tcp_udp_decoder(b: BytesLike) -&gt; str:
 register(&#34;tcp&#34;, tcp_udp_encoder, tcp_udp_decoder, 2)
 register(&#34;udp&#34;, tcp_udp_encoder, tcp_udp_decoder, 2)
 
-register(&#34;quic&#34;, None, None, 0)</code></pre>
+# TODO: dccp, 2 bytes
+# TODO: ip6zone, variable, rfc4007 IPv6 zone
+# TODO: dns, variable
+# TODO: dns4, variable
+# TODO: dns6, variable
+# TODO: dnsaddr, variable
+# TODO: sctp, 2 bytes
+# TODO: unix, variable
+# TODO: p2p, variable
+# TODO: ipfs, variable, backwards compatibility; equivalent to /p2p
+# TODO: onion, 12 bytes
+# TODO: onion3, 37 bytes
+# TODO: garlic64, variable
+# TODO: garlic32, variable
+# TODO: memory, variable, in memory transport for self-dialing and testing; arbitrary
+
+# Protocols without address value:
+register(&#34;udt&#34;, None, None, 0)
+register(&#34;utp&#34;, None, None, 0)
+register(&#34;tls&#34;, None, None, 0)
+register(&#34;noise&#34;, None, None, 0)
+register(&#34;quic&#34;, None, None, 0)
+register(&#34;http&#34;, None, None, 0)
+register(&#34;https&#34;, None, None, 0) # deprecated alias for /tls/http
+register(&#34;ws&#34;, None, None, 0) # WebSockets
+register(&#34;wss&#34;, None, None, 0) # deprecated alias for /tls/ws
+register(&#34;p2p-websocket-star&#34;, None, None, 0)
+register(&#34;p2p-stardust&#34;, None, None, 0)
+register(&#34;p2p-webrtc-star&#34;, None, None, 0)
+register(&#34;p2p-webrtc-direct&#34;, None, None, 0)
+register(&#34;p2p-circuit&#34;, None, None, 0)</code></pre>
 </details>
 </section>
 <section>

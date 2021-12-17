@@ -62,6 +62,28 @@
     >>> bytes(ma).hex()
     '047f00000191022382cc03'
     ```
+
+    The `parse` and `decode` functions create multiaddrs from their human-readable strings and encoded bytes respectively:
+
+    ```py
+        >>> from multiformats import multiaddr
+        >>> s = '/ip4/127.0.0.1/udp/9090/quic'
+        >>> multiaddr.parse(s)
+        Multiaddr(Addr('ip4', '127.0.0.1'), Addr('udp', '9090'), Proto('quic'))
+        >>> b = bytes.fromhex('047f00000191022382cc03')
+        >>> multiaddr.decode(b)
+        Multiaddr(Addr('ip4', '127.0.0.1'), Addr('udp', '9090'), Proto('quic'))
+    ```
+
+    For uniformity of API, the same functionality as the `Proto` class is provided by the `proto` function:
+
+    ```py
+    >>> from multiformats import multiaddr
+    >>> ip4 = multiaddr.proto("ip4")
+    >>> ip4
+    Proto("ip4")
+    ```
+
 """
 
 from ipaddress import AddressValueError
@@ -753,3 +775,98 @@ class Multiaddr(Sequence[Union[Addr, Proto]]):
         if not isinstance(other, Multiaddr):
             return NotImplemented
         return self._as_tuple == other._as_tuple
+
+
+def proto(codec: Union[str, int, Multicodec]) -> Proto:
+    """
+        Convenience function to construct a `Proto` instance.
+
+        Example usage:
+
+        ```py
+        >>> ip4 = multiaddr.proto("ip4")
+        >>> ip4
+        Proto("ip4")
+        ```
+    """
+    return Proto(codec)
+
+
+def parse(multiaddr_str: str, allow_incomplete: bool = False) -> Multiaddr:
+    """
+        Parses a multiaddr from its human-readable string representation.
+
+        Example usage:
+
+        ```py
+        >>> s = '/ip4/127.0.0.1/udp/9090/quic'
+        >>> multiaddr.parse(s)
+        Multiaddr(Addr('ip4', '127.0.0.1'), Addr('udp', '9090'), Proto('quic'))
+        ```
+
+        Example usage with incomplete multiaddr:
+
+        ```py
+        >>> s = '/ip4/127.0.0.1/udp'
+        >>> multiaddr.parse(s)
+        ValueError: Decoded multiaddr is incomplete: /ip4/127.0.0.1/udp
+        >>> multiaddr.parse(s, allow_incomplete=True)
+        Multiaddr(Addr('ip4', '127.0.0.1'), Proto('udp'))
+        ```
+    """
+    validate(multiaddr_str, str)
+    validate(allow_incomplete, bool)
+    tokens = multiaddr_str.split("/")
+    protocol: Optional[Proto] = None
+    segments: List[Union[Addr, Proto]] = []
+    for token in islice(tokens, 1, None):
+        if protocol is None:
+            protocol = Proto(token)
+            if not protocol.admits_addr:
+                segments.append(protocol)
+                protocol = None
+        else:
+            segments.append(protocol/token)
+            protocol = None
+    if protocol is not None:
+        segments.append(protocol)
+    ma = Multiaddr(*segments)
+    if ma.is_incomplete and not allow_incomplete:
+        raise ValueError(f"Decoded multiaddr is incomplete: {str(ma)}")
+    return ma
+
+
+def decode(multiaddr_bytes: BytesLike) -> Multiaddr:
+    """
+        Decodes a multiaddr from its `(TLV)+` binary encoding.
+
+        Example usage:
+
+        ```py
+        >>> b = bytes.fromhex('047f00000191022382cc03')
+        >>> multiaddr.decode(b)
+        Multiaddr(Addr('ip4', '127.0.0.1'), Addr('udp', '9090'), Proto('quic'))
+        ```
+    """
+    validate(multiaddr_bytes, BytesLike)
+    b = memoryview(multiaddr_bytes)
+    protocol: Optional[Proto] = None
+    segments: List[Union[Addr, Proto]] = []
+    while len(b) > 0:
+        if protocol is None:
+            code, _, b = varint.decode_raw(b)
+            protocol = Proto(code)
+            if not protocol.admits_addr:
+                segments.append(protocol)
+                protocol = None
+        else:
+            addr_size = protocol.addr_size
+            if addr_size is None:
+                addr_size, _, b = varint.decode_raw(b)
+            addr_value_bytes = bytes(b[:addr_size])
+            b = b[addr_size:]
+            segments.append(protocol/addr_value_bytes)
+            protocol = None
+    ma = Multiaddr(*segments)
+    assert not ma.is_incomplete
+    return ma
