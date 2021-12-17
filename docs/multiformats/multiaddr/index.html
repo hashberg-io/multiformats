@@ -57,7 +57,7 @@ Addr('udp', '9090')
 <pre><code class="language-py">&gt;&gt;&gt; quic = Proto(&quot;quic&quot;)
 &gt;&gt;&gt; ma = ip4/&quot;127.0.0.1&quot;/udp/9090/quic
 &gt;&gt;&gt; ma
-Multiaddr(Addr('ip4', '127.0.0.1'), Addr('udp', '9090'), Addr('quic'))
+Multiaddr(Addr('ip4', '127.0.0.1'), Addr('udp', '9090'), Proto('quic'))
 &gt;&gt;&gt; str(ma)
 '/ip4/127.0.0.1/udp/9090/quic'
 </code></pre>
@@ -122,7 +122,7 @@ Multiaddr(Addr('ip4', '127.0.0.1'), Addr('udp', '9090'), Addr('quic'))
     &gt;&gt;&gt; quic = Proto(&#34;quic&#34;)
     &gt;&gt;&gt; ma = ip4/&#34;127.0.0.1&#34;/udp/9090/quic
     &gt;&gt;&gt; ma
-    Multiaddr(Addr(&#39;ip4&#39;, &#39;127.0.0.1&#39;), Addr(&#39;udp&#39;, &#39;9090&#39;), Addr(&#39;quic&#39;))
+    Multiaddr(Addr(&#39;ip4&#39;, &#39;127.0.0.1&#39;), Addr(&#39;udp&#39;, &#39;9090&#39;), Proto(&#39;quic&#39;))
     &gt;&gt;&gt; str(ma)
     &#39;/ip4/127.0.0.1/udp/9090/quic&#39;
     ```
@@ -614,7 +614,7 @@ class Multiaddr(Sequence[Union[Addr, Proto]]):
         &gt;&gt;&gt; quic = Proto(&#34;quic&#34;)
         &gt;&gt;&gt; ma = ip4/&#34;127.0.0.1&#34;/udp/9090/quic
         &gt;&gt;&gt; ma
-        Multiaddr(Addr(&#39;ip4&#39;, &#39;127.0.0.1&#39;), Addr(&#39;udp&#39;, &#39;9090&#39;), Addr(&#39;quic&#39;))
+        Multiaddr(Addr(&#39;ip4&#39;, &#39;127.0.0.1&#39;), Addr(&#39;udp&#39;, &#39;9090&#39;), Proto(&#39;quic&#39;))
         &gt;&gt;&gt; str(ma)
         &#39;/ip4/127.0.0.1/udp/9090/quic&#39;
         ```
@@ -1114,7 +1114,7 @@ def value_bytes(self) -&gt; bytes:
 &gt;&gt;&gt; quic = Proto(&quot;quic&quot;)
 &gt;&gt;&gt; ma = ip4/&quot;127.0.0.1&quot;/udp/9090/quic
 &gt;&gt;&gt; ma
-Multiaddr(Addr('ip4', '127.0.0.1'), Addr('udp', '9090'), Addr('quic'))
+Multiaddr(Addr('ip4', '127.0.0.1'), Addr('udp', '9090'), Proto('quic'))
 &gt;&gt;&gt; str(ma)
 '/ip4/127.0.0.1/udp/9090/quic'
 </code></pre>
@@ -1144,7 +1144,7 @@ Multiaddr(Addr('ip4', '127.0.0.1'), Addr('udp', '9090'), Addr('quic'))
         &gt;&gt;&gt; quic = Proto(&#34;quic&#34;)
         &gt;&gt;&gt; ma = ip4/&#34;127.0.0.1&#34;/udp/9090/quic
         &gt;&gt;&gt; ma
-        Multiaddr(Addr(&#39;ip4&#39;, &#39;127.0.0.1&#39;), Addr(&#39;udp&#39;, &#39;9090&#39;), Addr(&#39;quic&#39;))
+        Multiaddr(Addr(&#39;ip4&#39;, &#39;127.0.0.1&#39;), Addr(&#39;udp&#39;, &#39;9090&#39;), Proto(&#39;quic&#39;))
         &gt;&gt;&gt; str(ma)
         &#39;/ip4/127.0.0.1/udp/9090/quic&#39;
         ```
