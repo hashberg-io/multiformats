@@ -132,7 +132,7 @@ The [`table`](https://hashberg-io.github.io/multiformats/multiformats/multicodec
  178, 192, 193, 290, 297, 400, 421, 460, 477, 478, 479, 512]
 ```
 
-For advanced usage, see the [API documentation](https://hashberg-io.github.io/multiformats/multiformats/multicodec.html).
+For advanced usage, see the [API documentation](https://hashberg-io.github.io/multiformats/multiformats/multicodec/index.html).
 
 
 ### Multibase
@@ -180,7 +180,7 @@ Multibase(encoding="base16", code="f",
           status="default", description="hexadecimal")
 ```
 
-For advanced usage, see the [API documentation](https://hashberg-io.github.io/multiformats/multiformats/multibase.html).
+For advanced usage, see the [API documentation](https://hashberg-io.github.io/multiformats/multiformats/multibase/index.html).
 
 
 ### Multihash
@@ -311,7 +311,7 @@ b'H\x00e\x00l\x00l\x00o\x00 \x00w\x00o\x00r\x00l\x00d\x00!\x00'
 b'\x00H\x00e\x00l\x00l\x00o\x00 \x00w\x00o\x00r\x00l\x00d\x00!'
 ```
 
-For advanced usage, see the [API documentation](https://hashberg-io.github.io/multiformats/multiformats/multihash.html).
+For advanced usage, see the [API documentation](https://hashberg-io.github.io/multiformats/multiformats/multihash/index.html).
 
 
 ### CID
@@ -470,7 +470,7 @@ For uniformity of API, the same functionality as the [`Proto`](https://hashberg-
 Proto("ip4")
 ```
 
-For advanced usage, see the [API documentation](https://hashberg-io.github.io/multiformats/multiformats/multiaddr.html).
+For advanced usage, see the [API documentation](https://hashberg-io.github.io/multiformats/multiformats/multiaddr/index.html).
 
 
 ## API
