@@ -2,7 +2,7 @@
     This package implements existing multiformat protocols, according to the [Multiformats](https://multiformats.io/) specifications.
 """
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 
 from . import varint
 from . import multicodec

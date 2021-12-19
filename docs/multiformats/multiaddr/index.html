@@ -178,7 +178,6 @@ Proto(&quot;ip4&quot;)
 
 &#34;&#34;&#34;
 
-from ipaddress import AddressValueError
 from itertools import islice, chain
 from typing import Any, cast, ClassVar, Dict, Iterator, List, Optional, overload, Sequence, Tuple, Type, Union
 from weakref import WeakValueDictionary
@@ -189,7 +188,7 @@ from multiformats import varint, multicodec
 from multiformats.multicodec import Multicodec
 from multiformats.varint import BytesLike, byteslike
 
-from . import raw
+from . import raw, err
 from .raw import RawEncoder, RawDecoder, ProtoImpl, _validate_size
 
 class Proto:
@@ -235,11 +234,11 @@ class Proto:
             validate(codec, Multicodec)
             existing_codec = multicodec.get(codec.name)
             if existing_codec != codec:
-                raise ValueError(f&#34;Multicodec named {repr(codec.name)} exists, but is not the one given.&#34;)
+                raise err.ValueError(f&#34;Multicodec named {repr(codec.name)} exists, but is not the one given.&#34;)
             codec = existing_codec
         # check that the codec is a multiaddr multicodec:
         if codec.tag != &#34;multiaddr&#34;:
-            raise ValueError(f&#34;Multicodec named {repr(codec.name)} exists, but is not a multiaddr.&#34;)
+            raise err.ValueError(f&#34;Multicodec named {repr(codec.name)} exists, but is not a multiaddr.&#34;)
         implementation: ProtoImpl = raw.get(codec.name)
         _cache = Proto._cache
         if codec.name in _cache:
@@ -403,12 +402,12 @@ class Proto:
         try:
             self.validate(addr_value)
             return True
-        except AddressValueError:
+        except err.ValueError:
             return False
 
     def validate(self, addr_value: Union[str, BytesLike]) -&gt; Tuple[str, bytes]:
         &#34;&#34;&#34;
-            Raises `ValueError` if `not self.is_valid(addr_value)`.
+            Raises `err.ValueError` if `not self.is_valid(addr_value)`.
             If successful, returns a pair of the string and bytes representations of the address value.
 
             Example usage:
@@ -417,21 +416,21 @@ class Proto:
             &gt;&gt;&gt; ip4.validate(&#34;192.168.1.1&#34;)
             (&#39;192.168.1.1&#39;, b&#39;\\xc0\\xa8\\x01\\x01&#39;)
             &gt;&gt;&gt; ip4.validate(&#34;192.168&#34;)
-            ipaddress.AddressValueError: Expected 4 octets in &#39;192.168&#39;
+            err.ValueError: Expected 4 octets in &#39;192.168&#39;
             ```
         &#34;&#34;&#34;
         raw_encoder, raw_decoder, addr_size = self.implementation
         if addr_size == 0:
-            raise AddressValueError(f&#34;Protocol admits no address value, but {repr(addr_value)} was passed.&#34;)
+            raise err.ValueError(f&#34;Protocol admits no address value, but {repr(addr_value)} was passed.&#34;)
         if isinstance(addr_value, byteslike):
             assert raw_decoder is not None
-            addr_value_str = raw_decoder(addr_value) # raises AddressValueError if addr_value is invalid
+            addr_value_str = raw_decoder(addr_value) # raises err.ValueError if addr_value is invalid
             if not isinstance(addr_value, bytes):
                 addr_value = bytes(addr_value)
             return addr_value_str, addr_value
         validate(addr_value, str)
         assert raw_encoder is not None
-        addr_value_bytes = raw_encoder(addr_value) # raises AddressValueError if addr_value is invalid
+        addr_value_bytes = raw_encoder(addr_value) # raises err.ValueError if addr_value is invalid
         return addr_value, addr_value_bytes
 
     def addr(self, value: Union[str, BytesLike]) -&gt; &#34;Addr&#34;:
@@ -485,7 +484,7 @@ class Proto:
 
     def __bytes__(self) -&gt; bytes:
         if self.addr_size != 0:
-            raise ValueError(&#34;Missing address value for protocol, cannot compute bytes.&#34;)
+            raise err.ValueError(&#34;Missing address value for protocol, cannot compute bytes.&#34;)
         return varint.encode(self.code)
 
     def __repr__(self) -&gt; str:
@@ -611,15 +610,13 @@ class Addr:
         return f&#34;{str(self.proto)}/{self.value}&#34;
 
     def __bytes__(self) -&gt; bytes:
-        chunks: List[bytes] = []
         proto = self.proto
         value_bytes = self.value_bytes
-        chunks.append(varint.encode(proto.code))
         if proto.addr_size is None:
             assert value_bytes is not None
-            chunks.append(varint.encode(len(value_bytes)))
-        chunks.append(value_bytes)
-        return bytes(chain.from_iterable(chunks))
+            l = varint.encode(len(value_bytes))
+            return proto.codec.wrap(l+value_bytes)
+        return proto.codec.wrap(value_bytes)
 
     def __repr__(self) -&gt; str:
         return f&#34;Addr({repr(self.proto.name)}, {repr(self.value)})&#34;
@@ -687,12 +684,12 @@ class Multiaddr(Sequence[Union[Addr, Proto]]):
                     if idx == l-1:
                         is_incomplete = True
                     else:
-                        raise ValueError(f&#34;Protocol {repr(proto.name)} expects an address, but is followed by another protocol instead.&#34;)
+                        raise err.ValueError(f&#34;Protocol {repr(proto.name)} expects an address, but is followed by another protocol instead.&#34;)
             else:
                 validate(addr, Addr)
                 proto = addr.proto
             if proto in proto_map:
-                raise ValueError(f&#34;Protocol {repr(proto.name)} appears twice in multiaddr.&#34;)
+                raise err.ValueError(f&#34;Protocol {repr(proto.name)} appears twice in multiaddr.&#34;)
             proto_map[proto] = idx
         instance: Multiaddr = super().__new__(cls)
         instance._addrs = addrs
@@ -723,7 +720,7 @@ class Multiaddr(Sequence[Union[Addr, Proto]]):
 
             ```py
             &gt;&gt;&gt; bytes(ma)
-            ValueError: Missing address value for last protocol, cannot compute bytes.
+            err.ValueError: Missing address value for last protocol, cannot compute bytes.
             &gt;&gt;&gt; bytes(ma2).hex()
             &#39;047f00000191022382&#39;
             ```
@@ -750,18 +747,18 @@ class Multiaddr(Sequence[Union[Addr, Proto]]):
             0
             ```
 
-            This method raises `ValueError` if the protocol/address does not appear:
+            This method raises `err.ValueError` if the protocol/address does not appear:
 
             ```py
             &gt;&gt;&gt; ip6 = Proto(&#34;ip6&#34;)
             &gt;&gt;&gt; ip6 in ma
             False
             &gt;&gt;&gt; ma.index(ip6)
-            ValueError: Protocol &#39;ip6&#39; does not appear in multiaddr /ip4/127.0.0.1/udp/9090/quic
+            err.ValueError: Protocol &#39;ip6&#39; does not appear in multiaddr /ip4/127.0.0.1/udp/9090/quic
             &gt;&gt;&gt; ip4/&#34;127.0.0.2&#34; in ma
             False
             &gt;&gt;&gt; ma.index(ip4/&#34;127.0.0.2&#34;)
-            ValueError: Address Addr(&#39;ip4&#39;, &#39;127.0.0.2&#39;) does not appear in multiaddr /ip4/127.0.0.1/udp/9090/quic
+            err.ValueError: Address Addr(&#39;ip4&#39;, &#39;127.0.0.2&#39;) does not appear in multiaddr /ip4/127.0.0.1/udp/9090/quic
             ```
 
             The optional `start` and `stop` arguments can be used to specify a range of indices
@@ -773,7 +770,7 @@ class Multiaddr(Sequence[Union[Addr, Proto]]):
             &gt;&gt;&gt; ma.index(ip4/&#34;127.0.0.1&#34;)
             0
             &gt;&gt;&gt; ma.index(ip4/&#34;127.0.0.1&#34;, start=1)
-            ValueError: Address Addr(&#39;ip4&#39;, &#39;127.0.0.1&#39;) does not appear in sub-multiaddr /udp/9090/quic of multiaddr /ip4/127.0.0.1/udp/9090/quic
+            err.ValueError: Address Addr(&#39;ip4&#39;, &#39;127.0.0.1&#39;) does not appear in sub-multiaddr /udp/9090/quic of multiaddr /ip4/127.0.0.1/udp/9090/quic
             ```
         &#34;&#34;&#34;
         validate(start, int)
@@ -786,13 +783,13 @@ class Multiaddr(Sequence[Union[Addr, Proto]]):
             validate(value, Addr)
             proto = value.proto
         if proto not in self._proto_map:
-            raise ValueError(f&#34;Protocol {repr(proto.name)} does not appear in multiaddr {str(self)}&#34;)
+            raise err.ValueError(f&#34;Protocol {repr(proto.name)} does not appear in multiaddr {str(self)}&#34;)
         idx = self._proto_map[proto]
         if isinstance(value, Addr):
             if self[idx] != value:
-                raise ValueError(f&#34;Address {repr(value)} does not appear in multiaddr {str(self)}&#34;)
+                raise err.ValueError(f&#34;Address {repr(value)} does not appear in multiaddr {str(self)}&#34;)
             if not start &lt;= idx &lt; stop:
-                raise ValueError(f&#34;Address {repr(value)} does not appear in sub-multiaddr {str(self[start:stop])} &#34;
+                raise err.ValueError(f&#34;Address {repr(value)} does not appear in sub-multiaddr {str(self[start:stop])} &#34;
                                  f&#34;of multiaddr {str(self)}&#34;)
         return idx
 
@@ -801,7 +798,7 @@ class Multiaddr(Sequence[Union[Addr, Proto]]):
             try:
                 self.index(value)
                 return True
-            except ValueError:
+            except err.ValueError:
                 return False
         return False
 
@@ -828,18 +825,18 @@ class Multiaddr(Sequence[Union[Addr, Proto]]):
     def __truediv__(self, other: Union[int, str, BytesLike, Addr, Proto, &#34;Multiaddr&#34;]) -&gt; &#34;Multiaddr&#34;:
         if isinstance(other, (int, str,)+byteslike):
             if not self.is_incomplete:
-                raise ValueError(&#34;Unexpected address value. Expected Proto, Addr or Multiaddr.&#34;)
+                raise err.ValueError(&#34;Unexpected address value. Expected Proto, Addr or Multiaddr.&#34;)
             addrs = list(self)
             tail_proto = addrs[-1]
             assert isinstance(tail_proto, Proto)
             return Multiaddr(*islice(addrs, 0, len(addrs)-1), tail_proto/other)
         if isinstance(other, (Addr, Proto)):
             if self.is_incomplete:
-                raise ValueError(&#34;Expected address value (string or binary).&#34;)
+                raise err.ValueError(&#34;Expected address value (string or binary).&#34;)
             return Multiaddr(*self, other)
         if isinstance(other, Multiaddr):
             if self.is_incomplete:
-                raise ValueError(&#34;Expected address value (string or binary).&#34;)
+                raise err.ValueError(&#34;Expected address value (string or binary).&#34;)
             return Multiaddr(*self, *other)
         return NotImplemented
 
@@ -848,7 +845,7 @@ class Multiaddr(Sequence[Union[Addr, Proto]]):
 
     def __bytes__(self) -&gt; bytes:
         if self.is_incomplete:
-            raise ValueError(&#34;Missing address value for last protocol, cannot compute bytes.&#34;)
+            raise err.ValueError(&#34;Missing address value for last protocol, cannot compute bytes.&#34;)
         return bytes(chain.from_iterable(bytes(addr) for addr in self))
 
     def __repr__(self) -&gt; str:
@@ -883,7 +880,6 @@ def proto(codec: Union[str, int, Multicodec]) -&gt; Proto:
     &#34;&#34;&#34;
     return Proto(codec)
 
-
 def parse(multiaddr_str: str, allow_incomplete: bool = False) -&gt; Multiaddr:
     &#34;&#34;&#34;
         Parses a multiaddr from its human-readable string representation.
@@ -901,7 +897,7 @@ def parse(multiaddr_str: str, allow_incomplete: bool = False) -&gt; Multiaddr:
         ```py
         &gt;&gt;&gt; s = &#39;/ip4/127.0.0.1/udp&#39;
         &gt;&gt;&gt; multiaddr.parse(s)
-        ValueError: Decoded multiaddr is incomplete: /ip4/127.0.0.1/udp
+        err.ValueError: Decoded multiaddr is incomplete: /ip4/127.0.0.1/udp
         &gt;&gt;&gt; multiaddr.parse(s, allow_incomplete=True)
         Multiaddr(Addr(&#39;ip4&#39;, &#39;127.0.0.1&#39;), Proto(&#39;udp&#39;))
         ```
@@ -909,22 +905,22 @@ def parse(multiaddr_str: str, allow_incomplete: bool = False) -&gt; Multiaddr:
     validate(multiaddr_str, str)
     validate(allow_incomplete, bool)
     tokens = multiaddr_str.split(&#34;/&#34;)
-    proto: Optional[Proto] = None
+    protocol: Optional[Proto] = None
     segments: List[Union[Addr, Proto]] = []
     for token in islice(tokens, 1, None):
-        if proto is None:
-            proto = Proto(token)
-            if not proto.admits_addr:
-                segments.append(proto)
-                proto = None
+        if protocol is None:
+            protocol = Proto(token)
+            if not protocol.admits_addr:
+                segments.append(protocol)
+                protocol = None
         else:
-            segments.append(proto/token)
-            proto = None
-    if proto is not None:
-        segments.append(proto)
+            segments.append(protocol/token)
+            protocol = None
+    if protocol is not None:
+        segments.append(protocol)
     ma = Multiaddr(*segments)
     if ma.is_incomplete and not allow_incomplete:
-        raise ValueError(f&#34;Decoded multiaddr is incomplete: {str(ma)}&#34;)
+        raise err.ValueError(f&#34;Decoded multiaddr is incomplete: {str(ma)}&#34;)
     return ma
 
 
@@ -942,23 +938,19 @@ def decode(multiaddr_bytes: BytesLike) -&gt; Multiaddr:
     &#34;&#34;&#34;
     validate(multiaddr_bytes, BytesLike)
     b = memoryview(multiaddr_bytes)
-    proto: Optional[Proto] = None
     segments: List[Union[Addr, Proto]] = []
     while len(b) &gt; 0:
-        if proto is None:
-            code, _, b = varint.decode_raw(b)
-            proto = Proto(code)
-            if not proto.admits_addr:
-                segments.append(proto)
-                proto = None
-        else:
-            addr_size = proto.addr_size
+        code, _, b = multicodec.unwrap_raw(b)
+        protocol = Proto(code)
+        if protocol.admits_addr:
+            addr_size = protocol.addr_size
             if addr_size is None:
                 addr_size, _, b = varint.decode_raw(b)
             addr_value_bytes = bytes(b[:addr_size])
             b = b[addr_size:]
-            segments.append(proto/addr_value_bytes)
-            proto = None
+            segments.append(protocol/addr_value_bytes)
+        else:
+            segments.append(protocol)
     ma = Multiaddr(*segments)
     assert not ma.is_incomplete
     return ma</code></pre>
@@ -967,6 +959,10 @@ def decode(multiaddr_bytes: BytesLike) -&gt; Multiaddr:
 <section>
 <h2 class="section-title" id="header-submodules">Sub-modules</h2>
 <dl>
+<dt><code class="name"><a title="multiformats.multiaddr.err" href="err.html">multiformats.multiaddr.err</a></code></dt>
+<dd>
+<div class="desc"><p>Errors for the <code><a title="multiformats.multiaddr" href="#multiformats.multiaddr">multiformats.multiaddr</a></code> module.</p></div>
+</dd>
 <dt><code class="name"><a title="multiformats.multiaddr.raw" href="raw.html">multiformats.multiaddr.raw</a></code></dt>
 <dd>
 <div class="desc"><p>Implementation of raw encodings used by multiaddr protocols …</p></div>
@@ -1006,23 +1002,19 @@ Multiaddr(Addr('ip4', '127.0.0.1'), Addr('udp', '9090'), Proto('quic'))
     &#34;&#34;&#34;
     validate(multiaddr_bytes, BytesLike)
     b = memoryview(multiaddr_bytes)
-    proto: Optional[Proto] = None
     segments: List[Union[Addr, Proto]] = []
     while len(b) &gt; 0:
-        if proto is None:
-            code, _, b = varint.decode_raw(b)
-            proto = Proto(code)
-            if not proto.admits_addr:
-                segments.append(proto)
-                proto = None
-        else:
-            addr_size = proto.addr_size
+        code, _, b = multicodec.unwrap_raw(b)
+        protocol = Proto(code)
+        if protocol.admits_addr:
+            addr_size = protocol.addr_size
             if addr_size is None:
                 addr_size, _, b = varint.decode_raw(b)
             addr_value_bytes = bytes(b[:addr_size])
             b = b[addr_size:]
-            segments.append(proto/addr_value_bytes)
-            proto = None
+            segments.append(protocol/addr_value_bytes)
+        else:
+            segments.append(protocol)
     ma = Multiaddr(*segments)
     assert not ma.is_incomplete
     return ma</code></pre>
@@ -1041,7 +1033,7 @@ Multiaddr(Addr('ip4', '127.0.0.1'), Addr('udp', '9090'), Proto('quic'))
 <p>Example usage with incomplete multiaddr:</p>
 <pre><code class="language-py">&gt;&gt;&gt; s = '/ip4/127.0.0.1/udp'
 &gt;&gt;&gt; multiaddr.parse(s)
-ValueError: Decoded multiaddr is incomplete: /ip4/127.0.0.1/udp
+err.ValueError: Decoded multiaddr is incomplete: /ip4/127.0.0.1/udp
 &gt;&gt;&gt; multiaddr.parse(s, allow_incomplete=True)
 Multiaddr(Addr('ip4', '127.0.0.1'), Proto('udp'))
 </code></pre></div>
@@ -1066,7 +1058,7 @@ Multiaddr(Addr('ip4', '127.0.0.1'), Proto('udp'))
         ```py
         &gt;&gt;&gt; s = &#39;/ip4/127.0.0.1/udp&#39;
         &gt;&gt;&gt; multiaddr.parse(s)
-        ValueError: Decoded multiaddr is incomplete: /ip4/127.0.0.1/udp
+        err.ValueError: Decoded multiaddr is incomplete: /ip4/127.0.0.1/udp
         &gt;&gt;&gt; multiaddr.parse(s, allow_incomplete=True)
         Multiaddr(Addr(&#39;ip4&#39;, &#39;127.0.0.1&#39;), Proto(&#39;udp&#39;))
         ```
@@ -1074,22 +1066,22 @@ Multiaddr(Addr('ip4', '127.0.0.1'), Proto('udp'))
     validate(multiaddr_str, str)
     validate(allow_incomplete, bool)
     tokens = multiaddr_str.split(&#34;/&#34;)
-    proto: Optional[Proto] = None
+    protocol: Optional[Proto] = None
     segments: List[Union[Addr, Proto]] = []
     for token in islice(tokens, 1, None):
-        if proto is None:
-            proto = Proto(token)
-            if not proto.admits_addr:
-                segments.append(proto)
-                proto = None
+        if protocol is None:
+            protocol = Proto(token)
+            if not protocol.admits_addr:
+                segments.append(protocol)
+                protocol = None
         else:
-            segments.append(proto/token)
-            proto = None
-    if proto is not None:
-        segments.append(proto)
+            segments.append(protocol/token)
+            protocol = None
+    if protocol is not None:
+        segments.append(protocol)
     ma = Multiaddr(*segments)
     if ma.is_incomplete and not allow_incomplete:
-        raise ValueError(f&#34;Decoded multiaddr is incomplete: {str(ma)}&#34;)
+        raise err.ValueError(f&#34;Decoded multiaddr is incomplete: {str(ma)}&#34;)
     return ma</code></pre>
 </details>
 </dd>
@@ -1262,15 +1254,13 @@ Addr('ip4', '192.168.1.1')
         return f&#34;{str(self.proto)}/{self.value}&#34;
 
     def __bytes__(self) -&gt; bytes:
-        chunks: List[bytes] = []
         proto = self.proto
         value_bytes = self.value_bytes
-        chunks.append(varint.encode(proto.code))
         if proto.addr_size is None:
             assert value_bytes is not None
-            chunks.append(varint.encode(len(value_bytes)))
-        chunks.append(value_bytes)
-        return bytes(chain.from_iterable(chunks))
+            l = varint.encode(len(value_bytes))
+            return proto.codec.wrap(l+value_bytes)
+        return proto.codec.wrap(value_bytes)
 
     def __repr__(self) -&gt; str:
         return f&#34;Addr({repr(self.proto.name)}, {repr(self.value)})&#34;
@@ -1459,12 +1449,12 @@ Multiaddr(Addr('ip4', '127.0.0.1'), Addr('udp', '9090'), Proto('quic'))
                     if idx == l-1:
                         is_incomplete = True
                     else:
-                        raise ValueError(f&#34;Protocol {repr(proto.name)} expects an address, but is followed by another protocol instead.&#34;)
+                        raise err.ValueError(f&#34;Protocol {repr(proto.name)} expects an address, but is followed by another protocol instead.&#34;)
             else:
                 validate(addr, Addr)
                 proto = addr.proto
             if proto in proto_map:
-                raise ValueError(f&#34;Protocol {repr(proto.name)} appears twice in multiaddr.&#34;)
+                raise err.ValueError(f&#34;Protocol {repr(proto.name)} appears twice in multiaddr.&#34;)
             proto_map[proto] = idx
         instance: Multiaddr = super().__new__(cls)
         instance._addrs = addrs
@@ -1495,7 +1485,7 @@ Multiaddr(Addr('ip4', '127.0.0.1'), Addr('udp', '9090'), Proto('quic'))
 
             ```py
             &gt;&gt;&gt; bytes(ma)
-            ValueError: Missing address value for last protocol, cannot compute bytes.
+            err.ValueError: Missing address value for last protocol, cannot compute bytes.
             &gt;&gt;&gt; bytes(ma2).hex()
             &#39;047f00000191022382&#39;
             ```
@@ -1522,18 +1512,18 @@ Multiaddr(Addr('ip4', '127.0.0.1'), Addr('udp', '9090'), Proto('quic'))
             0
             ```
 
-            This method raises `ValueError` if the protocol/address does not appear:
+            This method raises `err.ValueError` if the protocol/address does not appear:
 
             ```py
             &gt;&gt;&gt; ip6 = Proto(&#34;ip6&#34;)
             &gt;&gt;&gt; ip6 in ma
             False
             &gt;&gt;&gt; ma.index(ip6)
-            ValueError: Protocol &#39;ip6&#39; does not appear in multiaddr /ip4/127.0.0.1/udp/9090/quic
+            err.ValueError: Protocol &#39;ip6&#39; does not appear in multiaddr /ip4/127.0.0.1/udp/9090/quic
             &gt;&gt;&gt; ip4/&#34;127.0.0.2&#34; in ma
             False
             &gt;&gt;&gt; ma.index(ip4/&#34;127.0.0.2&#34;)
-            ValueError: Address Addr(&#39;ip4&#39;, &#39;127.0.0.2&#39;) does not appear in multiaddr /ip4/127.0.0.1/udp/9090/quic
+            err.ValueError: Address Addr(&#39;ip4&#39;, &#39;127.0.0.2&#39;) does not appear in multiaddr /ip4/127.0.0.1/udp/9090/quic
             ```
 
             The optional `start` and `stop` arguments can be used to specify a range of indices
@@ -1545,7 +1535,7 @@ Multiaddr(Addr('ip4', '127.0.0.1'), Addr('udp', '9090'), Proto('quic'))
             &gt;&gt;&gt; ma.index(ip4/&#34;127.0.0.1&#34;)
             0
             &gt;&gt;&gt; ma.index(ip4/&#34;127.0.0.1&#34;, start=1)
-            ValueError: Address Addr(&#39;ip4&#39;, &#39;127.0.0.1&#39;) does not appear in sub-multiaddr /udp/9090/quic of multiaddr /ip4/127.0.0.1/udp/9090/quic
+            err.ValueError: Address Addr(&#39;ip4&#39;, &#39;127.0.0.1&#39;) does not appear in sub-multiaddr /udp/9090/quic of multiaddr /ip4/127.0.0.1/udp/9090/quic
             ```
         &#34;&#34;&#34;
         validate(start, int)
@@ -1558,13 +1548,13 @@ Multiaddr(Addr('ip4', '127.0.0.1'), Addr('udp', '9090'), Proto('quic'))
             validate(value, Addr)
             proto = value.proto
         if proto not in self._proto_map:
-            raise ValueError(f&#34;Protocol {repr(proto.name)} does not appear in multiaddr {str(self)}&#34;)
+            raise err.ValueError(f&#34;Protocol {repr(proto.name)} does not appear in multiaddr {str(self)}&#34;)
         idx = self._proto_map[proto]
         if isinstance(value, Addr):
             if self[idx] != value:
-                raise ValueError(f&#34;Address {repr(value)} does not appear in multiaddr {str(self)}&#34;)
+                raise err.ValueError(f&#34;Address {repr(value)} does not appear in multiaddr {str(self)}&#34;)
             if not start &lt;= idx &lt; stop:
-                raise ValueError(f&#34;Address {repr(value)} does not appear in sub-multiaddr {str(self[start:stop])} &#34;
+                raise err.ValueError(f&#34;Address {repr(value)} does not appear in sub-multiaddr {str(self[start:stop])} &#34;
                                  f&#34;of multiaddr {str(self)}&#34;)
         return idx
 
@@ -1573,7 +1563,7 @@ Multiaddr(Addr('ip4', '127.0.0.1'), Addr('udp', '9090'), Proto('quic'))
             try:
                 self.index(value)
                 return True
-            except ValueError:
+            except err.ValueError:
                 return False
         return False
 
@@ -1600,18 +1590,18 @@ Multiaddr(Addr('ip4', '127.0.0.1'), Addr('udp', '9090'), Proto('quic'))
     def __truediv__(self, other: Union[int, str, BytesLike, Addr, Proto, &#34;Multiaddr&#34;]) -&gt; &#34;Multiaddr&#34;:
         if isinstance(other, (int, str,)+byteslike):
             if not self.is_incomplete:
-                raise ValueError(&#34;Unexpected address value. Expected Proto, Addr or Multiaddr.&#34;)
+                raise err.ValueError(&#34;Unexpected address value. Expected Proto, Addr or Multiaddr.&#34;)
             addrs = list(self)
             tail_proto = addrs[-1]
             assert isinstance(tail_proto, Proto)
             return Multiaddr(*islice(addrs, 0, len(addrs)-1), tail_proto/other)
         if isinstance(other, (Addr, Proto)):
             if self.is_incomplete:
-                raise ValueError(&#34;Expected address value (string or binary).&#34;)
+                raise err.ValueError(&#34;Expected address value (string or binary).&#34;)
             return Multiaddr(*self, other)
         if isinstance(other, Multiaddr):
             if self.is_incomplete:
-                raise ValueError(&#34;Expected address value (string or binary).&#34;)
+                raise err.ValueError(&#34;Expected address value (string or binary).&#34;)
             return Multiaddr(*self, *other)
         return NotImplemented
 
@@ -1620,7 +1610,7 @@ Multiaddr(Addr('ip4', '127.0.0.1'), Addr('udp', '9090'), Proto('quic'))
 
     def __bytes__(self) -&gt; bytes:
         if self.is_incomplete:
-            raise ValueError(&#34;Missing address value for last protocol, cannot compute bytes.&#34;)
+            raise err.ValueError(&#34;Missing address value for last protocol, cannot compute bytes.&#34;)
         return bytes(chain.from_iterable(bytes(addr) for addr in self))
 
     def __repr__(self) -&gt; str:
@@ -1669,7 +1659,7 @@ False
 </code></pre>
 <p>Incomplete multiaddrs don't admit a byte representation:</p>
 <pre><code class="language-py">&gt;&gt;&gt; bytes(ma)
-ValueError: Missing address value for last protocol, cannot compute bytes.
+err.ValueError: Missing address value for last protocol, cannot compute bytes.
 &gt;&gt;&gt; bytes(ma2).hex()
 '047f00000191022382'
 </code></pre></div>
@@ -1700,7 +1690,7 @@ def is_incomplete(self) -&gt; bool:
 
         ```py
         &gt;&gt;&gt; bytes(ma)
-        ValueError: Missing address value for last protocol, cannot compute bytes.
+        err.ValueError: Missing address value for last protocol, cannot compute bytes.
         &gt;&gt;&gt; bytes(ma2).hex()
         &#39;047f00000191022382&#39;
         ```
@@ -1730,16 +1720,16 @@ True
 &gt;&gt;&gt; ma.index(ip4/&quot;127.0.0.1&quot; in ma)
 0
 </code></pre>
-<p>This method raises <code>ValueError</code> if the protocol/address does not appear:</p>
+<p>This method raises <code><a title="multiformats.multiaddr.err.ValueError" href="err.html#multiformats.multiaddr.err.ValueError">ValueError</a></code> if the protocol/address does not appear:</p>
 <pre><code class="language-py">&gt;&gt;&gt; ip6 = Proto(&quot;ip6&quot;)
 &gt;&gt;&gt; ip6 in ma
 False
 &gt;&gt;&gt; ma.index(ip6)
-ValueError: Protocol 'ip6' does not appear in multiaddr /ip4/127.0.0.1/udp/9090/quic
+err.ValueError: Protocol 'ip6' does not appear in multiaddr /ip4/127.0.0.1/udp/9090/quic
 &gt;&gt;&gt; ip4/&quot;127.0.0.2&quot; in ma
 False
 &gt;&gt;&gt; ma.index(ip4/&quot;127.0.0.2&quot;)
-ValueError: Address Addr('ip4', '127.0.0.2') does not appear in multiaddr /ip4/127.0.0.1/udp/9090/quic
+err.ValueError: Address Addr('ip4', '127.0.0.2') does not appear in multiaddr /ip4/127.0.0.1/udp/9090/quic
 </code></pre>
 <p>The optional <code>start</code> and <code>stop</code> arguments can be used to specify a range of indices
 within which to search for the protocol/address.</p>
@@ -1748,7 +1738,7 @@ True
 &gt;&gt;&gt; ma.index(ip4/&quot;127.0.0.1&quot;)
 0
 &gt;&gt;&gt; ma.index(ip4/&quot;127.0.0.1&quot;, start=1)
-ValueError: Address Addr('ip4', '127.0.0.1') does not appear in sub-multiaddr /udp/9090/quic of multiaddr /ip4/127.0.0.1/udp/9090/quic
+err.ValueError: Address Addr('ip4', '127.0.0.1') does not appear in sub-multiaddr /udp/9090/quic of multiaddr /ip4/127.0.0.1/udp/9090/quic
 </code></pre></div>
 <details class="source">
 <summary>
@@ -1774,18 +1764,18 @@ ValueError: Address Addr('ip4', '127.0.0.1') does not appear in sub-multiaddr /u
         0
         ```
 
-        This method raises `ValueError` if the protocol/address does not appear:
+        This method raises `err.ValueError` if the protocol/address does not appear:
 
         ```py
         &gt;&gt;&gt; ip6 = Proto(&#34;ip6&#34;)
         &gt;&gt;&gt; ip6 in ma
         False
         &gt;&gt;&gt; ma.index(ip6)
-        ValueError: Protocol &#39;ip6&#39; does not appear in multiaddr /ip4/127.0.0.1/udp/9090/quic
+        err.ValueError: Protocol &#39;ip6&#39; does not appear in multiaddr /ip4/127.0.0.1/udp/9090/quic
         &gt;&gt;&gt; ip4/&#34;127.0.0.2&#34; in ma
         False
         &gt;&gt;&gt; ma.index(ip4/&#34;127.0.0.2&#34;)
-        ValueError: Address Addr(&#39;ip4&#39;, &#39;127.0.0.2&#39;) does not appear in multiaddr /ip4/127.0.0.1/udp/9090/quic
+        err.ValueError: Address Addr(&#39;ip4&#39;, &#39;127.0.0.2&#39;) does not appear in multiaddr /ip4/127.0.0.1/udp/9090/quic
         ```
 
         The optional `start` and `stop` arguments can be used to specify a range of indices
@@ -1797,7 +1787,7 @@ ValueError: Address Addr('ip4', '127.0.0.1') does not appear in sub-multiaddr /u
         &gt;&gt;&gt; ma.index(ip4/&#34;127.0.0.1&#34;)
         0
         &gt;&gt;&gt; ma.index(ip4/&#34;127.0.0.1&#34;, start=1)
-        ValueError: Address Addr(&#39;ip4&#39;, &#39;127.0.0.1&#39;) does not appear in sub-multiaddr /udp/9090/quic of multiaddr /ip4/127.0.0.1/udp/9090/quic
+        err.ValueError: Address Addr(&#39;ip4&#39;, &#39;127.0.0.1&#39;) does not appear in sub-multiaddr /udp/9090/quic of multiaddr /ip4/127.0.0.1/udp/9090/quic
         ```
     &#34;&#34;&#34;
     validate(start, int)
@@ -1810,13 +1800,13 @@ ValueError: Address Addr('ip4', '127.0.0.1') does not appear in sub-multiaddr /u
         validate(value, Addr)
         proto = value.proto
     if proto not in self._proto_map:
-        raise ValueError(f&#34;Protocol {repr(proto.name)} does not appear in multiaddr {str(self)}&#34;)
+        raise err.ValueError(f&#34;Protocol {repr(proto.name)} does not appear in multiaddr {str(self)}&#34;)
     idx = self._proto_map[proto]
     if isinstance(value, Addr):
         if self[idx] != value:
-            raise ValueError(f&#34;Address {repr(value)} does not appear in multiaddr {str(self)}&#34;)
+            raise err.ValueError(f&#34;Address {repr(value)} does not appear in multiaddr {str(self)}&#34;)
         if not start &lt;= idx &lt; stop:
-            raise ValueError(f&#34;Address {repr(value)} does not appear in sub-multiaddr {str(self[start:stop])} &#34;
+            raise err.ValueError(f&#34;Address {repr(value)} does not appear in sub-multiaddr {str(self[start:stop])} &#34;
                              f&#34;of multiaddr {str(self)}&#34;)
     return idx</code></pre>
 </details>
@@ -1891,11 +1881,11 @@ Proto(&quot;ip4&quot;)
             validate(codec, Multicodec)
             existing_codec = multicodec.get(codec.name)
             if existing_codec != codec:
-                raise ValueError(f&#34;Multicodec named {repr(codec.name)} exists, but is not the one given.&#34;)
+                raise err.ValueError(f&#34;Multicodec named {repr(codec.name)} exists, but is not the one given.&#34;)
             codec = existing_codec
         # check that the codec is a multiaddr multicodec:
         if codec.tag != &#34;multiaddr&#34;:
-            raise ValueError(f&#34;Multicodec named {repr(codec.name)} exists, but is not a multiaddr.&#34;)
+            raise err.ValueError(f&#34;Multicodec named {repr(codec.name)} exists, but is not a multiaddr.&#34;)
         implementation: ProtoImpl = raw.get(codec.name)
         _cache = Proto._cache
         if codec.name in _cache:
@@ -2059,12 +2049,12 @@ Proto(&quot;ip4&quot;)
         try:
             self.validate(addr_value)
             return True
-        except AddressValueError:
+        except err.ValueError:
             return False
 
     def validate(self, addr_value: Union[str, BytesLike]) -&gt; Tuple[str, bytes]:
         &#34;&#34;&#34;
-            Raises `ValueError` if `not self.is_valid(addr_value)`.
+            Raises `err.ValueError` if `not self.is_valid(addr_value)`.
             If successful, returns a pair of the string and bytes representations of the address value.
 
             Example usage:
@@ -2073,21 +2063,21 @@ Proto(&quot;ip4&quot;)
             &gt;&gt;&gt; ip4.validate(&#34;192.168.1.1&#34;)
             (&#39;192.168.1.1&#39;, b&#39;\\xc0\\xa8\\x01\\x01&#39;)
             &gt;&gt;&gt; ip4.validate(&#34;192.168&#34;)
-            ipaddress.AddressValueError: Expected 4 octets in &#39;192.168&#39;
+            err.ValueError: Expected 4 octets in &#39;192.168&#39;
             ```
         &#34;&#34;&#34;
         raw_encoder, raw_decoder, addr_size = self.implementation
         if addr_size == 0:
-            raise AddressValueError(f&#34;Protocol admits no address value, but {repr(addr_value)} was passed.&#34;)
+            raise err.ValueError(f&#34;Protocol admits no address value, but {repr(addr_value)} was passed.&#34;)
         if isinstance(addr_value, byteslike):
             assert raw_decoder is not None
-            addr_value_str = raw_decoder(addr_value) # raises AddressValueError if addr_value is invalid
+            addr_value_str = raw_decoder(addr_value) # raises err.ValueError if addr_value is invalid
             if not isinstance(addr_value, bytes):
                 addr_value = bytes(addr_value)
             return addr_value_str, addr_value
         validate(addr_value, str)
         assert raw_encoder is not None
-        addr_value_bytes = raw_encoder(addr_value) # raises AddressValueError if addr_value is invalid
+        addr_value_bytes = raw_encoder(addr_value) # raises err.ValueError if addr_value is invalid
         return addr_value, addr_value_bytes
 
     def addr(self, value: Union[str, BytesLike]) -&gt; &#34;Addr&#34;:
@@ -2141,7 +2131,7 @@ Proto(&quot;ip4&quot;)
 
     def __bytes__(self) -&gt; bytes:
         if self.addr_size != 0:
-            raise ValueError(&#34;Missing address value for protocol, cannot compute bytes.&#34;)
+            raise err.ValueError(&#34;Missing address value for protocol, cannot compute bytes.&#34;)
         return varint.encode(self.code)
 
     def __repr__(self) -&gt; str:
@@ -2486,7 +2476,7 @@ True
     try:
         self.validate(addr_value)
         return True
-    except AddressValueError:
+    except err.ValueError:
         return False</code></pre>
 </details>
 </dd>
@@ -2494,13 +2484,13 @@ True
 <span>def <span class="ident">validate</span></span>(<span>self, addr_value: Union[str, bytes, bytearray, memoryview]) ‑> Tuple[str, bytes]</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Raises <code>ValueError</code> if <code>not self.is_valid(addr_value)</code>.
+<div class="desc"><p>Raises <code><a title="multiformats.multiaddr.err.ValueError" href="err.html#multiformats.multiaddr.err.ValueError">ValueError</a></code> if <code>not self.is_valid(addr_value)</code>.
 If successful, returns a pair of the string and bytes representations of the address value.</p>
 <p>Example usage:</p>
 <pre><code class="language-py">&gt;&gt;&gt; ip4.validate(&quot;192.168.1.1&quot;)
 ('192.168.1.1', b'\xc0\xa8\x01\x01')
 &gt;&gt;&gt; ip4.validate(&quot;192.168&quot;)
-ipaddress.AddressValueError: Expected 4 octets in '192.168'
+err.ValueError: Expected 4 octets in '192.168'
 </code></pre></div>
 <details class="source">
 <summary>
@@ -2508,7 +2498,7 @@ ipaddress.AddressValueError: Expected 4 octets in '192.168'
 </summary>
 <pre><code class="python">def validate(self, addr_value: Union[str, BytesLike]) -&gt; Tuple[str, bytes]:
     &#34;&#34;&#34;
-        Raises `ValueError` if `not self.is_valid(addr_value)`.
+        Raises `err.ValueError` if `not self.is_valid(addr_value)`.
         If successful, returns a pair of the string and bytes representations of the address value.
 
         Example usage:
@@ -2517,21 +2507,21 @@ ipaddress.AddressValueError: Expected 4 octets in '192.168'
         &gt;&gt;&gt; ip4.validate(&#34;192.168.1.1&#34;)
         (&#39;192.168.1.1&#39;, b&#39;\\xc0\\xa8\\x01\\x01&#39;)
         &gt;&gt;&gt; ip4.validate(&#34;192.168&#34;)
-        ipaddress.AddressValueError: Expected 4 octets in &#39;192.168&#39;
+        err.ValueError: Expected 4 octets in &#39;192.168&#39;
         ```
     &#34;&#34;&#34;
     raw_encoder, raw_decoder, addr_size = self.implementation
     if addr_size == 0:
-        raise AddressValueError(f&#34;Protocol admits no address value, but {repr(addr_value)} was passed.&#34;)
+        raise err.ValueError(f&#34;Protocol admits no address value, but {repr(addr_value)} was passed.&#34;)
     if isinstance(addr_value, byteslike):
         assert raw_decoder is not None
-        addr_value_str = raw_decoder(addr_value) # raises AddressValueError if addr_value is invalid
+        addr_value_str = raw_decoder(addr_value) # raises err.ValueError if addr_value is invalid
         if not isinstance(addr_value, bytes):
             addr_value = bytes(addr_value)
         return addr_value_str, addr_value
     validate(addr_value, str)
     assert raw_encoder is not None
-    addr_value_bytes = raw_encoder(addr_value) # raises AddressValueError if addr_value is invalid
+    addr_value_bytes = raw_encoder(addr_value) # raises err.ValueError if addr_value is invalid
     return addr_value, addr_value_bytes</code></pre>
 </details>
 </dd>
@@ -2553,6 +2543,7 @@ ipaddress.AddressValueError: Expected 4 octets in '192.168'
 </li>
 <li><h3><a href="#header-submodules">Sub-modules</a></h3>
 <ul>
+<li><code><a title="multiformats.multiaddr.err" href="err.html">multiformats.multiaddr.err</a></code></li>
 <li><code><a title="multiformats.multiaddr.raw" href="raw.html">multiformats.multiaddr.raw</a></code></li>
 </ul>
 </li>

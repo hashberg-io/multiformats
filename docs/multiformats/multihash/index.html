@@ -24,7 +24,7 @@
 </header>
 <section id="section-intro">
 <p>Implementation of the <a href="https://github.com/multiformats/multihash">multihash spec</a>.</p>
-<p>Core functionality is provided by the <code><a title="multiformats.multihash.digest" href="#multiformats.multihash.digest">digest()</a></code>, <code><a title="multiformats.multihash.encode" href="#multiformats.multihash.encode">encode()</a></code>, <code><a title="multiformats.multihash.decode" href="#multiformats.multihash.decode">decode()</a></code> functions,
+<p>Core functionality is provided by the <code><a title="multiformats.multihash.digest" href="#multiformats.multihash.digest">digest()</a></code>, <code><a title="multiformats.multihash.wrap" href="#multiformats.multihash.wrap">wrap()</a></code>, <code><a title="multiformats.multihash.unwrap" href="#multiformats.multihash.unwrap">unwrap()</a></code> functions,
 or the correspondingly-named methods of the <code><a title="multiformats.multihash.Multihash" href="#multiformats.multihash.Multihash">Multihash</a></code> class.
 The <code><a title="multiformats.multihash.digest" href="#multiformats.multihash.digest">digest()</a></code> function and <code><a title="multiformats.multihash.Multihash.digest" href="#multiformats.multihash.Multihash.digest">Multihash.digest()</a></code> method can be used to create a multihash digest directly from data:</p>
 <pre><code class="language-py">&gt;&gt;&gt; data = b&quot;Hello world!&quot;
@@ -44,35 +44,35 @@ Optionally, a smaller digest size can be specified to produce truncated hashes:<
 &gt;&gt;&gt; multihash_digest.hex()
 '1214c0535e4be2b79ffd93291305436bf889314e4a3f' # 20-bytes truncated hash
 </code></pre>
-<p>The <code><a title="multiformats.multihash.decode" href="#multiformats.multihash.decode">decode()</a></code> function can be used to extract the raw digest from a multihash digest:</p>
+<p>The <code><a title="multiformats.multihash.unwrap" href="#multiformats.multihash.unwrap">unwrap()</a></code> function can be used to extract the raw digest from a multihash digest:</p>
 <pre><code class="language-py">&gt;&gt;&gt; digest.hex()
 '1214c0535e4be2b79ffd93291305436bf889314e4a3f'
-&gt;&gt;&gt; raw_digest = multihash.decode(digest)
+&gt;&gt;&gt; raw_digest = multihash.unwrap(digest)
 &gt;&gt;&gt; raw_digest.hex()
     'c0535e4be2b79ffd93291305436bf889314e4a3f'
 </code></pre>
-<p>The <code><a title="multiformats.multihash.Multihash.digest" href="#multiformats.multihash.Multihash.digest">Multihash.digest()</a></code> performs the same functionality, but additionally checks
+<p>The <code><a title="multiformats.multihash.Multihash.unwrap" href="#multiformats.multihash.Multihash.unwrap">Multihash.unwrap()</a></code> method performs the same functionality, but additionally checks
 that the multihash digest is valid for the multihash:</p>
-<pre><code class="language-py">&gt;&gt;&gt; raw_digest = sha2_256.decode(digest)
+<pre><code class="language-py">&gt;&gt;&gt; raw_digest = sha2_256.unwrap(digest)
 &gt;&gt;&gt; raw_digest.hex()
     'c0535e4be2b79ffd93291305436bf889314e4a3f'
 </code></pre>
 <pre><code class="language-py">&gt;&gt;&gt; sha1 = multihash.get(&quot;sha1&quot;)
 &gt;&gt;&gt; (sha2_256.code, sha1.code)
 (18, 17)
-&gt;&gt;&gt; sha1.decode(digest)
-ValueError: Decoded code 18 differs from multihash code 17.
+&gt;&gt;&gt; sha1.unwrap(digest)
+err.ValueError: Decoded code 18 differs from multihash code 17.
 </code></pre>
-<p>The <code><a title="multiformats.multihash.encode" href="#multiformats.multihash.encode">encode()</a></code> function and <code><a title="multiformats.multihash.Multihash.encode" href="#multiformats.multihash.Multihash.encode">Multihash.encode()</a></code> method can be used to encode a raw digest into a multihash digest:</p>
+<p>The <code><a title="multiformats.multihash.wrap" href="#multiformats.multihash.wrap">wrap()</a></code> function and <code><a title="multiformats.multihash.Multihash.wrap" href="#multiformats.multihash.Multihash.wrap">Multihash.wrap()</a></code> method can be used to wrap a raw digest into a multihash digest:</p>
 <pre><code class="language-py">&gt;&gt;&gt; raw_digest.hex()
     'c0535e4be2b79ffd93291305436bf889314e4a3f'
-&gt;&gt;&gt; multihash.encode(raw_digest, &quot;sha2-256&quot;).hex()
+&gt;&gt;&gt; multihash.wrap(raw_digest, &quot;sha2-256&quot;).hex()
 '1214c0535e4be2b79ffd93291305436bf889314e4a3f'
 </code></pre>
-<pre><code class="language-py">&gt;&gt;&gt; sha2_256.encode(raw_digest).hex()
+<pre><code class="language-py">&gt;&gt;&gt; sha2_256.wrap(raw_digest).hex()
 '1214c0535e4be2b79ffd93291305436bf889314e4a3f'
 </code></pre>
-<p>Note the both multihash code and digest length are encoded as varints
+<p>Note the both multihash code and digest length are wrapped as varints
 (see the <code><a title="multiformats.varint" href="../varint.html">multiformats.varint</a></code> module) and can span multiple bytes:</p>
 <pre><code class="language-py">&gt;&gt;&gt; skein1024_1024 = multihash.get(&quot;skein1024-1024&quot;)
 &gt;&gt;&gt; skein1024_1024.codec
@@ -122,7 +122,7 @@ Multihash(codec='sha1')
 <pre><code class="python">&#34;&#34;&#34;
     Implementation of the [multihash spec](https://github.com/multiformats/multihash).
 
-    Core functionality is provided by the `digest`, `encode`, `decode` functions,
+    Core functionality is provided by the `digest`, `wrap`, `unwrap` functions,
     or the correspondingly-named methods of the `Multihash` class.
     The `digest` function and `Multihash.digest` method can be used to create a multihash digest directly from data:
 
@@ -150,21 +150,21 @@ Multihash(codec='sha1')
     &#39;1214c0535e4be2b79ffd93291305436bf889314e4a3f&#39; # 20-bytes truncated hash
     ```
 
-    The `decode` function can be used to extract the raw digest from a multihash digest:
+    The `unwrap` function can be used to extract the raw digest from a multihash digest:
 
     ```py
     &gt;&gt;&gt; digest.hex()
     &#39;1214c0535e4be2b79ffd93291305436bf889314e4a3f&#39;
-    &gt;&gt;&gt; raw_digest = multihash.decode(digest)
+    &gt;&gt;&gt; raw_digest = multihash.unwrap(digest)
     &gt;&gt;&gt; raw_digest.hex()
         &#39;c0535e4be2b79ffd93291305436bf889314e4a3f&#39;
     ```
 
-    The `Multihash.digest` performs the same functionality, but additionally checks
+    The `Multihash.unwrap` method performs the same functionality, but additionally checks
     that the multihash digest is valid for the multihash:
 
     ```py
-    &gt;&gt;&gt; raw_digest = sha2_256.decode(digest)
+    &gt;&gt;&gt; raw_digest = sha2_256.unwrap(digest)
     &gt;&gt;&gt; raw_digest.hex()
         &#39;c0535e4be2b79ffd93291305436bf889314e4a3f&#39;
     ```
@@ -173,25 +173,25 @@ Multihash(codec='sha1')
     &gt;&gt;&gt; sha1 = multihash.get(&#34;sha1&#34;)
     &gt;&gt;&gt; (sha2_256.code, sha1.code)
     (18, 17)
-    &gt;&gt;&gt; sha1.decode(digest)
-    ValueError: Decoded code 18 differs from multihash code 17.
+    &gt;&gt;&gt; sha1.unwrap(digest)
+    err.ValueError: Decoded code 18 differs from multihash code 17.
     ```
 
-    The `encode` function and `Multihash.encode` method can be used to encode a raw digest into a multihash digest:
+    The `wrap` function and `Multihash.wrap` method can be used to wrap a raw digest into a multihash digest:
 
     ```py
     &gt;&gt;&gt; raw_digest.hex()
         &#39;c0535e4be2b79ffd93291305436bf889314e4a3f&#39;
-    &gt;&gt;&gt; multihash.encode(raw_digest, &#34;sha2-256&#34;).hex()
+    &gt;&gt;&gt; multihash.wrap(raw_digest, &#34;sha2-256&#34;).hex()
     &#39;1214c0535e4be2b79ffd93291305436bf889314e4a3f&#39;
     ```
 
     ```py
-    &gt;&gt;&gt; sha2_256.encode(raw_digest).hex()
+    &gt;&gt;&gt; sha2_256.wrap(raw_digest).hex()
     &#39;1214c0535e4be2b79ffd93291305436bf889314e4a3f&#39;
     ```
 
-    Note the both multihash code and digest length are encoded as varints
+    Note the both multihash code and digest length are wrapped as varints
     (see the `multiformats.varint` module) and can span multiple bytes:
 
     ```py
@@ -256,11 +256,11 @@ from typing_extensions import Literal
 from typing_validation import validate
 
 from multiformats import multicodec, varint
-from multiformats.multicodec import Multicodec
+from multiformats.multicodec import Multicodec, _hexcode
 from multiformats.varint import BytesLike
 
-from . import raw
-from .raw import Hashfun
+from . import raw, err
+from .raw import Hashfun, MultihashImpl
 
 class Multihash:
     &#34;&#34;&#34;
@@ -279,8 +279,9 @@ class Multihash:
     _cache: ClassVar[WeakValueDictionary] = WeakValueDictionary() # type: ignore
 
     _codec: Multicodec
+    _implementation: MultihashImpl
 
-    __slots__ = (&#34;__weakref__&#34;, &#34;_codec&#34;)
+    __slots__ = (&#34;__weakref__&#34;, &#34;_codec&#34;, &#34;_implementation&#34;)
 
     def __new__(cls, *, codec: Union[str, int, Multicodec]) -&gt; &#34;Multihash&#34;:
         # check that the codec exists:
@@ -292,23 +293,25 @@ class Multihash:
             validate(codec, Multicodec)
             existing_codec = multicodec.get(codec.name)
             if existing_codec != codec:
-                raise ValueError(f&#34;Multicodec named {repr(codec.name)} exists, but is not the one given.&#34;)
+                raise err.ValueError(f&#34;Multicodec named {repr(codec.name)} exists, but is not the one given.&#34;)
             codec = existing_codec
         # check that the codec is a multihash multicodec:
         if codec.tag != &#34;multihash&#34;:
-            raise ValueError(f&#34;Multicodec named {repr(codec.name)} exists, but is not a multihash.&#34;)
+            raise err.ValueError(f&#34;Multicodec named {repr(codec.name)} exists, but is not a multihash.&#34;)
+        implementation: MultihashImpl = raw.get(codec.name)
         _cache = Multihash._cache
         if codec.name in _cache:
             # if a multihash instance with this name is already registered
             instance: Multihash = _cache[codec.name]
-            if instance.codec == codec:
-                # if the codec did not change, return the existing instance
+            if instance.codec == codec and instance._implementation == implementation:
+                # nothing changed, can use the existing instance
                 return instance
             # otherwise remove the existing instance
             del _cache[codec.name]
         # create a fresh instance, register it and return it
         instance = super().__new__(cls)
         instance._codec = codec
+        instance._implementation = implementation
         _cache[codec.name] = instance
         return instance
 
@@ -361,7 +364,7 @@ class Multihash:
         &#34;&#34;&#34;
             The maximum size (in bytes) for raw digests of this multihash,
             or `None` if there is no maximum size.
-            Used to sense-check the encoded/decoded raw digests.
+            Used to sense-check the wrapped/unwrapped raw digests.
 
             Example usage:
 
@@ -375,7 +378,7 @@ class Multihash:
         return max_digest_size
 
     @property
-    def implementation(self) -&gt; Tuple[Hashfun, Optional[int]]:
+    def implementation(self) -&gt;MultihashImpl:
         &#34;&#34;&#34;
             Returns the implementation of a multihash multicodec, as a pair:
 
@@ -395,26 +398,13 @@ class Multihash:
             (&lt;function _hashlib_sha.&lt;locals&gt;.hashfun at 0x0000029396E22280&gt;, 32)
             ```
         &#34;&#34;&#34;
-        hash_function, max_digest_size = raw.get(self.name)
-        return hash_function, max_digest_size
+        return self._implementation
+        # hash_function, max_digest_size = raw.get(self.name)
+        # return hash_function, max_digest_size
 
-    @property
-    def is_implemented(self) -&gt; bool:
+    def wrap(self, raw_digest: BytesLike) -&gt; bytes:
         &#34;&#34;&#34;
-            Whether this multihash has an implementation (see `implementation`).
-
-            Example usage:
-
-            ```py
-            &gt;&gt;&gt; sha2_256.is_implemented
-            True
-            ```
-        &#34;&#34;&#34;
-        return raw.exists(self.name)
-
-    def encode(self, raw_digest: BytesLike) -&gt; bytes:
-        &#34;&#34;&#34;
-            Encodes a raw digest into a multihash digest:
+            Wraps a raw digest into a multihash digest:
 
             ```
             &lt;raw digest&gt; -&gt; &lt;code&gt;&lt;size&gt;&lt;raw digest&gt;
@@ -426,23 +416,23 @@ class Multihash:
             &gt;&gt;&gt; sha2_256 = multihash.get(&#34;sha2-256&#34;)
             &gt;&gt;&gt; raw_digest = bytes.fromhex(
             ... &#34;c0535e4be2b79ffd93291305436bf889314e4a3f&#34;)
-            &gt;&gt;&gt; sha2_256.encode(raw_digest).hex()
+            &gt;&gt;&gt; sha2_256.wrap(raw_digest).hex()
             &#34;1214c0535e4be2b79ffd93291305436bf889314e4a3f&#34;
             ```
 
-            See `encode` for more information.
+            See `wrap` for more information.
         &#34;&#34;&#34;
         validate(raw_digest, BytesLike)
         _, max_digest_size = self.implementation
         size = len(raw_digest)
         if max_digest_size is not None and size &gt; max_digest_size:
-            raise ValueError(f&#34;Digest size {max_digest_size} is listed for {self.name}, &#34;
-                             f&#34;but a digest of larger size {size} was given to be encoded.&#34;)
-        return varint.encode(self.code)+varint.encode(size)+raw_digest
+            raise err.ValueError(f&#34;Digest size {max_digest_size} is listed for {self.name}, &#34;
+                             f&#34;but a digest of larger size {size} was given to be wrapped.&#34;)
+        return self.codec.wrap(varint.encode(size)+raw_digest)
 
     def digest(self, data: BytesLike, *, size: Optional[int] = None) -&gt; bytes:
         &#34;&#34;&#34;
-            Computes the raw digest of the given data and encodes it into a multihash digest.
+            Computes the raw digest of the given data and wraps it into a multihash digest.
             The optional keyword argument `size` can be used to truncate the
             raw digest to be of the given size (or less) before encoding.
 
@@ -465,11 +455,12 @@ class Multihash:
         raw_digest = hf(data)
         if size is not None:
             raw_digest = raw_digest[:size] # truncate digest
-        return varint.encode(self.code)+varint.encode(len(raw_digest))+raw_digest
+        size = len(raw_digest)
+        return self.codec.wrap(varint.encode(size)+raw_digest)
 
-    def decode(self, digest: Union[BytesLike, BufferedIOBase]) -&gt; bytes:
+    def unwrap(self, digest: Union[BytesLike, BufferedIOBase]) -&gt; bytes:
         &#34;&#34;&#34;
-            Decodes a multihash digest into a hash digest:
+            Unwraps a multihash digest into a hash digest:
 
             ```
             &lt;code&gt;&lt;size&gt;&lt;raw digest&gt; -&gt; &lt;raw digest&gt;
@@ -484,14 +475,14 @@ class Multihash:
             &gt;&gt;&gt; sha2_256 = multihash.get(&#34;sha2-256&#34;)
             &gt;&gt;&gt; digest = bytes.fromhex(
             ... &#34;1214c0535e4be2b79ffd93291305436bf889314e4a3f&#34;)
-            &gt;&gt;&gt; sha2_256.decode(digest).hex()
+            &gt;&gt;&gt; sha2_256.unwrap(digest).hex()
             &#39;c0535e4be2b79ffd93291305436bf889314e4a3f&#39;
             ```
 
         &#34;&#34;&#34;
-        code, raw_digest = decode_raw(digest)
+        code, raw_digest = unwrap_raw(digest)
         if code != self.code:
-            raise ValueError(f&#34;Decoded code {code} differs from multihash code {self.code}.&#34;)
+            raise err.ValueError(f&#34;Decoded code {code} differs from multihash code {self.code}.&#34;)
         _validate_raw_digest_size(self.name, raw_digest, self.max_digest_size)
         return raw_digest
 
@@ -519,7 +510,7 @@ class Multihash:
 def get(name: Optional[str] = None, *, code: Optional[int] = None) -&gt; Multihash:
     &#34;&#34;&#34;
         Gets the multihash multicodec with given name or code.
-        Raises `KeyError` if no such multihash exists.
+        Raises `err.KeyError` if the multihash does not exist or is not implemented.
         Exactly one of `name` and `code` must be specified.
 
         Example usage:
@@ -533,17 +524,17 @@ def get(name: Optional[str] = None, *, code: Optional[int] = None) -&gt; Multiha
 
     &#34;&#34;&#34;
     if name is not None and code is not None:
-        raise ValueError(&#34;Must specify at most one between &#39;name&#39; and &#39;code&#39;.&#34;)
+        raise err.ValueError(&#34;Must specify at most one between &#39;name&#39; and &#39;code&#39;.&#34;)
     if name is not None:
         return Multihash(codec=name)
     if code is not None:
         return Multihash(codec=code)
-    raise ValueError(&#34;Must specify at least one between &#39;name&#39; and &#39;code&#39;.&#34;)
+    raise err.ValueError(&#34;Must specify at least one between &#39;name&#39; and &#39;code&#39;.&#34;)
 
 
 def exists(name: Optional[str] = None, *, code: Optional[int] = None) -&gt; bool:
     &#34;&#34;&#34;
-        Checks whether there is a multihash multicodec with the given name or code.
+        Checks whether a multihash multicodec with the given name or code exists.
         Exactly one of `name` and `code` must be specified.
         This function returns `False` if a multicodec by given name or code exists,
         but is not tagged &#39;multihash&#39;.
@@ -570,11 +561,31 @@ def exists(name: Optional[str] = None, *, code: Optional[int] = None) -&gt; bool
     return multihash.tag == &#34;multihash&#34;
 
 
-def from_digest(multihash_digest: Union[BytesLike, memoryview]) -&gt; Multihash:
+def is_implemented(name: Optional[str] = None, *, code: Optional[int] = None) -&gt; bool:
+    &#34;&#34;&#34;
+        Checks whether a multihash with the given name or code exists and is implemented.
+        Exactly one of `name` and `code` must be specified.
+
+        Example usage:
+
+        ```py
+        &gt;&gt;&gt; multihash.is_implemented(&#34;sha1&#34;)
+        True
+        &gt;&gt;&gt; multihash.is_implemented(code=0x11)
+        True
+        ```
+    &#34;&#34;&#34;
+    if not exists(name, code=code):
+        return False
+    multihash = multicodec.get(name, code=code)
+    return raw.exists(multihash.name)
+
+
+def from_digest(multihash_digest: BytesLike) -&gt; Multihash:
     &#34;&#34;&#34;
         Returns the multihash multicodec for the given digest,
         according to the code specified by its prefix.
-        Raises `KeyError` if no multihash exists with that code.
+        Raises `err.KeyError` if no multihash exists with that code.
 
         Example usage:
 
@@ -585,13 +596,13 @@ def from_digest(multihash_digest: Union[BytesLike, memoryview]) -&gt; Multihash:
         ```
 
     &#34;&#34;&#34;
-    code, _, _ = varint.decode_raw(multihash_digest)
+    code, _, _ = multicodec.unwrap_raw(multihash_digest)
     return get(code=code)
 
 
-def encode(raw_digest: BytesLike, multihash: Union[str, int, Multihash]) -&gt; bytes:
+def wrap(raw_digest: BytesLike, multihash: Union[str, int, Multihash]) -&gt; bytes:
     &#34;&#34;&#34;
-        Encodes a raw digest into a multihash digest using the given multihash:
+        Wraps a raw digest into a multihash digest using the given multihash:
 
         ```
         &lt;raw digest&gt; -&gt; &lt;code&gt;&lt;size&gt;&lt;raw digest&gt;
@@ -608,7 +619,7 @@ def encode(raw_digest: BytesLike, multihash: Union[str, int, Multihash]) -&gt; b
         &gt;&gt;&gt; raw_digest = bytes.fromhex(&#34;c0535e4be2b79ffd93291305436bf889314e4a3f&#34;)
         &gt;&gt;&gt; len(raw_digest)
         20
-        &gt;&gt;&gt; multihash.encode(raw_digest, &#34;sha2-256&#34;).hex()
+        &gt;&gt;&gt; multihash.wrap(raw_digest, &#34;sha2-256&#34;).hex()
         &#34;1214c0535e4be2b79ffd93291305436bf889314e4a3f&#34;
         #^^   code 0x12 for multihash multicodec &#34;sha2-256&#34;
         #  ^^ truncated hash length 0x14 = 20 bytes
@@ -616,10 +627,10 @@ def encode(raw_digest: BytesLike, multihash: Union[str, int, Multihash]) -&gt; b
 
         Note that all digests are `bytes` objects, represented here as hex strings for clarity:
 
-        ```raw_digest
+        ```py
         &gt;&gt;&gt; hash_digest
         b&#39;\\xc0S^K\\xe2\\xb7\\x9f\\xfd\\x93)\\x13\\x05Ck\\xf8\\x891NJ?&#39;
-        &gt;&gt;&gt; multihash.encode(raw_digest, &#34;sha2-256&#34;)
+        &gt;&gt;&gt; multihash.wrap(raw_digest, &#34;sha2-256&#34;)
         b&#39;\\x12\\x14\\xc0S^K\\xe2\\xb7\\x9f\\xfd\\x93)\\x13\\x05Ck\\xf8\\x891NJ?&#39;
         # ^^^^     0x12 -&gt; multihash multicodec &#34;sha2-256&#34;
         #     ^^^^ 0x14 -&gt; truncated hash length of 20 bytes
@@ -628,12 +639,12 @@ def encode(raw_digest: BytesLike, multihash: Union[str, int, Multihash]) -&gt; b
     &#34;&#34;&#34;
     if not isinstance(multihash, Multihash):
         multihash = Multihash(codec=multihash)
-    return multihash.encode(raw_digest)
+    return multihash.wrap(raw_digest)
 
 
 def digest(data: BytesLike, multihash: Union[str, int, Multihash], *, size: Optional[int] = None) -&gt; bytes:
     &#34;&#34;&#34;
-        Computes the raw digest of the given data and encodes it into a multihash digest.
+        Computes the raw digest of the given data and wraps it into a multihash digest.
         The optional keyword argument `size` can be used to truncate the
         raw digest to be of the given size (or less) before encoding.
 
@@ -652,7 +663,7 @@ def digest(data: BytesLike, multihash: Union[str, int, Multihash], *, size: Opti
         #  ^^ truncated hash length 0x14 = 20 bytes
         ```
 
-        Note both multihash code and digest length are encoded as varints
+        Note both multihash code and digest length are wrapped as varints
         (see the `multiformats.varint` module) and can span multiple bytes:
 
         ```py
@@ -678,14 +689,14 @@ def digest(data: BytesLike, multihash: Union[str, int, Multihash], *, size: Opti
 
 def _validate_raw_digest_size(name: str, raw_digest: bytes, max_digest_size: Optional[int]) -&gt; None:
     if max_digest_size is not None and len(raw_digest) &gt; max_digest_size:
-        raise ValueError(f&#34;Multihash {name} has max digest size {max_digest_size}, &#34;
-                         f&#34;but a digest of larger size {len(raw_digest)} was decoded instead.&#34;)
+        raise err.ValueError(f&#34;Multihash {name} has max digest size {max_digest_size}, &#34;
+                         f&#34;but a digest of larger size {len(raw_digest)} was unwrapped instead.&#34;)
 
 
-def decode(digest: Union[BytesLike, BufferedIOBase],
+def unwrap(digest: Union[BytesLike, BufferedIOBase],
            multihash: Union[None, str, int, Multihash]=None) -&gt; bytes:
     &#34;&#34;&#34;
-        Decodes a multihash digest into a raw digest:
+        Unwraps a multihash digest into a raw digest:
 
         ```
         &lt;code&gt;&lt;size&gt;&lt;raw digest&gt; -&gt; &lt;raw digest&gt;
@@ -698,23 +709,24 @@ def decode(digest: Union[BytesLike, BufferedIOBase],
         and no further bytes are consumed from the stream.
 
         If `multihash` is not `None`, the function additionally enforces that the code from the
-        multihash digest matches the code of the multihash codec (calls `Multihash.decode` under the hood to do so).
-        Regardless, the function checks that the multihash codec with code specified by the multihash digest exists.
+        multihash digest matches the code of the multihash (calls `Multihash.unwrap` under the hood to do so).
+        Regardless, the function checks that the multihash with code specified by the multihash digest exists
+        and is implemented.
 
         Example usage:
 
         ```py
         &gt;&gt;&gt; digest = bytes.fromhex(
         ... &#34;1214c0535e4be2b79ffd93291305436bf889314e4a3f&#34;)
-        &gt;&gt;&gt; multihash.decode(digest, &#34;sha2-256&#34;).hex()
+        &gt;&gt;&gt; multihash.unwrap(digest, &#34;sha2-256&#34;).hex()
         &#39;c0535e4be2b79ffd93291305436bf889314e4a3f&#39;
         ```
     &#34;&#34;&#34;
     if multihash is not None:
         if not isinstance(multihash, Multihash):
             multihash = Multihash(codec=multihash)
-        return multihash.decode(digest)
-    code, raw_digest = decode_raw(digest)
+        return multihash.unwrap(digest)
+    code, raw_digest = unwrap_raw(digest)
     multihash = Multihash(codec=code)
     _validate_raw_digest_size(multihash.name, raw_digest, multihash.max_digest_size)
     return raw_digest
@@ -723,29 +735,30 @@ def decode(digest: Union[BytesLike, BufferedIOBase],
 _BufferedIOT = TypeVar(&#34;_BufferedIOT&#34;, bound=BufferedIOBase)
 
 @overload
-def decode_raw(multihash_digest: BufferedIOBase) -&gt; Tuple[int, bytes]:
+def unwrap_raw(multihash_digest: BufferedIOBase) -&gt; Tuple[int, bytes]:
     ...
 
 @overload
-def decode_raw(multihash_digest: BytesLike) -&gt; Tuple[int, memoryview]:
+def unwrap_raw(multihash_digest: BytesLike) -&gt; Tuple[int, memoryview]:
     ...
 
-def decode_raw(multihash_digest: Union[BytesLike, BufferedIOBase]) -&gt; Tuple[int, Union[bytes, memoryview]]:
+def unwrap_raw(multihash_digest: Union[BytesLike, BufferedIOBase]) -&gt; Tuple[int, Union[bytes, memoryview]]:
     &#34;&#34;&#34;
-        Decodes a multihash digest into a code and raw digest pair:
+        Unwraps a multihash digest into a code and raw digest pair:
 
         ```
         &lt;code&gt;&lt;size&gt;&lt;hash digest&gt; -&gt; (&lt;code&gt;, &lt;hash digest&gt;)
         ```
 
-        Unlike `decode`, this function performs no checks involving the multihash code,
-        which is simply returned as an integer.
+        The function checks that the multihash codec with code specified by the multihash digest exists,
+        but does not check whether it is implemented or not.
 
         Example usage:
 
         ```py
-        &gt;&gt;&gt; multihash_digest = bytes.fromhex(&#34;1214c0535e4be2b79ffd93291305436bf889314e4a3f&#34;)
-        &gt;&gt;&gt; code, digest = multihash.decode_raw(multihash_digest, &#34;sha2-256&#34;)
+        &gt;&gt;&gt; multihash_digest = bytes.fromhex(
+        ... &#34;1214c0535e4be2b79ffd93291305436bf889314e4a3f&#34;)
+        &gt;&gt;&gt; code, digest = multihash.unwrap_raw(multihash_digest, &#34;sha2-256&#34;)
         &gt;&gt;&gt; code
         18 # the code 0x12 of &#39;sha2-256&#39;
         &gt;&gt;&gt; digest.hex()
@@ -762,7 +775,10 @@ def decode_raw(multihash_digest: Union[BytesLike, BufferedIOBase]) -&gt; Tuple[i
         stream_mode = False
         stream = memoryview(multihash_digest)
     # extract multihash code
-    multihash_code, _, stream = varint.decode_raw(multihash_digest)
+    multihash_code, n, stream = multicodec.unwrap_raw(multihash_digest)
+    if not exists(code=multihash_code):
+        n_bytes_read = f&#34; ({n} bytes read)&#34; if stream_mode else &#34;&#34;
+        raise err.KeyError(f&#34;Multicodec {_hexcode(multihash_code)} is not a multihash{n_bytes_read}.&#34;)
     # extract hash digest size
     digest_size, _, stream = varint.decode_raw(stream)
     # extract hash digest
@@ -774,13 +790,17 @@ def decode_raw(multihash_digest: Union[BytesLike, BufferedIOBase]) -&gt; Tuple[i
         hash_digest = cast(memoryview, stream)
     # check that the hash digest size is valid
     if digest_size != len(hash_digest):
-        raise ValueError(f&#34;Multihash digest lists size {digest_size}, but the hash digest has size {len(hash_digest)} instead.&#34;)
+        raise err.ValueError(f&#34;Multihash digest lists size {digest_size}, but the hash digest has size {len(hash_digest)} instead.&#34;)
     return multihash_code, hash_digest</code></pre>
 </details>
 </section>
 <section>
 <h2 class="section-title" id="header-submodules">Sub-modules</h2>
 <dl>
+<dt><code class="name"><a title="multiformats.multihash.err" href="err.html">multiformats.multihash.err</a></code></dt>
+<dd>
+<div class="desc"><p>Errors for the <code><a title="multiformats.multihash" href="#multiformats.multihash">multiformats.multihash</a></code> module.</p></div>
+</dd>
 <dt><code class="name"><a title="multiformats.multihash.raw" href="raw.html">multiformats.multihash.raw</a></code></dt>
 <dd>
 <div class="desc"><p>Implementation of raw hash functions used by multihash multicodecs …</p></div>
@@ -792,143 +812,11 @@ def decode_raw(multihash_digest: Union[BytesLike, BufferedIOBase]) -&gt; Tuple[i
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="multiformats.multihash.decode"><code class="name flex">
-<span>def <span class="ident">decode</span></span>(<span>digest: Union[bytes, bytearray, memoryview, io.BufferedIOBase], multihash: Union[ForwardRef(None), str, int, <a title="multiformats.multihash.Multihash" href="#multiformats.multihash.Multihash">Multihash</a>] = None) ‑> bytes</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Decodes a multihash digest into a raw digest:</p>
-<pre><code>&lt;code&gt;&lt;size&gt;&lt;raw digest&gt; -&gt; &lt;raw digest&gt;
-</code></pre>
-<p>If <code><a title="multiformats.multihash.digest" href="#multiformats.multihash.digest">digest()</a></code> is one of <code>bytes</code>, <code>bytearray</code> or <code>memoryview</code>, the method also checks
-that the actual raw digest size matches the size listed in the multihash digest.
-If <code><a title="multiformats.multihash.digest" href="#multiformats.multihash.digest">digest()</a></code> is a stream (an instance of <code>BufferedIOBase</code>, specifically), then the
-number of bytes consumed to produce the raw digest matches the size lised in the multihash digest,
-and no further bytes are consumed from the stream.</p>
-<p>If <code>multihash</code> is not <code>None</code>, the function additionally enforces that the code from the
-multihash digest matches the code of the multihash codec (calls <code><a title="multiformats.multihash.Multihash.decode" href="#multiformats.multihash.Multihash.decode">Multihash.decode()</a></code> under the hood to do so).
-Regardless, the function checks that the multihash codec with code specified by the multihash digest exists.</p>
-<p>Example usage:</p>
-<pre><code class="language-py">&gt;&gt;&gt; digest = bytes.fromhex(
-... &quot;1214c0535e4be2b79ffd93291305436bf889314e4a3f&quot;)
-&gt;&gt;&gt; multihash.decode(digest, &quot;sha2-256&quot;).hex()
-'c0535e4be2b79ffd93291305436bf889314e4a3f'
-</code></pre></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def decode(digest: Union[BytesLike, BufferedIOBase],
-           multihash: Union[None, str, int, Multihash]=None) -&gt; bytes:
-    &#34;&#34;&#34;
-        Decodes a multihash digest into a raw digest:
-
-        ```
-        &lt;code&gt;&lt;size&gt;&lt;raw digest&gt; -&gt; &lt;raw digest&gt;
-        ```
-
-        If `digest` is one of `bytes`, `bytearray` or `memoryview`, the method also checks
-        that the actual raw digest size matches the size listed in the multihash digest.
-        If `digest` is a stream (an instance of `BufferedIOBase`, specifically), then the
-        number of bytes consumed to produce the raw digest matches the size lised in the multihash digest,
-        and no further bytes are consumed from the stream.
-
-        If `multihash` is not `None`, the function additionally enforces that the code from the
-        multihash digest matches the code of the multihash codec (calls `Multihash.decode` under the hood to do so).
-        Regardless, the function checks that the multihash codec with code specified by the multihash digest exists.
-
-        Example usage:
-
-        ```py
-        &gt;&gt;&gt; digest = bytes.fromhex(
-        ... &#34;1214c0535e4be2b79ffd93291305436bf889314e4a3f&#34;)
-        &gt;&gt;&gt; multihash.decode(digest, &#34;sha2-256&#34;).hex()
-        &#39;c0535e4be2b79ffd93291305436bf889314e4a3f&#39;
-        ```
-    &#34;&#34;&#34;
-    if multihash is not None:
-        if not isinstance(multihash, Multihash):
-            multihash = Multihash(codec=multihash)
-        return multihash.decode(digest)
-    code, raw_digest = decode_raw(digest)
-    multihash = Multihash(codec=code)
-    _validate_raw_digest_size(multihash.name, raw_digest, multihash.max_digest_size)
-    return raw_digest</code></pre>
-</details>
-</dd>
-<dt id="multiformats.multihash.decode_raw"><code class="name flex">
-<span>def <span class="ident">decode_raw</span></span>(<span>multihash_digest: Union[bytes, bytearray, memoryview, io.BufferedIOBase]) ‑> Tuple[int, Union[bytes, memoryview]]</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Decodes a multihash digest into a code and raw digest pair:</p>
-<pre><code>&lt;code&gt;&lt;size&gt;&lt;hash digest&gt; -&gt; (&lt;code&gt;, &lt;hash digest&gt;)
-</code></pre>
-<p>Unlike <code><a title="multiformats.multihash.decode" href="#multiformats.multihash.decode">decode()</a></code>, this function performs no checks involving the multihash code,
-which is simply returned as an integer.</p>
-<p>Example usage:</p>
-<pre><code class="language-py">&gt;&gt;&gt; multihash_digest = bytes.fromhex(&quot;1214c0535e4be2b79ffd93291305436bf889314e4a3f&quot;)
-&gt;&gt;&gt; code, digest = multihash.decode_raw(multihash_digest, &quot;sha2-256&quot;)
-&gt;&gt;&gt; code
-18 # the code 0x12 of 'sha2-256'
-&gt;&gt;&gt; digest.hex()
-'c0535e4be2b79ffd93291305436bf889314e4a3f'
-</code></pre></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def decode_raw(multihash_digest: Union[BytesLike, BufferedIOBase]) -&gt; Tuple[int, Union[bytes, memoryview]]:
-    &#34;&#34;&#34;
-        Decodes a multihash digest into a code and raw digest pair:
-
-        ```
-        &lt;code&gt;&lt;size&gt;&lt;hash digest&gt; -&gt; (&lt;code&gt;, &lt;hash digest&gt;)
-        ```
-
-        Unlike `decode`, this function performs no checks involving the multihash code,
-        which is simply returned as an integer.
-
-        Example usage:
-
-        ```py
-        &gt;&gt;&gt; multihash_digest = bytes.fromhex(&#34;1214c0535e4be2b79ffd93291305436bf889314e4a3f&#34;)
-        &gt;&gt;&gt; code, digest = multihash.decode_raw(multihash_digest, &#34;sha2-256&#34;)
-        &gt;&gt;&gt; code
-        18 # the code 0x12 of &#39;sha2-256&#39;
-        &gt;&gt;&gt; digest.hex()
-        &#39;c0535e4be2b79ffd93291305436bf889314e4a3f&#39;
-        ```
-
-    &#34;&#34;&#34;
-    # switch between memoryview mode and stream mode
-    if isinstance(multihash_digest, BufferedIOBase):
-        stream_mode = True
-        validate(multihash_digest, BufferedIOBase)
-        stream: Union[memoryview, BufferedIOBase] = multihash_digest
-    else:
-        stream_mode = False
-        stream = memoryview(multihash_digest)
-    # extract multihash code
-    multihash_code, _, stream = varint.decode_raw(multihash_digest)
-    # extract hash digest size
-    digest_size, _, stream = varint.decode_raw(stream)
-    # extract hash digest
-    if stream_mode:
-        # use only the number of bytes specified by the multihash
-        hash_digest = cast(BufferedIOBase, stream).read(digest_size)
-    else:
-        # use all remaining bytes
-        hash_digest = cast(memoryview, stream)
-    # check that the hash digest size is valid
-    if digest_size != len(hash_digest):
-        raise ValueError(f&#34;Multihash digest lists size {digest_size}, but the hash digest has size {len(hash_digest)} instead.&#34;)
-    return multihash_code, hash_digest</code></pre>
-</details>
-</dd>
 <dt id="multiformats.multihash.digest"><code class="name flex">
 <span>def <span class="ident">digest</span></span>(<span>data: Union[bytes, bytearray, memoryview], multihash: Union[str, int, <a title="multiformats.multihash.Multihash" href="#multiformats.multihash.Multihash">Multihash</a>], *, size: Optional[None] = None) ‑> bytes</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Computes the raw digest of the given data and encodes it into a multihash digest.
+<div class="desc"><p>Computes the raw digest of the given data and wraps it into a multihash digest.
 The optional keyword argument <code>size</code> can be used to truncate the
 raw digest to be of the given size (or less) before encoding.</p>
 <p>Example usage:</p>
@@ -943,7 +831,7 @@ raw digest to be of the given size (or less) before encoding.</p>
 #^^   code 0x12 for multihash multicodec &quot;sha2-256&quot;
 #  ^^ truncated hash length 0x14 = 20 bytes
 </code></pre>
-<p>Note both multihash code and digest length are encoded as varints
+<p>Note both multihash code and digest length are wrapped as varints
 (see the <code><a title="multiformats.varint" href="../varint.html">multiformats.varint</a></code> module) and can span multiple bytes:</p>
 <pre><code class="language-py">&gt;&gt;&gt; multihash.get(&quot;skein1024-1024&quot;)
 Multicodec(name='skein1024-1024', tag='multihash', code='0xb3e0',
@@ -964,7 +852,7 @@ Multicodec(name='skein1024-1024', tag='multihash', code='0xb3e0',
 </summary>
 <pre><code class="python">def digest(data: BytesLike, multihash: Union[str, int, Multihash], *, size: Optional[int] = None) -&gt; bytes:
     &#34;&#34;&#34;
-        Computes the raw digest of the given data and encodes it into a multihash digest.
+        Computes the raw digest of the given data and wraps it into a multihash digest.
         The optional keyword argument `size` can be used to truncate the
         raw digest to be of the given size (or less) before encoding.
 
@@ -983,7 +871,7 @@ Multicodec(name='skein1024-1024', tag='multihash', code='0xb3e0',
         #  ^^ truncated hash length 0x14 = 20 bytes
         ```
 
-        Note both multihash code and digest length are encoded as varints
+        Note both multihash code and digest length are wrapped as varints
         (see the `multiformats.varint` module) and can span multiple bytes:
 
         ```py
@@ -1007,85 +895,11 @@ Multicodec(name='skein1024-1024', tag='multihash', code='0xb3e0',
     return multihash.digest(data, size=size)</code></pre>
 </details>
 </dd>
-<dt id="multiformats.multihash.encode"><code class="name flex">
-<span>def <span class="ident">encode</span></span>(<span>raw_digest: Union[bytes, bytearray, memoryview], multihash: Union[str, int, <a title="multiformats.multihash.Multihash" href="#multiformats.multihash.Multihash">Multihash</a>]) ‑> bytes</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Encodes a raw digest into a multihash digest using the given multihash:</p>
-<pre><code>&lt;raw digest&gt; -&gt; &lt;code&gt;&lt;size&gt;&lt;raw digest&gt;
-</code></pre>
-<p>If the multihash is passed by name or code, the <code><a title="multiformats.multihash.get" href="#multiformats.multihash.get">get()</a></code> function is used to retrieve it.</p>
-<p>Example usage:</p>
-<pre><code class="language-py">&gt;&gt;&gt; multihash.get(&quot;sha2-256&quot;).codec
-Multicodec(name='sha2-256', tag='multihash', code='0x12',
-           status='permanent', description='')
-&gt;&gt;&gt; raw_digest = bytes.fromhex(&quot;c0535e4be2b79ffd93291305436bf889314e4a3f&quot;)
-&gt;&gt;&gt; len(raw_digest)
-20
-&gt;&gt;&gt; multihash.encode(raw_digest, &quot;sha2-256&quot;).hex()
-&quot;1214c0535e4be2b79ffd93291305436bf889314e4a3f&quot;
-#^^   code 0x12 for multihash multicodec &quot;sha2-256&quot;
-#  ^^ truncated hash length 0x14 = 20 bytes
-</code></pre>
-<p>Note that all digests are <code>bytes</code> objects, represented here as hex strings for clarity:</p>
-<pre><code class="language-raw_digest">&gt;&gt;&gt; hash_digest
-b'\xc0S^K\xe2\xb7\x9f\xfd\x93)\x13\x05Ck\xf8\x891NJ?'
-&gt;&gt;&gt; multihash.encode(raw_digest, &quot;sha2-256&quot;)
-b'\x12\x14\xc0S^K\xe2\xb7\x9f\xfd\x93)\x13\x05Ck\xf8\x891NJ?'
-# ^^^^     0x12 -&gt; multihash multicodec &quot;sha2-256&quot;
-#     ^^^^ 0x14 -&gt; truncated hash length of 20 bytes
-</code></pre></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def encode(raw_digest: BytesLike, multihash: Union[str, int, Multihash]) -&gt; bytes:
-    &#34;&#34;&#34;
-        Encodes a raw digest into a multihash digest using the given multihash:
-
-        ```
-        &lt;raw digest&gt; -&gt; &lt;code&gt;&lt;size&gt;&lt;raw digest&gt;
-        ```
-
-        If the multihash is passed by name or code, the `get` function is used to retrieve it.
-
-        Example usage:
-
-        ```py
-        &gt;&gt;&gt; multihash.get(&#34;sha2-256&#34;).codec
-        Multicodec(name=&#39;sha2-256&#39;, tag=&#39;multihash&#39;, code=&#39;0x12&#39;,
-                   status=&#39;permanent&#39;, description=&#39;&#39;)
-        &gt;&gt;&gt; raw_digest = bytes.fromhex(&#34;c0535e4be2b79ffd93291305436bf889314e4a3f&#34;)
-        &gt;&gt;&gt; len(raw_digest)
-        20
-        &gt;&gt;&gt; multihash.encode(raw_digest, &#34;sha2-256&#34;).hex()
-        &#34;1214c0535e4be2b79ffd93291305436bf889314e4a3f&#34;
-        #^^   code 0x12 for multihash multicodec &#34;sha2-256&#34;
-        #  ^^ truncated hash length 0x14 = 20 bytes
-        ```
-
-        Note that all digests are `bytes` objects, represented here as hex strings for clarity:
-
-        ```raw_digest
-        &gt;&gt;&gt; hash_digest
-        b&#39;\\xc0S^K\\xe2\\xb7\\x9f\\xfd\\x93)\\x13\\x05Ck\\xf8\\x891NJ?&#39;
-        &gt;&gt;&gt; multihash.encode(raw_digest, &#34;sha2-256&#34;)
-        b&#39;\\x12\\x14\\xc0S^K\\xe2\\xb7\\x9f\\xfd\\x93)\\x13\\x05Ck\\xf8\\x891NJ?&#39;
-        # ^^^^     0x12 -&gt; multihash multicodec &#34;sha2-256&#34;
-        #     ^^^^ 0x14 -&gt; truncated hash length of 20 bytes
-        ```
-
-    &#34;&#34;&#34;
-    if not isinstance(multihash, Multihash):
-        multihash = Multihash(codec=multihash)
-    return multihash.encode(raw_digest)</code></pre>
-</details>
-</dd>
 <dt id="multiformats.multihash.exists"><code class="name flex">
 <span>def <span class="ident">exists</span></span>(<span>name: Optional[str] = None, *, code: Optional[None] = None) ‑> bool</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Checks whether there is a multihash multicodec with the given name or code.
+<div class="desc"><p>Checks whether a multihash multicodec with the given name or code exists.
 Exactly one of <code>name</code> and <code>code</code> must be specified.
 This function returns <code>False</code> if a multicodec by given name or code exists,
 but is not tagged 'multihash'.</p>
@@ -1107,7 +921,7 @@ False
 </summary>
 <pre><code class="python">def exists(name: Optional[str] = None, *, code: Optional[int] = None) -&gt; bool:
     &#34;&#34;&#34;
-        Checks whether there is a multihash multicodec with the given name or code.
+        Checks whether a multihash multicodec with the given name or code exists.
         Exactly one of `name` and `code` must be specified.
         This function returns `False` if a multicodec by given name or code exists,
         but is not tagged &#39;multihash&#39;.
@@ -1140,7 +954,7 @@ False
 <dd>
 <div class="desc"><p>Returns the multihash multicodec for the given digest,
 according to the code specified by its prefix.
-Raises <code>KeyError</code> if no multihash exists with that code.</p>
+Raises <code><a title="multiformats.multihash.err.KeyError" href="err.html#multiformats.multihash.err.KeyError">KeyError</a></code> if no multihash exists with that code.</p>
 <p>Example usage:</p>
 <pre><code class="language-py">&gt;&gt;&gt; multihash_digest = bytes.fromhex(&quot;140a9a7a8207a57d03e9c524&quot;)
 &gt;&gt;&gt; multihash.from_digest(multihash_digest)
@@ -1150,11 +964,11 @@ Multihash(codec='sha3-512')
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def from_digest(multihash_digest: Union[BytesLike, memoryview]) -&gt; Multihash:
+<pre><code class="python">def from_digest(multihash_digest: BytesLike) -&gt; Multihash:
     &#34;&#34;&#34;
         Returns the multihash multicodec for the given digest,
         according to the code specified by its prefix.
-        Raises `KeyError` if no multihash exists with that code.
+        Raises `err.KeyError` if no multihash exists with that code.
 
         Example usage:
 
@@ -1165,7 +979,7 @@ Multihash(codec='sha3-512')
         ```
 
     &#34;&#34;&#34;
-    code, _, _ = varint.decode_raw(multihash_digest)
+    code, _, _ = multicodec.unwrap_raw(multihash_digest)
     return get(code=code)</code></pre>
 </details>
 </dd>
@@ -1174,7 +988,7 @@ Multihash(codec='sha3-512')
 </code></dt>
 <dd>
 <div class="desc"><p>Gets the multihash multicodec with given name or code.
-Raises <code>KeyError</code> if no such multihash exists.
+Raises <code><a title="multiformats.multihash.err.KeyError" href="err.html#multiformats.multihash.err.KeyError">KeyError</a></code> if the multihash does not exist or is not implemented.
 Exactly one of <code>name</code> and <code>code</code> must be specified.</p>
 <p>Example usage:</p>
 <pre><code class="language-py">&gt;&gt;&gt; multihash.get(&quot;sha1&quot;)
@@ -1189,7 +1003,7 @@ Multihash(codec='sha1')
 <pre><code class="python">def get(name: Optional[str] = None, *, code: Optional[int] = None) -&gt; Multihash:
     &#34;&#34;&#34;
         Gets the multihash multicodec with given name or code.
-        Raises `KeyError` if no such multihash exists.
+        Raises `err.KeyError` if the multihash does not exist or is not implemented.
         Exactly one of `name` and `code` must be specified.
 
         Example usage:
@@ -1203,12 +1017,261 @@ Multihash(codec='sha1')
 
     &#34;&#34;&#34;
     if name is not None and code is not None:
-        raise ValueError(&#34;Must specify at most one between &#39;name&#39; and &#39;code&#39;.&#34;)
+        raise err.ValueError(&#34;Must specify at most one between &#39;name&#39; and &#39;code&#39;.&#34;)
     if name is not None:
         return Multihash(codec=name)
     if code is not None:
         return Multihash(codec=code)
-    raise ValueError(&#34;Must specify at least one between &#39;name&#39; and &#39;code&#39;.&#34;)</code></pre>
+    raise err.ValueError(&#34;Must specify at least one between &#39;name&#39; and &#39;code&#39;.&#34;)</code></pre>
+</details>
+</dd>
+<dt id="multiformats.multihash.is_implemented"><code class="name flex">
+<span>def <span class="ident">is_implemented</span></span>(<span>name: Optional[str] = None, *, code: Optional[None] = None) ‑> bool</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Checks whether a multihash with the given name or code exists and is implemented.
+Exactly one of <code>name</code> and <code>code</code> must be specified.</p>
+<p>Example usage:</p>
+<pre><code class="language-py">&gt;&gt;&gt; multihash.is_implemented(&quot;sha1&quot;)
+True
+&gt;&gt;&gt; multihash.is_implemented(code=0x11)
+True
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_implemented(name: Optional[str] = None, *, code: Optional[int] = None) -&gt; bool:
+    &#34;&#34;&#34;
+        Checks whether a multihash with the given name or code exists and is implemented.
+        Exactly one of `name` and `code` must be specified.
+
+        Example usage:
+
+        ```py
+        &gt;&gt;&gt; multihash.is_implemented(&#34;sha1&#34;)
+        True
+        &gt;&gt;&gt; multihash.is_implemented(code=0x11)
+        True
+        ```
+    &#34;&#34;&#34;
+    if not exists(name, code=code):
+        return False
+    multihash = multicodec.get(name, code=code)
+    return raw.exists(multihash.name)</code></pre>
+</details>
+</dd>
+<dt id="multiformats.multihash.unwrap"><code class="name flex">
+<span>def <span class="ident">unwrap</span></span>(<span>digest: Union[bytes, bytearray, memoryview, io.BufferedIOBase], multihash: Union[ForwardRef(None), str, int, <a title="multiformats.multihash.Multihash" href="#multiformats.multihash.Multihash">Multihash</a>] = None) ‑> bytes</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Unwraps a multihash digest into a raw digest:</p>
+<pre><code>&lt;code&gt;&lt;size&gt;&lt;raw digest&gt; -&gt; &lt;raw digest&gt;
+</code></pre>
+<p>If <code><a title="multiformats.multihash.digest" href="#multiformats.multihash.digest">digest()</a></code> is one of <code>bytes</code>, <code>bytearray</code> or <code>memoryview</code>, the method also checks
+that the actual raw digest size matches the size listed in the multihash digest.
+If <code><a title="multiformats.multihash.digest" href="#multiformats.multihash.digest">digest()</a></code> is a stream (an instance of <code>BufferedIOBase</code>, specifically), then the
+number of bytes consumed to produce the raw digest matches the size lised in the multihash digest,
+and no further bytes are consumed from the stream.</p>
+<p>If <code>multihash</code> is not <code>None</code>, the function additionally enforces that the code from the
+multihash digest matches the code of the multihash (calls <code><a title="multiformats.multihash.Multihash.unwrap" href="#multiformats.multihash.Multihash.unwrap">Multihash.unwrap()</a></code> under the hood to do so).
+Regardless, the function checks that the multihash with code specified by the multihash digest exists
+and is implemented.</p>
+<p>Example usage:</p>
+<pre><code class="language-py">&gt;&gt;&gt; digest = bytes.fromhex(
+... &quot;1214c0535e4be2b79ffd93291305436bf889314e4a3f&quot;)
+&gt;&gt;&gt; multihash.unwrap(digest, &quot;sha2-256&quot;).hex()
+'c0535e4be2b79ffd93291305436bf889314e4a3f'
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def unwrap(digest: Union[BytesLike, BufferedIOBase],
+           multihash: Union[None, str, int, Multihash]=None) -&gt; bytes:
+    &#34;&#34;&#34;
+        Unwraps a multihash digest into a raw digest:
+
+        ```
+        &lt;code&gt;&lt;size&gt;&lt;raw digest&gt; -&gt; &lt;raw digest&gt;
+        ```
+
+        If `digest` is one of `bytes`, `bytearray` or `memoryview`, the method also checks
+        that the actual raw digest size matches the size listed in the multihash digest.
+        If `digest` is a stream (an instance of `BufferedIOBase`, specifically), then the
+        number of bytes consumed to produce the raw digest matches the size lised in the multihash digest,
+        and no further bytes are consumed from the stream.
+
+        If `multihash` is not `None`, the function additionally enforces that the code from the
+        multihash digest matches the code of the multihash (calls `Multihash.unwrap` under the hood to do so).
+        Regardless, the function checks that the multihash with code specified by the multihash digest exists
+        and is implemented.
+
+        Example usage:
+
+        ```py
+        &gt;&gt;&gt; digest = bytes.fromhex(
+        ... &#34;1214c0535e4be2b79ffd93291305436bf889314e4a3f&#34;)
+        &gt;&gt;&gt; multihash.unwrap(digest, &#34;sha2-256&#34;).hex()
+        &#39;c0535e4be2b79ffd93291305436bf889314e4a3f&#39;
+        ```
+    &#34;&#34;&#34;
+    if multihash is not None:
+        if not isinstance(multihash, Multihash):
+            multihash = Multihash(codec=multihash)
+        return multihash.unwrap(digest)
+    code, raw_digest = unwrap_raw(digest)
+    multihash = Multihash(codec=code)
+    _validate_raw_digest_size(multihash.name, raw_digest, multihash.max_digest_size)
+    return raw_digest</code></pre>
+</details>
+</dd>
+<dt id="multiformats.multihash.unwrap_raw"><code class="name flex">
+<span>def <span class="ident">unwrap_raw</span></span>(<span>multihash_digest: Union[bytes, bytearray, memoryview, io.BufferedIOBase]) ‑> Tuple[int, Union[bytes, memoryview]]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Unwraps a multihash digest into a code and raw digest pair:</p>
+<pre><code>&lt;code&gt;&lt;size&gt;&lt;hash digest&gt; -&gt; (&lt;code&gt;, &lt;hash digest&gt;)
+</code></pre>
+<p>The function checks that the multihash codec with code specified by the multihash digest exists,
+but does not check whether it is implemented or not.</p>
+<p>Example usage:</p>
+<pre><code class="language-py">&gt;&gt;&gt; multihash_digest = bytes.fromhex(
+... &quot;1214c0535e4be2b79ffd93291305436bf889314e4a3f&quot;)
+&gt;&gt;&gt; code, digest = multihash.unwrap_raw(multihash_digest, &quot;sha2-256&quot;)
+&gt;&gt;&gt; code
+18 # the code 0x12 of 'sha2-256'
+&gt;&gt;&gt; digest.hex()
+'c0535e4be2b79ffd93291305436bf889314e4a3f'
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def unwrap_raw(multihash_digest: Union[BytesLike, BufferedIOBase]) -&gt; Tuple[int, Union[bytes, memoryview]]:
+    &#34;&#34;&#34;
+        Unwraps a multihash digest into a code and raw digest pair:
+
+        ```
+        &lt;code&gt;&lt;size&gt;&lt;hash digest&gt; -&gt; (&lt;code&gt;, &lt;hash digest&gt;)
+        ```
+
+        The function checks that the multihash codec with code specified by the multihash digest exists,
+        but does not check whether it is implemented or not.
+
+        Example usage:
+
+        ```py
+        &gt;&gt;&gt; multihash_digest = bytes.fromhex(
+        ... &#34;1214c0535e4be2b79ffd93291305436bf889314e4a3f&#34;)
+        &gt;&gt;&gt; code, digest = multihash.unwrap_raw(multihash_digest, &#34;sha2-256&#34;)
+        &gt;&gt;&gt; code
+        18 # the code 0x12 of &#39;sha2-256&#39;
+        &gt;&gt;&gt; digest.hex()
+        &#39;c0535e4be2b79ffd93291305436bf889314e4a3f&#39;
+        ```
+
+    &#34;&#34;&#34;
+    # switch between memoryview mode and stream mode
+    if isinstance(multihash_digest, BufferedIOBase):
+        stream_mode = True
+        validate(multihash_digest, BufferedIOBase)
+        stream: Union[memoryview, BufferedIOBase] = multihash_digest
+    else:
+        stream_mode = False
+        stream = memoryview(multihash_digest)
+    # extract multihash code
+    multihash_code, n, stream = multicodec.unwrap_raw(multihash_digest)
+    if not exists(code=multihash_code):
+        n_bytes_read = f&#34; ({n} bytes read)&#34; if stream_mode else &#34;&#34;
+        raise err.KeyError(f&#34;Multicodec {_hexcode(multihash_code)} is not a multihash{n_bytes_read}.&#34;)
+    # extract hash digest size
+    digest_size, _, stream = varint.decode_raw(stream)
+    # extract hash digest
+    if stream_mode:
+        # use only the number of bytes specified by the multihash
+        hash_digest = cast(BufferedIOBase, stream).read(digest_size)
+    else:
+        # use all remaining bytes
+        hash_digest = cast(memoryview, stream)
+    # check that the hash digest size is valid
+    if digest_size != len(hash_digest):
+        raise err.ValueError(f&#34;Multihash digest lists size {digest_size}, but the hash digest has size {len(hash_digest)} instead.&#34;)
+    return multihash_code, hash_digest</code></pre>
+</details>
+</dd>
+<dt id="multiformats.multihash.wrap"><code class="name flex">
+<span>def <span class="ident">wrap</span></span>(<span>raw_digest: Union[bytes, bytearray, memoryview], multihash: Union[str, int, <a title="multiformats.multihash.Multihash" href="#multiformats.multihash.Multihash">Multihash</a>]) ‑> bytes</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Wraps a raw digest into a multihash digest using the given multihash:</p>
+<pre><code>&lt;raw digest&gt; -&gt; &lt;code&gt;&lt;size&gt;&lt;raw digest&gt;
+</code></pre>
+<p>If the multihash is passed by name or code, the <code><a title="multiformats.multihash.get" href="#multiformats.multihash.get">get()</a></code> function is used to retrieve it.</p>
+<p>Example usage:</p>
+<pre><code class="language-py">&gt;&gt;&gt; multihash.get(&quot;sha2-256&quot;).codec
+Multicodec(name='sha2-256', tag='multihash', code='0x12',
+           status='permanent', description='')
+&gt;&gt;&gt; raw_digest = bytes.fromhex(&quot;c0535e4be2b79ffd93291305436bf889314e4a3f&quot;)
+&gt;&gt;&gt; len(raw_digest)
+20
+&gt;&gt;&gt; multihash.wrap(raw_digest, &quot;sha2-256&quot;).hex()
+&quot;1214c0535e4be2b79ffd93291305436bf889314e4a3f&quot;
+#^^   code 0x12 for multihash multicodec &quot;sha2-256&quot;
+#  ^^ truncated hash length 0x14 = 20 bytes
+</code></pre>
+<p>Note that all digests are <code>bytes</code> objects, represented here as hex strings for clarity:</p>
+<pre><code class="language-py">&gt;&gt;&gt; hash_digest
+b'\xc0S^K\xe2\xb7\x9f\xfd\x93)\x13\x05Ck\xf8\x891NJ?'
+&gt;&gt;&gt; multihash.wrap(raw_digest, &quot;sha2-256&quot;)
+b'\x12\x14\xc0S^K\xe2\xb7\x9f\xfd\x93)\x13\x05Ck\xf8\x891NJ?'
+# ^^^^     0x12 -&gt; multihash multicodec &quot;sha2-256&quot;
+#     ^^^^ 0x14 -&gt; truncated hash length of 20 bytes
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def wrap(raw_digest: BytesLike, multihash: Union[str, int, Multihash]) -&gt; bytes:
+    &#34;&#34;&#34;
+        Wraps a raw digest into a multihash digest using the given multihash:
+
+        ```
+        &lt;raw digest&gt; -&gt; &lt;code&gt;&lt;size&gt;&lt;raw digest&gt;
+        ```
+
+        If the multihash is passed by name or code, the `get` function is used to retrieve it.
+
+        Example usage:
+
+        ```py
+        &gt;&gt;&gt; multihash.get(&#34;sha2-256&#34;).codec
+        Multicodec(name=&#39;sha2-256&#39;, tag=&#39;multihash&#39;, code=&#39;0x12&#39;,
+                   status=&#39;permanent&#39;, description=&#39;&#39;)
+        &gt;&gt;&gt; raw_digest = bytes.fromhex(&#34;c0535e4be2b79ffd93291305436bf889314e4a3f&#34;)
+        &gt;&gt;&gt; len(raw_digest)
+        20
+        &gt;&gt;&gt; multihash.wrap(raw_digest, &#34;sha2-256&#34;).hex()
+        &#34;1214c0535e4be2b79ffd93291305436bf889314e4a3f&#34;
+        #^^   code 0x12 for multihash multicodec &#34;sha2-256&#34;
+        #  ^^ truncated hash length 0x14 = 20 bytes
+        ```
+
+        Note that all digests are `bytes` objects, represented here as hex strings for clarity:
+
+        ```py
+        &gt;&gt;&gt; hash_digest
+        b&#39;\\xc0S^K\\xe2\\xb7\\x9f\\xfd\\x93)\\x13\\x05Ck\\xf8\\x891NJ?&#39;
+        &gt;&gt;&gt; multihash.wrap(raw_digest, &#34;sha2-256&#34;)
+        b&#39;\\x12\\x14\\xc0S^K\\xe2\\xb7\\x9f\\xfd\\x93)\\x13\\x05Ck\\xf8\\x891NJ?&#39;
+        # ^^^^     0x12 -&gt; multihash multicodec &#34;sha2-256&#34;
+        #     ^^^^ 0x14 -&gt; truncated hash length of 20 bytes
+        ```
+
+    &#34;&#34;&#34;
+    if not isinstance(multihash, Multihash):
+        multihash = Multihash(codec=multihash)
+    return multihash.wrap(raw_digest)</code></pre>
 </details>
 </dd>
 </dl>
@@ -1248,8 +1311,9 @@ Multihash(codec='sha2-256')
     _cache: ClassVar[WeakValueDictionary] = WeakValueDictionary() # type: ignore
 
     _codec: Multicodec
+    _implementation: MultihashImpl
 
-    __slots__ = (&#34;__weakref__&#34;, &#34;_codec&#34;)
+    __slots__ = (&#34;__weakref__&#34;, &#34;_codec&#34;, &#34;_implementation&#34;)
 
     def __new__(cls, *, codec: Union[str, int, Multicodec]) -&gt; &#34;Multihash&#34;:
         # check that the codec exists:
@@ -1261,23 +1325,25 @@ Multihash(codec='sha2-256')
             validate(codec, Multicodec)
             existing_codec = multicodec.get(codec.name)
             if existing_codec != codec:
-                raise ValueError(f&#34;Multicodec named {repr(codec.name)} exists, but is not the one given.&#34;)
+                raise err.ValueError(f&#34;Multicodec named {repr(codec.name)} exists, but is not the one given.&#34;)
             codec = existing_codec
         # check that the codec is a multihash multicodec:
         if codec.tag != &#34;multihash&#34;:
-            raise ValueError(f&#34;Multicodec named {repr(codec.name)} exists, but is not a multihash.&#34;)
+            raise err.ValueError(f&#34;Multicodec named {repr(codec.name)} exists, but is not a multihash.&#34;)
+        implementation: MultihashImpl = raw.get(codec.name)
         _cache = Multihash._cache
         if codec.name in _cache:
             # if a multihash instance with this name is already registered
             instance: Multihash = _cache[codec.name]
-            if instance.codec == codec:
-                # if the codec did not change, return the existing instance
+            if instance.codec == codec and instance._implementation == implementation:
+                # nothing changed, can use the existing instance
                 return instance
             # otherwise remove the existing instance
             del _cache[codec.name]
         # create a fresh instance, register it and return it
         instance = super().__new__(cls)
         instance._codec = codec
+        instance._implementation = implementation
         _cache[codec.name] = instance
         return instance
 
@@ -1330,7 +1396,7 @@ Multihash(codec='sha2-256')
         &#34;&#34;&#34;
             The maximum size (in bytes) for raw digests of this multihash,
             or `None` if there is no maximum size.
-            Used to sense-check the encoded/decoded raw digests.
+            Used to sense-check the wrapped/unwrapped raw digests.
 
             Example usage:
 
@@ -1344,7 +1410,7 @@ Multihash(codec='sha2-256')
         return max_digest_size
 
     @property
-    def implementation(self) -&gt; Tuple[Hashfun, Optional[int]]:
+    def implementation(self) -&gt;MultihashImpl:
         &#34;&#34;&#34;
             Returns the implementation of a multihash multicodec, as a pair:
 
@@ -1364,26 +1430,13 @@ Multihash(codec='sha2-256')
             (&lt;function _hashlib_sha.&lt;locals&gt;.hashfun at 0x0000029396E22280&gt;, 32)
             ```
         &#34;&#34;&#34;
-        hash_function, max_digest_size = raw.get(self.name)
-        return hash_function, max_digest_size
+        return self._implementation
+        # hash_function, max_digest_size = raw.get(self.name)
+        # return hash_function, max_digest_size
 
-    @property
-    def is_implemented(self) -&gt; bool:
+    def wrap(self, raw_digest: BytesLike) -&gt; bytes:
         &#34;&#34;&#34;
-            Whether this multihash has an implementation (see `implementation`).
-
-            Example usage:
-
-            ```py
-            &gt;&gt;&gt; sha2_256.is_implemented
-            True
-            ```
-        &#34;&#34;&#34;
-        return raw.exists(self.name)
-
-    def encode(self, raw_digest: BytesLike) -&gt; bytes:
-        &#34;&#34;&#34;
-            Encodes a raw digest into a multihash digest:
+            Wraps a raw digest into a multihash digest:
 
             ```
             &lt;raw digest&gt; -&gt; &lt;code&gt;&lt;size&gt;&lt;raw digest&gt;
@@ -1395,23 +1448,23 @@ Multihash(codec='sha2-256')
             &gt;&gt;&gt; sha2_256 = multihash.get(&#34;sha2-256&#34;)
             &gt;&gt;&gt; raw_digest = bytes.fromhex(
             ... &#34;c0535e4be2b79ffd93291305436bf889314e4a3f&#34;)
-            &gt;&gt;&gt; sha2_256.encode(raw_digest).hex()
+            &gt;&gt;&gt; sha2_256.wrap(raw_digest).hex()
             &#34;1214c0535e4be2b79ffd93291305436bf889314e4a3f&#34;
             ```
 
-            See `encode` for more information.
+            See `wrap` for more information.
         &#34;&#34;&#34;
         validate(raw_digest, BytesLike)
         _, max_digest_size = self.implementation
         size = len(raw_digest)
         if max_digest_size is not None and size &gt; max_digest_size:
-            raise ValueError(f&#34;Digest size {max_digest_size} is listed for {self.name}, &#34;
-                             f&#34;but a digest of larger size {size} was given to be encoded.&#34;)
-        return varint.encode(self.code)+varint.encode(size)+raw_digest
+            raise err.ValueError(f&#34;Digest size {max_digest_size} is listed for {self.name}, &#34;
+                             f&#34;but a digest of larger size {size} was given to be wrapped.&#34;)
+        return self.codec.wrap(varint.encode(size)+raw_digest)
 
     def digest(self, data: BytesLike, *, size: Optional[int] = None) -&gt; bytes:
         &#34;&#34;&#34;
-            Computes the raw digest of the given data and encodes it into a multihash digest.
+            Computes the raw digest of the given data and wraps it into a multihash digest.
             The optional keyword argument `size` can be used to truncate the
             raw digest to be of the given size (or less) before encoding.
 
@@ -1434,11 +1487,12 @@ Multihash(codec='sha2-256')
         raw_digest = hf(data)
         if size is not None:
             raw_digest = raw_digest[:size] # truncate digest
-        return varint.encode(self.code)+varint.encode(len(raw_digest))+raw_digest
+        size = len(raw_digest)
+        return self.codec.wrap(varint.encode(size)+raw_digest)
 
-    def decode(self, digest: Union[BytesLike, BufferedIOBase]) -&gt; bytes:
+    def unwrap(self, digest: Union[BytesLike, BufferedIOBase]) -&gt; bytes:
         &#34;&#34;&#34;
-            Decodes a multihash digest into a hash digest:
+            Unwraps a multihash digest into a hash digest:
 
             ```
             &lt;code&gt;&lt;size&gt;&lt;raw digest&gt; -&gt; &lt;raw digest&gt;
@@ -1453,14 +1507,14 @@ Multihash(codec='sha2-256')
             &gt;&gt;&gt; sha2_256 = multihash.get(&#34;sha2-256&#34;)
             &gt;&gt;&gt; digest = bytes.fromhex(
             ... &#34;1214c0535e4be2b79ffd93291305436bf889314e4a3f&#34;)
-            &gt;&gt;&gt; sha2_256.decode(digest).hex()
+            &gt;&gt;&gt; sha2_256.unwrap(digest).hex()
             &#39;c0535e4be2b79ffd93291305436bf889314e4a3f&#39;
             ```
 
         &#34;&#34;&#34;
-        code, raw_digest = decode_raw(digest)
+        code, raw_digest = unwrap_raw(digest)
         if code != self.code:
-            raise ValueError(f&#34;Decoded code {code} differs from multihash code {self.code}.&#34;)
+            raise err.ValueError(f&#34;Decoded code {code} differs from multihash code {self.code}.&#34;)
         _validate_raw_digest_size(self.name, raw_digest, self.max_digest_size)
         return raw_digest
 
@@ -1560,7 +1614,7 @@ there is no max size, such as in the case of the 'identity' multihash multicodec
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property
-def implementation(self) -&gt; Tuple[Hashfun, Optional[int]]:
+def implementation(self) -&gt;MultihashImpl:
     &#34;&#34;&#34;
         Returns the implementation of a multihash multicodec, as a pair:
 
@@ -1580,41 +1634,16 @@ def implementation(self) -&gt; Tuple[Hashfun, Optional[int]]:
         (&lt;function _hashlib_sha.&lt;locals&gt;.hashfun at 0x0000029396E22280&gt;, 32)
         ```
     &#34;&#34;&#34;
-    hash_function, max_digest_size = raw.get(self.name)
-    return hash_function, max_digest_size</code></pre>
-</details>
-</dd>
-<dt id="multiformats.multihash.Multihash.is_implemented"><code class="name">var <span class="ident">is_implemented</span> : bool</code></dt>
-<dd>
-<div class="desc"><p>Whether this multihash has an implementation (see <code>implementation</code>).</p>
-<p>Example usage:</p>
-<pre><code class="language-py">&gt;&gt;&gt; sha2_256.is_implemented
-True
-</code></pre></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-def is_implemented(self) -&gt; bool:
-    &#34;&#34;&#34;
-        Whether this multihash has an implementation (see `implementation`).
-
-        Example usage:
-
-        ```py
-        &gt;&gt;&gt; sha2_256.is_implemented
-        True
-        ```
-    &#34;&#34;&#34;
-    return raw.exists(self.name)</code></pre>
+    return self._implementation
+    # hash_function, max_digest_size = raw.get(self.name)
+    # return hash_function, max_digest_size</code></pre>
 </details>
 </dd>
 <dt id="multiformats.multihash.Multihash.max_digest_size"><code class="name">var <span class="ident">max_digest_size</span> : Optional[None]</code></dt>
 <dd>
 <div class="desc"><p>The maximum size (in bytes) for raw digests of this multihash,
 or <code>None</code> if there is no maximum size.
-Used to sense-check the encoded/decoded raw digests.</p>
+Used to sense-check the wrapped/unwrapped raw digests.</p>
 <p>Example usage:</p>
 <pre><code class="language-py">&gt;&gt;&gt; sha2_256.max_digest_size
 32
@@ -1629,7 +1658,7 @@ def max_digest_size(self) -&gt; Optional[int]:
     &#34;&#34;&#34;
         The maximum size (in bytes) for raw digests of this multihash,
         or `None` if there is no maximum size.
-        Used to sense-check the encoded/decoded raw digests.
+        Used to sense-check the wrapped/unwrapped raw digests.
 
         Example usage:
 
@@ -1672,60 +1701,11 @@ def name(self) -&gt; str:
 </dl>
 <h3>Methods</h3>
 <dl>
-<dt id="multiformats.multihash.Multihash.decode"><code class="name flex">
-<span>def <span class="ident">decode</span></span>(<span>self, digest: Union[bytes, bytearray, memoryview, io.BufferedIOBase]) ‑> bytes</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Decodes a multihash digest into a hash digest:</p>
-<pre><code>&lt;code&gt;&lt;size&gt;&lt;raw digest&gt; -&gt; &lt;raw digest&gt;
-</code></pre>
-<p>If <code><a title="multiformats.multihash.digest" href="#multiformats.multihash.digest">digest()</a></code> is one of bytes, bytearray or memoryview, the method also checks
-that the actual hash digest size matches the size listed by the multihash digest.</p>
-<p>Example usage:</p>
-<pre><code class="language-py">&gt;&gt;&gt; sha2_256 = multihash.get(&quot;sha2-256&quot;)
-&gt;&gt;&gt; digest = bytes.fromhex(
-... &quot;1214c0535e4be2b79ffd93291305436bf889314e4a3f&quot;)
-&gt;&gt;&gt; sha2_256.decode(digest).hex()
-'c0535e4be2b79ffd93291305436bf889314e4a3f'
-</code></pre></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def decode(self, digest: Union[BytesLike, BufferedIOBase]) -&gt; bytes:
-    &#34;&#34;&#34;
-        Decodes a multihash digest into a hash digest:
-
-        ```
-        &lt;code&gt;&lt;size&gt;&lt;raw digest&gt; -&gt; &lt;raw digest&gt;
-        ```
-
-        If `digest` is one of bytes, bytearray or memoryview, the method also checks
-        that the actual hash digest size matches the size listed by the multihash digest.
-
-        Example usage:
-
-        ```py
-        &gt;&gt;&gt; sha2_256 = multihash.get(&#34;sha2-256&#34;)
-        &gt;&gt;&gt; digest = bytes.fromhex(
-        ... &#34;1214c0535e4be2b79ffd93291305436bf889314e4a3f&#34;)
-        &gt;&gt;&gt; sha2_256.decode(digest).hex()
-        &#39;c0535e4be2b79ffd93291305436bf889314e4a3f&#39;
-        ```
-
-    &#34;&#34;&#34;
-    code, raw_digest = decode_raw(digest)
-    if code != self.code:
-        raise ValueError(f&#34;Decoded code {code} differs from multihash code {self.code}.&#34;)
-    _validate_raw_digest_size(self.name, raw_digest, self.max_digest_size)
-    return raw_digest</code></pre>
-</details>
-</dd>
 <dt id="multiformats.multihash.Multihash.digest"><code class="name flex">
 <span>def <span class="ident">digest</span></span>(<span>self, data: Union[bytes, bytearray, memoryview], *, size: Optional[None] = None) ‑> bytes</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Computes the raw digest of the given data and encodes it into a multihash digest.
+<div class="desc"><p>Computes the raw digest of the given data and wraps it into a multihash digest.
 The optional keyword argument <code>size</code> can be used to truncate the
 raw digest to be of the given size (or less) before encoding.</p>
 <p>Example usage:</p>
@@ -1745,7 +1725,7 @@ raw digest to be of the given size (or less) before encoding.</p>
 </summary>
 <pre><code class="python">def digest(self, data: BytesLike, *, size: Optional[int] = None) -&gt; bytes:
     &#34;&#34;&#34;
-        Computes the raw digest of the given data and encodes it into a multihash digest.
+        Computes the raw digest of the given data and wraps it into a multihash digest.
         The optional keyword argument `size` can be used to truncate the
         raw digest to be of the given size (or less) before encoding.
 
@@ -1768,31 +1748,81 @@ raw digest to be of the given size (or less) before encoding.</p>
     raw_digest = hf(data)
     if size is not None:
         raw_digest = raw_digest[:size] # truncate digest
-    return varint.encode(self.code)+varint.encode(len(raw_digest))+raw_digest</code></pre>
+    size = len(raw_digest)
+    return self.codec.wrap(varint.encode(size)+raw_digest)</code></pre>
 </details>
 </dd>
-<dt id="multiformats.multihash.Multihash.encode"><code class="name flex">
-<span>def <span class="ident">encode</span></span>(<span>self, raw_digest: Union[bytes, bytearray, memoryview]) ‑> bytes</span>
+<dt id="multiformats.multihash.Multihash.unwrap"><code class="name flex">
+<span>def <span class="ident">unwrap</span></span>(<span>self, digest: Union[bytes, bytearray, memoryview, io.BufferedIOBase]) ‑> bytes</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Encodes a raw digest into a multihash digest:</p>
+<div class="desc"><p>Unwraps a multihash digest into a hash digest:</p>
+<pre><code>&lt;code&gt;&lt;size&gt;&lt;raw digest&gt; -&gt; &lt;raw digest&gt;
+</code></pre>
+<p>If <code><a title="multiformats.multihash.digest" href="#multiformats.multihash.digest">digest()</a></code> is one of bytes, bytearray or memoryview, the method also checks
+that the actual hash digest size matches the size listed by the multihash digest.</p>
+<p>Example usage:</p>
+<pre><code class="language-py">&gt;&gt;&gt; sha2_256 = multihash.get(&quot;sha2-256&quot;)
+&gt;&gt;&gt; digest = bytes.fromhex(
+... &quot;1214c0535e4be2b79ffd93291305436bf889314e4a3f&quot;)
+&gt;&gt;&gt; sha2_256.unwrap(digest).hex()
+'c0535e4be2b79ffd93291305436bf889314e4a3f'
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def unwrap(self, digest: Union[BytesLike, BufferedIOBase]) -&gt; bytes:
+    &#34;&#34;&#34;
+        Unwraps a multihash digest into a hash digest:
+
+        ```
+        &lt;code&gt;&lt;size&gt;&lt;raw digest&gt; -&gt; &lt;raw digest&gt;
+        ```
+
+        If `digest` is one of bytes, bytearray or memoryview, the method also checks
+        that the actual hash digest size matches the size listed by the multihash digest.
+
+        Example usage:
+
+        ```py
+        &gt;&gt;&gt; sha2_256 = multihash.get(&#34;sha2-256&#34;)
+        &gt;&gt;&gt; digest = bytes.fromhex(
+        ... &#34;1214c0535e4be2b79ffd93291305436bf889314e4a3f&#34;)
+        &gt;&gt;&gt; sha2_256.unwrap(digest).hex()
+        &#39;c0535e4be2b79ffd93291305436bf889314e4a3f&#39;
+        ```
+
+    &#34;&#34;&#34;
+    code, raw_digest = unwrap_raw(digest)
+    if code != self.code:
+        raise err.ValueError(f&#34;Decoded code {code} differs from multihash code {self.code}.&#34;)
+    _validate_raw_digest_size(self.name, raw_digest, self.max_digest_size)
+    return raw_digest</code></pre>
+</details>
+</dd>
+<dt id="multiformats.multihash.Multihash.wrap"><code class="name flex">
+<span>def <span class="ident">wrap</span></span>(<span>self, raw_digest: Union[bytes, bytearray, memoryview]) ‑> bytes</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Wraps a raw digest into a multihash digest:</p>
 <pre><code>&lt;raw digest&gt; -&gt; &lt;code&gt;&lt;size&gt;&lt;raw digest&gt;
 </code></pre>
 <p>Example usage:</p>
 <pre><code class="language-py">&gt;&gt;&gt; sha2_256 = multihash.get(&quot;sha2-256&quot;)
 &gt;&gt;&gt; raw_digest = bytes.fromhex(
 ... &quot;c0535e4be2b79ffd93291305436bf889314e4a3f&quot;)
-&gt;&gt;&gt; sha2_256.encode(raw_digest).hex()
+&gt;&gt;&gt; sha2_256.wrap(raw_digest).hex()
 &quot;1214c0535e4be2b79ffd93291305436bf889314e4a3f&quot;
 </code></pre>
-<p>See <code><a title="multiformats.multihash.encode" href="#multiformats.multihash.encode">encode()</a></code> for more information.</p></div>
+<p>See <code><a title="multiformats.multihash.wrap" href="#multiformats.multihash.wrap">wrap()</a></code> for more information.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def encode(self, raw_digest: BytesLike) -&gt; bytes:
+<pre><code class="python">def wrap(self, raw_digest: BytesLike) -&gt; bytes:
     &#34;&#34;&#34;
-        Encodes a raw digest into a multihash digest:
+        Wraps a raw digest into a multihash digest:
 
         ```
         &lt;raw digest&gt; -&gt; &lt;code&gt;&lt;size&gt;&lt;raw digest&gt;
@@ -1804,19 +1834,19 @@ raw digest to be of the given size (or less) before encoding.</p>
         &gt;&gt;&gt; sha2_256 = multihash.get(&#34;sha2-256&#34;)
         &gt;&gt;&gt; raw_digest = bytes.fromhex(
         ... &#34;c0535e4be2b79ffd93291305436bf889314e4a3f&#34;)
-        &gt;&gt;&gt; sha2_256.encode(raw_digest).hex()
+        &gt;&gt;&gt; sha2_256.wrap(raw_digest).hex()
         &#34;1214c0535e4be2b79ffd93291305436bf889314e4a3f&#34;
         ```
 
-        See `encode` for more information.
+        See `wrap` for more information.
     &#34;&#34;&#34;
     validate(raw_digest, BytesLike)
     _, max_digest_size = self.implementation
     size = len(raw_digest)
     if max_digest_size is not None and size &gt; max_digest_size:
-        raise ValueError(f&#34;Digest size {max_digest_size} is listed for {self.name}, &#34;
-                         f&#34;but a digest of larger size {size} was given to be encoded.&#34;)
-    return varint.encode(self.code)+varint.encode(size)+raw_digest</code></pre>
+        raise err.ValueError(f&#34;Digest size {max_digest_size} is listed for {self.name}, &#34;
+                         f&#34;but a digest of larger size {size} was given to be wrapped.&#34;)
+    return self.codec.wrap(varint.encode(size)+raw_digest)</code></pre>
 </details>
 </dd>
 </dl>
@@ -1837,18 +1867,20 @@ raw digest to be of the given size (or less) before encoding.</p>
 </li>
 <li><h3><a href="#header-submodules">Sub-modules</a></h3>
 <ul>
+<li><code><a title="multiformats.multihash.err" href="err.html">multiformats.multihash.err</a></code></li>
 <li><code><a title="multiformats.multihash.raw" href="raw.html">multiformats.multihash.raw</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="two-column">
-<li><code><a title="multiformats.multihash.decode" href="#multiformats.multihash.decode">decode</a></code></li>
-<li><code><a title="multiformats.multihash.decode_raw" href="#multiformats.multihash.decode_raw">decode_raw</a></code></li>
 <li><code><a title="multiformats.multihash.digest" href="#multiformats.multihash.digest">digest</a></code></li>
-<li><code><a title="multiformats.multihash.encode" href="#multiformats.multihash.encode">encode</a></code></li>
 <li><code><a title="multiformats.multihash.exists" href="#multiformats.multihash.exists">exists</a></code></li>
 <li><code><a title="multiformats.multihash.from_digest" href="#multiformats.multihash.from_digest">from_digest</a></code></li>
 <li><code><a title="multiformats.multihash.get" href="#multiformats.multihash.get">get</a></code></li>
+<li><code><a title="multiformats.multihash.is_implemented" href="#multiformats.multihash.is_implemented">is_implemented</a></code></li>
+<li><code><a title="multiformats.multihash.unwrap" href="#multiformats.multihash.unwrap">unwrap</a></code></li>
+<li><code><a title="multiformats.multihash.unwrap_raw" href="#multiformats.multihash.unwrap_raw">unwrap_raw</a></code></li>
+<li><code><a title="multiformats.multihash.wrap" href="#multiformats.multihash.wrap">wrap</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
@@ -1858,13 +1890,12 @@ raw digest to be of the given size (or less) before encoding.</p>
 <ul class="two-column">
 <li><code><a title="multiformats.multihash.Multihash.code" href="#multiformats.multihash.Multihash.code">code</a></code></li>
 <li><code><a title="multiformats.multihash.Multihash.codec" href="#multiformats.multihash.Multihash.codec">codec</a></code></li>
-<li><code><a title="multiformats.multihash.Multihash.decode" href="#multiformats.multihash.Multihash.decode">decode</a></code></li>
 <li><code><a title="multiformats.multihash.Multihash.digest" href="#multiformats.multihash.Multihash.digest">digest</a></code></li>
-<li><code><a title="multiformats.multihash.Multihash.encode" href="#multiformats.multihash.Multihash.encode">encode</a></code></li>
 <li><code><a title="multiformats.multihash.Multihash.implementation" href="#multiformats.multihash.Multihash.implementation">implementation</a></code></li>
-<li><code><a title="multiformats.multihash.Multihash.is_implemented" href="#multiformats.multihash.Multihash.is_implemented">is_implemented</a></code></li>
 <li><code><a title="multiformats.multihash.Multihash.max_digest_size" href="#multiformats.multihash.Multihash.max_digest_size">max_digest_size</a></code></li>
 <li><code><a title="multiformats.multihash.Multihash.name" href="#multiformats.multihash.Multihash.name">name</a></code></li>
+<li><code><a title="multiformats.multihash.Multihash.unwrap" href="#multiformats.multihash.Multihash.unwrap">unwrap</a></code></li>
+<li><code><a title="multiformats.multihash.Multihash.wrap" href="#multiformats.multihash.Multihash.wrap">wrap</a></code></li>
 </ul>
 </li>
 </ul>

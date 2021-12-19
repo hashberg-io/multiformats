@@ -61,7 +61,7 @@
 
     ```py
     >>> base32.decode('Bjbswy3dpeblw64tmmqqq')
-    ValueError: Expected 'base32' encoding, found 'base32upper' encoding instead.
+    err.ValueError: Expected 'base32' encoding, found 'base32upper' encoding instead.
     ```
 
     The `table` function can be used to iterate through known multibase encodings:
@@ -96,6 +96,7 @@ from bases import (base2, base16, base8, base10, base36, base58btc, base58flickr
 from multiformats.multibase import raw
 from multiformats.varint import BytesLike
 from .raw import RawEncoder, RawDecoder
+from . import err
 
 
 class Multibase:
@@ -138,7 +139,7 @@ class Multibase:
         validate(name, Optional[str])
         assert name is not None
         if not re.match(r"^[a-z][a-z0-9_-]+$", name): # ensures len(name) > 1
-            raise ValueError(f"Invalid multibase encoding name {repr(name)}")
+            raise err.ValueError(f"Invalid multibase encoding name {repr(name)}")
         return name
 
     @staticmethod
@@ -152,7 +153,7 @@ class Multibase:
             >>> Multibase.validate_code("0x00")
             '\\x00'
             >>> Multibase.validate_code("hi")
-            ValueError: Multibase codes must be single-character strings
+            err.ValueError: Multibase codes must be single-character strings
             or the hex digits '0xYZ' of a single byte.
             ```
         """
@@ -161,15 +162,15 @@ class Multibase:
             ord_code = int(code, base=16)
             code = chr(ord_code)
         elif len(code) != 1:
-            raise ValueError("Multibase codes must be single-character strings or the hex digits '0xYZ' of a single byte.")
+            raise err.ValueError("Multibase codes must be single-character strings or the hex digits '0xYZ' of a single byte.")
         if ord(code) not in range(0x00, 0x80):
-            raise ValueError("Multibase codes must be ASCII characters.")
+            raise err.ValueError("Multibase codes must be ASCII characters.")
         return code
 
     @staticmethod
     def _validate_status(status: str) -> Literal["draft", "candidate", "default"]:
         if status not in ("draft", "candidate", "default"):
-            raise ValueError(f"Invalid multibase encoding status {repr(status)}.")
+            raise err.ValueError(f"Invalid multibase encoding status {repr(status)}.")
         return cast(Literal["draft", "candidate", "default"], status)
 
     @property
@@ -285,7 +286,7 @@ class Multibase:
         """
         encoding = from_str(string)
         if encoding != self:
-            raise ValueError(f"Expected {repr(self.name)} encoding, "
+            raise err.ValueError(f"Expected {repr(self.name)} encoding, "
                              f"found {repr(encoding.name)} encoding instead.")
         return self.raw_decoder(string[1:])
 
@@ -341,7 +342,7 @@ def get(name: Optional[str] = None, *, code: Optional[str] = None) -> Multibase:
         - `name` can be passed as either a positional or keyword argument
         - `code` must be passed as a keyword argument
 
-        Raises `ValueError` if the empty string is passed. Raises `KeyError` if no such encoding exists.
+        Raises `err.ValueError` if the empty string is passed. Raises `err.KeyError` if no such encoding exists.
 
         Example usage:
 
@@ -360,13 +361,13 @@ def get(name: Optional[str] = None, *, code: Optional[str] = None) -> Multibase:
     validate(name, Optional[str])
     validate(code, Optional[str])
     if (name is None) == (code is None):
-        raise ValueError("Must specify exactly one between encoding name and code.")
+        raise err.ValueError("Must specify exactly one between encoding name and code.")
     if code is not None:
         if code not in _code_table:
-            raise KeyError(f"No multibase encoding with code {repr(code)}.")
+            raise err.KeyError(f"No multibase encoding with code {repr(code)}.")
         return _code_table[code]
     if name not in _name_table:
-        raise KeyError(f"No multibase encoding named {repr(name)}.")
+        raise err.KeyError(f"No multibase encoding named {repr(name)}.")
     return _name_table[name]
 
 
@@ -378,7 +379,7 @@ def exists(name: Optional[str] = None, *, code: Optional[str] = None) -> bool:
         - `name` can be passed as either a positional or keyword argument
         - `code` must be passed as a keyword argument
 
-        Raises `ValueError` if the empty string is passed.
+        Raises `err.ValueError` if the empty string is passed.
 
         Example usage:
 
@@ -392,7 +393,7 @@ def exists(name: Optional[str] = None, *, code: Optional[str] = None) -> bool:
     validate(name, Optional[str])
     validate(code, Optional[str])
     if (name is None) == (code is None):
-        raise ValueError("Must specify exactly one between encoding name and code.")
+        raise err.ValueError("Must specify exactly one between encoding name and code.")
     if code is not None:
         code = Multibase.validate_code(code)
         return code in _code_table
@@ -404,8 +405,8 @@ def register(enc: Multibase, *, overwrite: bool = False) -> None:
         Registers a given multibase encoding. The optional keyword argument `overwrite` (default: `False`)
         can be used to overwrite a multibase encoding with existing code.
 
-        When `overwrite` is `False`, raises `ValueError` if a multibase encoding with the same name or code already exists.
-        When `overwrite` is `True`, raises `ValueError` if a multibase encoding with the same name but different code already exists.
+        When `overwrite` is `False`, raises `err.ValueError` if a multibase encoding with the same name or code already exists.
+        When `overwrite` is `True`, raises `err.ValueError` if a multibase encoding with the same name but different code already exists.
 
         Example usage:
 
@@ -421,9 +422,9 @@ def register(enc: Multibase, *, overwrite: bool = False) -> None:
     validate(enc, Multibase)
     validate(overwrite, bool)
     if not overwrite and enc.code in _code_table:
-        raise ValueError(f"Multibase encoding with code {repr(enc.code)} already exists: {_code_table[enc.code]}")
+        raise err.ValueError(f"Multibase encoding with code {repr(enc.code)} already exists: {_code_table[enc.code]}")
     if enc.name in _name_table and _name_table[enc.name].code != enc.code:
-        raise ValueError(f"Multibase encoding with name {repr(enc.name)} already exists: {_name_table[enc.name]}")
+        raise err.ValueError(f"Multibase encoding with name {repr(enc.name)} already exists: {_name_table[enc.name]}")
     _code_table[enc.code] = enc
     _name_table[enc.name] = enc
 
@@ -432,20 +433,20 @@ def validate_multibase(multibase: Multibase) -> None:
     """
         Validates a multibase:
 
-        - raises `KeyError` if no multibase with the given name is registered
-        - raises `ValueError` if a multibase with the given name is registered, but is different from the one given
+        - raises `err.KeyError` if no multibase with the given name is registered
+        - raises `err.ValueError` if a multibase with the given name is registered, but is different from the one given
         - raises no error if the given multibase is registered
     """
     validate(multibase, Multibase)
     mc = get(multibase.name)
     if mc != multibase:
-        raise ValueError(f"Multibase named {multibase.name} exists, but is not the one given.")
+        raise err.ValueError(f"Multibase named {multibase.name} exists, but is not the one given.")
 
 
 def unregister(name: Optional[str] = None, *, code: Optional[str] = None) -> None:
     """
         Unregisters the multibase encoding with given name (if a string is passed) or code (if an int is passed).
-        Raises `KeyError` if no such multibase encoding exists.
+        Raises `err.KeyError` if no such multibase encoding exists.
 
         Example usage:
 
@@ -485,8 +486,8 @@ def table() -> Iterator[Multibase]:
 def from_str(string: str) -> Multibase:
     """
         Returns the multibase encoding for the given string, according to the code specified by its prefix.
-        Raises `ValueError` if the empty string is passed.
-        Raises `KeyError` if no encoding exists with that code.
+        Raises `err.ValueError` if the empty string is passed.
+        Raises `err.KeyError` if no encoding exists with that code.
 
         Example usage:
 
@@ -498,13 +499,13 @@ def from_str(string: str) -> Multibase:
     """
     validate(string, str)
     if len(string) == 0:
-        raise ValueError("Empty string is not valid for encoded data.")
+        raise err.ValueError("Empty string is not valid for encoded data.")
     if string[0] in _code_table:
         return _code_table[string[0]]
     for code in _code_table:
         if string.startswith(code):
             return get(code=code)
-    raise KeyError("No known multibase code is a prefix of the given string.")
+    raise err.KeyError("No known multibase code is a prefix of the given string.")
 
 
 def encode(data: BytesLike, enc: Union[str, "Multibase"]) -> str:
@@ -567,7 +568,7 @@ def build_multibase_tables(encodings: Iterable[Multibase]) -> Tuple[Dict[str, Mu
     """
         Creates code->encoding and name->encoding mappings from a finite iterable of encodings, returning the mappings.
 
-        Raises `ValueError` if the same encoding code or name is encountered multiple times
+        Raises `err.ValueError` if the same encoding code or name is encountered multiple times
 
         Example usage:
 
@@ -580,10 +581,10 @@ def build_multibase_tables(encodings: Iterable[Multibase]) -> Tuple[Dict[str, Mu
     name_table: Dict[str, Multibase] = {}
     for e in encodings:
         if e.code in code_table:
-            raise ValueError(f"Multicodec name {e.name} appears multiple times in table.")
+            raise err.ValueError(f"Multicodec name {e.name} appears multiple times in table.")
         code_table[e.code] = e
         if e.name in name_table:
-            raise ValueError(f"Multicodec name {e.name} appears multiple times in table.")
+            raise err.ValueError(f"Multicodec name {e.name} appears multiple times in table.")
         name_table[e.name] = e
     return code_table, name_table
 

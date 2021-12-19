@@ -9,6 +9,7 @@ from typing import Callable, Dict, Optional, Tuple
 from typing_validation import validate
 
 from multiformats.varint import BytesLike
+from . import err
 
 RawEncoder = Callable[[str], bytes]
 RawDecoder = Callable[[BytesLike], str]
@@ -19,7 +20,7 @@ _proto_impl: Dict[str, ProtoImpl] = {}
 def get(name: str) -> ProtoImpl:
     """
         Gets the implementation `(raw_encoder, raw_decoder, addr_size)` for a protocol with given name.
-        Raises `KeyError` if no such encoding exists.
+        Raises `err.KeyError` if no such encoding exists.
 
         The `addr_size` component is the size in bytes for the binary representation of protocol addresses:
 
@@ -40,7 +41,7 @@ def get(name: str) -> ProtoImpl:
     """
     validate(name, str)
     if name not in _proto_impl:
-        raise KeyError(f"No implementation for protocol {repr(name)}.")
+        raise err.KeyError(f"No implementation for protocol {repr(name)}.")
     return _proto_impl[name]
 
 
@@ -67,12 +68,12 @@ def register(name: str, raw_encoder: Optional[RawEncoder], raw_decoder: Optional
         existing implementation.
         If `addr_size` is 0, `raw_encoder` and `raw_decoder` should both be None (because the protocol admits no address).
 
-        It is expected that `raw_encoder` raises `ValueError` if the string passed to it is not a valid
+        It is expected that `raw_encoder` raises `err.ValueError` if the string passed to it is not a valid
         string representatio for an address of this protocol.
-        It is expected that `raw_decoder` raises `ValueError` if the bytestring passed to it is not a valid
+        It is expected that `raw_decoder` raises `err.ValueError` if the bytestring passed to it is not a valid
         binary representatio for an address of this protocol.
 
-        If `overwrite` is `False`, raises `ValueError` if an implementation for the same name already exists.
+        If `overwrite` is `False`, raises `err.ValueError` if an implementation for the same name already exists.
 
         Example usage for protocol requiring address value:
 
@@ -102,18 +103,18 @@ def register(name: str, raw_encoder: Optional[RawEncoder], raw_decoder: Optional
     validate(addr_size, Optional[int])
     validate(overwrite, bool)
     if addr_size is not None and addr_size < 0:
-        raise ValueError("Size must be None or non-negative integer.")
+        raise err.ValueError("Size must be None or non-negative integer.")
     if addr_size == 0 and (raw_encoder is not None or raw_decoder is not None):
-        raise ValueError("Protocol admits no address (addr_size=0), set raw encoder and decoder to None.")
+        raise err.ValueError("Protocol admits no address (addr_size=0), set raw encoder and decoder to None.")
     if not overwrite and name in _proto_impl:
-        raise ValueError(f"Implementation for protocol {repr(name)} already exists.")
+        raise err.ValueError(f"Implementation for protocol {repr(name)} already exists.")
     _proto_impl[name] = (raw_encoder, raw_decoder, addr_size)
 
 
 def unregister(name: str) -> None:
     """
         Unregisters the implementatio for the protocol by given name.
-        Raises `KeyError` if no such implementation exists.
+        Raises `err.KeyError` if no such implementation exists.
 
         Example usage:
 
@@ -125,36 +126,48 @@ def unregister(name: str) -> None:
     """
     validate(name, str)
     if name not in _proto_impl:
-        raise KeyError(f"Implementation for protocol {repr(name)} does not exist.")
+        raise err.KeyError(f"Implementation for protocol {repr(name)} does not exist.")
     del _proto_impl[name]
 
 def _validate_size(name: str, b: BytesLike, size: int) -> None:
     if len(b) != size:
-        raise AddressValueError(f"Incorrect length for {repr(name)} bytes: found {len(b)}, expected {size}.")
+        raise err.ValueError(f"Incorrect length for {repr(name)} bytes: found {len(b)}, expected {size}.")
 
 def ip4_encoder(s: str) -> bytes:
     """ Encoder for 'ip4' protocol. """
     validate(s, str)
-    return IPv4Address(s).packed
+    try:
+        return IPv4Address(s).packed
+    except AddressValueError as e:
+        raise err.ValueError(str(e)) from e
 
 def ip4_decoder(b: BytesLike) -> str:
     """ Decoder for 'ip4' protocol. """
     validate(b, BytesLike)
     _validate_size('ip4', b, 4)
-    return str(IPv4Address(b))
+    try:
+        return str(IPv4Address(b))
+    except AddressValueError as e:
+        raise err.ValueError(str(e)) from e
 
 register("ip4", ip4_encoder, ip4_decoder, 4)
 
 def ip6_encoder(s: str) -> bytes:
     """ Encoder for 'ip6' protocol. """
     validate(s, str)
-    return IPv6Address(s).packed
+    try:
+        return IPv6Address(s).packed
+    except AddressValueError as e:
+        raise err.ValueError(str(e)) from e
 
 def ip6_decoder(b: BytesLike) -> str:
     """ Decoder for 'ip6' protocol. """
     validate(b, BytesLike)
     _validate_size('ip6', b, 16)
-    return str(IPv6Address(b))
+    try:
+        return str(IPv6Address(b))
+    except AddressValueError as e:
+        raise err.ValueError(str(e)) from e
 
 register("ip6", ip6_encoder, ip6_decoder, 16)
 
@@ -162,10 +175,10 @@ def tcp_udp_encoder(s: str) -> bytes:
     """ Encoder for 'tcp' and 'udp' protocols. """
     validate(s, str)
     if not s.isdigit():
-        raise AddressValueError(f"Invalid UDP port {repr(s)}.")
+        raise err.ValueError(f"Invalid UDP port {repr(s)}.")
     x = int(s)
     if not 0 <= x < 65536:
-        raise AddressValueError(f"UDP port {repr(s)} out of range.")
+        raise err.ValueError(f"UDP port {repr(s)} out of range.")
     return x.to_bytes(2, byteorder="big")
 
 def tcp_udp_decoder(b: BytesLike) -> str:

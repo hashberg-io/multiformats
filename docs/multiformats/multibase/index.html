@@ -68,7 +68,7 @@ b'Hello World!'
 </code></pre>
 <p>The <code><a title="multiformats.multibase.decode" href="#multiformats.multibase.decode">decode()</a></code> method includes additional encoding validation:</p>
 <pre><code class="language-py">&gt;&gt;&gt; base32.decode('Bjbswy3dpeblw64tmmqqq')
-ValueError: Expected 'base32' encoding, found 'base32upper' encoding instead.
+err.ValueError: Expected 'base32' encoding, found 'base32upper' encoding instead.
 </code></pre>
 <p>The <code><a title="multiformats.multibase.table" href="#multiformats.multibase.table">table()</a></code> function can be used to iterate through known multibase encodings:</p>
 <pre><code class="language-py">&gt;&gt;&gt; list(enc.name for enc in multibase.table())
@@ -146,7 +146,7 @@ ValueError: Expected 'base32' encoding, found 'base32upper' encoding instead.
 
     ```py
     &gt;&gt;&gt; base32.decode(&#39;Bjbswy3dpeblw64tmmqqq&#39;)
-    ValueError: Expected &#39;base32&#39; encoding, found &#39;base32upper&#39; encoding instead.
+    err.ValueError: Expected &#39;base32&#39; encoding, found &#39;base32upper&#39; encoding instead.
     ```
 
     The `table` function can be used to iterate through known multibase encodings:
@@ -181,6 +181,7 @@ from bases import (base2, base16, base8, base10, base36, base58btc, base58flickr
 from multiformats.multibase import raw
 from multiformats.varint import BytesLike
 from .raw import RawEncoder, RawDecoder
+from . import err
 
 
 class Multibase:
@@ -223,7 +224,7 @@ class Multibase:
         validate(name, Optional[str])
         assert name is not None
         if not re.match(r&#34;^[a-z][a-z0-9_-]+$&#34;, name): # ensures len(name) &gt; 1
-            raise ValueError(f&#34;Invalid multibase encoding name {repr(name)}&#34;)
+            raise err.ValueError(f&#34;Invalid multibase encoding name {repr(name)}&#34;)
         return name
 
     @staticmethod
@@ -237,7 +238,7 @@ class Multibase:
             &gt;&gt;&gt; Multibase.validate_code(&#34;0x00&#34;)
             &#39;\\x00&#39;
             &gt;&gt;&gt; Multibase.validate_code(&#34;hi&#34;)
-            ValueError: Multibase codes must be single-character strings
+            err.ValueError: Multibase codes must be single-character strings
             or the hex digits &#39;0xYZ&#39; of a single byte.
             ```
         &#34;&#34;&#34;
@@ -246,15 +247,15 @@ class Multibase:
             ord_code = int(code, base=16)
             code = chr(ord_code)
         elif len(code) != 1:
-            raise ValueError(&#34;Multibase codes must be single-character strings or the hex digits &#39;0xYZ&#39; of a single byte.&#34;)
+            raise err.ValueError(&#34;Multibase codes must be single-character strings or the hex digits &#39;0xYZ&#39; of a single byte.&#34;)
         if ord(code) not in range(0x00, 0x80):
-            raise ValueError(&#34;Multibase codes must be ASCII characters.&#34;)
+            raise err.ValueError(&#34;Multibase codes must be ASCII characters.&#34;)
         return code
 
     @staticmethod
     def _validate_status(status: str) -&gt; Literal[&#34;draft&#34;, &#34;candidate&#34;, &#34;default&#34;]:
         if status not in (&#34;draft&#34;, &#34;candidate&#34;, &#34;default&#34;):
-            raise ValueError(f&#34;Invalid multibase encoding status {repr(status)}.&#34;)
+            raise err.ValueError(f&#34;Invalid multibase encoding status {repr(status)}.&#34;)
         return cast(Literal[&#34;draft&#34;, &#34;candidate&#34;, &#34;default&#34;], status)
 
     @property
@@ -370,7 +371,7 @@ class Multibase:
         &#34;&#34;&#34;
         encoding = from_str(string)
         if encoding != self:
-            raise ValueError(f&#34;Expected {repr(self.name)} encoding, &#34;
+            raise err.ValueError(f&#34;Expected {repr(self.name)} encoding, &#34;
                              f&#34;found {repr(encoding.name)} encoding instead.&#34;)
         return self.raw_decoder(string[1:])
 
@@ -426,7 +427,7 @@ def get(name: Optional[str] = None, *, code: Optional[str] = None) -&gt; Multiba
         - `name` can be passed as either a positional or keyword argument
         - `code` must be passed as a keyword argument
 
-        Raises `ValueError` if the empty string is passed. Raises `KeyError` if no such encoding exists.
+        Raises `err.ValueError` if the empty string is passed. Raises `err.KeyError` if no such encoding exists.
 
         Example usage:
 
@@ -445,13 +446,13 @@ def get(name: Optional[str] = None, *, code: Optional[str] = None) -&gt; Multiba
     validate(name, Optional[str])
     validate(code, Optional[str])
     if (name is None) == (code is None):
-        raise ValueError(&#34;Must specify exactly one between encoding name and code.&#34;)
+        raise err.ValueError(&#34;Must specify exactly one between encoding name and code.&#34;)
     if code is not None:
         if code not in _code_table:
-            raise KeyError(f&#34;No multibase encoding with code {repr(code)}.&#34;)
+            raise err.KeyError(f&#34;No multibase encoding with code {repr(code)}.&#34;)
         return _code_table[code]
     if name not in _name_table:
-        raise KeyError(f&#34;No multibase encoding named {repr(name)}.&#34;)
+        raise err.KeyError(f&#34;No multibase encoding named {repr(name)}.&#34;)
     return _name_table[name]
 
 
@@ -463,7 +464,7 @@ def exists(name: Optional[str] = None, *, code: Optional[str] = None) -&gt; bool
         - `name` can be passed as either a positional or keyword argument
         - `code` must be passed as a keyword argument
 
-        Raises `ValueError` if the empty string is passed.
+        Raises `err.ValueError` if the empty string is passed.
 
         Example usage:
 
@@ -477,7 +478,7 @@ def exists(name: Optional[str] = None, *, code: Optional[str] = None) -&gt; bool
     validate(name, Optional[str])
     validate(code, Optional[str])
     if (name is None) == (code is None):
-        raise ValueError(&#34;Must specify exactly one between encoding name and code.&#34;)
+        raise err.ValueError(&#34;Must specify exactly one between encoding name and code.&#34;)
     if code is not None:
         code = Multibase.validate_code(code)
         return code in _code_table
@@ -489,8 +490,8 @@ def register(enc: Multibase, *, overwrite: bool = False) -&gt; None:
         Registers a given multibase encoding. The optional keyword argument `overwrite` (default: `False`)
         can be used to overwrite a multibase encoding with existing code.
 
-        When `overwrite` is `False`, raises `ValueError` if a multibase encoding with the same name or code already exists.
-        When `overwrite` is `True`, raises `ValueError` if a multibase encoding with the same name but different code already exists.
+        When `overwrite` is `False`, raises `err.ValueError` if a multibase encoding with the same name or code already exists.
+        When `overwrite` is `True`, raises `err.ValueError` if a multibase encoding with the same name but different code already exists.
 
         Example usage:
 
@@ -506,9 +507,9 @@ def register(enc: Multibase, *, overwrite: bool = False) -&gt; None:
     validate(enc, Multibase)
     validate(overwrite, bool)
     if not overwrite and enc.code in _code_table:
-        raise ValueError(f&#34;Multibase encoding with code {repr(enc.code)} already exists: {_code_table[enc.code]}&#34;)
+        raise err.ValueError(f&#34;Multibase encoding with code {repr(enc.code)} already exists: {_code_table[enc.code]}&#34;)
     if enc.name in _name_table and _name_table[enc.name].code != enc.code:
-        raise ValueError(f&#34;Multibase encoding with name {repr(enc.name)} already exists: {_name_table[enc.name]}&#34;)
+        raise err.ValueError(f&#34;Multibase encoding with name {repr(enc.name)} already exists: {_name_table[enc.name]}&#34;)
     _code_table[enc.code] = enc
     _name_table[enc.name] = enc
 
@@ -517,20 +518,20 @@ def validate_multibase(multibase: Multibase) -&gt; None:
     &#34;&#34;&#34;
         Validates a multibase:
 
-        - raises `KeyError` if no multibase with the given name is registered
-        - raises `ValueError` if a multibase with the given name is registered, but is different from the one given
+        - raises `err.KeyError` if no multibase with the given name is registered
+        - raises `err.ValueError` if a multibase with the given name is registered, but is different from the one given
         - raises no error if the given multibase is registered
     &#34;&#34;&#34;
     validate(multibase, Multibase)
     mc = get(multibase.name)
     if mc != multibase:
-        raise ValueError(f&#34;Multibase named {multibase.name} exists, but is not the one given.&#34;)
+        raise err.ValueError(f&#34;Multibase named {multibase.name} exists, but is not the one given.&#34;)
 
 
 def unregister(name: Optional[str] = None, *, code: Optional[str] = None) -&gt; None:
     &#34;&#34;&#34;
         Unregisters the multibase encoding with given name (if a string is passed) or code (if an int is passed).
-        Raises `KeyError` if no such multibase encoding exists.
+        Raises `err.KeyError` if no such multibase encoding exists.
 
         Example usage:
 
@@ -570,8 +571,8 @@ def table() -&gt; Iterator[Multibase]:
 def from_str(string: str) -&gt; Multibase:
     &#34;&#34;&#34;
         Returns the multibase encoding for the given string, according to the code specified by its prefix.
-        Raises `ValueError` if the empty string is passed.
-        Raises `KeyError` if no encoding exists with that code.
+        Raises `err.ValueError` if the empty string is passed.
+        Raises `err.KeyError` if no encoding exists with that code.
 
         Example usage:
 
@@ -583,13 +584,13 @@ def from_str(string: str) -&gt; Multibase:
     &#34;&#34;&#34;
     validate(string, str)
     if len(string) == 0:
-        raise ValueError(&#34;Empty string is not valid for encoded data.&#34;)
+        raise err.ValueError(&#34;Empty string is not valid for encoded data.&#34;)
     if string[0] in _code_table:
         return _code_table[string[0]]
     for code in _code_table:
         if string.startswith(code):
             return get(code=code)
-    raise KeyError(&#34;No known multibase code is a prefix of the given string.&#34;)
+    raise err.KeyError(&#34;No known multibase code is a prefix of the given string.&#34;)
 
 
 def encode(data: BytesLike, enc: Union[str, &#34;Multibase&#34;]) -&gt; str:
@@ -652,7 +653,7 @@ def build_multibase_tables(encodings: Iterable[Multibase]) -&gt; Tuple[Dict[str,
     &#34;&#34;&#34;
         Creates code-&gt;encoding and name-&gt;encoding mappings from a finite iterable of encodings, returning the mappings.
 
-        Raises `ValueError` if the same encoding code or name is encountered multiple times
+        Raises `err.ValueError` if the same encoding code or name is encountered multiple times
 
         Example usage:
 
@@ -665,10 +666,10 @@ def build_multibase_tables(encodings: Iterable[Multibase]) -&gt; Tuple[Dict[str,
     name_table: Dict[str, Multibase] = {}
     for e in encodings:
         if e.code in code_table:
-            raise ValueError(f&#34;Multicodec name {e.name} appears multiple times in table.&#34;)
+            raise err.ValueError(f&#34;Multicodec name {e.name} appears multiple times in table.&#34;)
         code_table[e.code] = e
         if e.name in name_table:
-            raise ValueError(f&#34;Multicodec name {e.name} appears multiple times in table.&#34;)
+            raise err.ValueError(f&#34;Multicodec name {e.name} appears multiple times in table.&#34;)
         name_table[e.name] = e
     return code_table, name_table
 
@@ -688,6 +689,10 @@ __pdoc__ = {
 <section>
 <h2 class="section-title" id="header-submodules">Sub-modules</h2>
 <dl>
+<dt><code class="name"><a title="multiformats.multibase.err" href="err.html">multiformats.multibase.err</a></code></dt>
+<dd>
+<div class="desc"><p>Errors for the <code><a title="multiformats.multibase" href="#multiformats.multibase">multiformats.multibase</a></code> module.</p></div>
+</dd>
 <dt><code class="name"><a title="multiformats.multibase.raw" href="raw.html">multiformats.multibase.raw</a></code></dt>
 <dd>
 <div class="desc"><p>Implementation of raw data encodings used by multibase encodings …</p></div>
@@ -813,7 +818,7 @@ of <code>name</code> or <code>code</code> must be passed:</p>
 <li><code>name</code> can be passed as either a positional or keyword argument</li>
 <li><code>code</code> must be passed as a keyword argument</li>
 </ul>
-<p>Raises <code>ValueError</code> if the empty string is passed.</p>
+<p>Raises <code><a title="multiformats.multibase.err.ValueError" href="err.html#multiformats.multibase.err.ValueError">ValueError</a></code> if the empty string is passed.</p>
 <p>Example usage:</p>
 <pre><code class="language-py">&gt;&gt;&gt; multibase.exists(&quot;base8&quot;)
 True
@@ -832,7 +837,7 @@ True
         - `name` can be passed as either a positional or keyword argument
         - `code` must be passed as a keyword argument
 
-        Raises `ValueError` if the empty string is passed.
+        Raises `err.ValueError` if the empty string is passed.
 
         Example usage:
 
@@ -846,7 +851,7 @@ True
     validate(name, Optional[str])
     validate(code, Optional[str])
     if (name is None) == (code is None):
-        raise ValueError(&#34;Must specify exactly one between encoding name and code.&#34;)
+        raise err.ValueError(&#34;Must specify exactly one between encoding name and code.&#34;)
     if code is not None:
         code = Multibase.validate_code(code)
         return code in _code_table
@@ -858,8 +863,8 @@ True
 </code></dt>
 <dd>
 <div class="desc"><p>Returns the multibase encoding for the given string, according to the code specified by its prefix.
-Raises <code>ValueError</code> if the empty string is passed.
-Raises <code>KeyError</code> if no encoding exists with that code.</p>
+Raises <code><a title="multiformats.multibase.err.ValueError" href="err.html#multiformats.multibase.err.ValueError">ValueError</a></code> if the empty string is passed.
+Raises <code><a title="multiformats.multibase.err.KeyError" href="err.html#multiformats.multibase.err.KeyError">KeyError</a></code> if no encoding exists with that code.</p>
 <p>Example usage:</p>
 <pre><code class="language-py">&gt;&gt;&gt; multibase.from_str(&quot;mSGVsbG8gd29ybGQh&quot;)
 Multibase(encoding='base64', code='m', status='default',
@@ -872,8 +877,8 @@ Multibase(encoding='base64', code='m', status='default',
 <pre><code class="python">def from_str(string: str) -&gt; Multibase:
     &#34;&#34;&#34;
         Returns the multibase encoding for the given string, according to the code specified by its prefix.
-        Raises `ValueError` if the empty string is passed.
-        Raises `KeyError` if no encoding exists with that code.
+        Raises `err.ValueError` if the empty string is passed.
+        Raises `err.KeyError` if no encoding exists with that code.
 
         Example usage:
 
@@ -885,13 +890,13 @@ Multibase(encoding='base64', code='m', status='default',
     &#34;&#34;&#34;
     validate(string, str)
     if len(string) == 0:
-        raise ValueError(&#34;Empty string is not valid for encoded data.&#34;)
+        raise err.ValueError(&#34;Empty string is not valid for encoded data.&#34;)
     if string[0] in _code_table:
         return _code_table[string[0]]
     for code in _code_table:
         if string.startswith(code):
             return get(code=code)
-    raise KeyError(&#34;No known multibase code is a prefix of the given string.&#34;)</code></pre>
+    raise err.KeyError(&#34;No known multibase code is a prefix of the given string.&#34;)</code></pre>
 </details>
 </dd>
 <dt id="multiformats.multibase.get"><code class="name flex">
@@ -904,7 +909,7 @@ of <code>name</code> or <code>code</code> must be passed:</p>
 <li><code>name</code> can be passed as either a positional or keyword argument</li>
 <li><code>code</code> must be passed as a keyword argument</li>
 </ul>
-<p>Raises <code>ValueError</code> if the empty string is passed. Raises <code>KeyError</code> if no such encoding exists.</p>
+<p>Raises <code><a title="multiformats.multibase.err.ValueError" href="err.html#multiformats.multibase.err.ValueError">ValueError</a></code> if the empty string is passed. Raises <code><a title="multiformats.multibase.err.KeyError" href="err.html#multiformats.multibase.err.KeyError">KeyError</a></code> if no such encoding exists.</p>
 <p>Example usage:</p>
 <pre><code class="language-py">&gt;&gt;&gt; multibase.get(&quot;base8&quot;)
 Multibase(encoding='base8', code='7',
@@ -928,7 +933,7 @@ Multibase(encoding='base32hexpad', code='t', status='candidate',
         - `name` can be passed as either a positional or keyword argument
         - `code` must be passed as a keyword argument
 
-        Raises `ValueError` if the empty string is passed. Raises `KeyError` if no such encoding exists.
+        Raises `err.ValueError` if the empty string is passed. Raises `err.KeyError` if no such encoding exists.
 
         Example usage:
 
@@ -947,13 +952,13 @@ Multibase(encoding='base32hexpad', code='t', status='candidate',
     validate(name, Optional[str])
     validate(code, Optional[str])
     if (name is None) == (code is None):
-        raise ValueError(&#34;Must specify exactly one between encoding name and code.&#34;)
+        raise err.ValueError(&#34;Must specify exactly one between encoding name and code.&#34;)
     if code is not None:
         if code not in _code_table:
-            raise KeyError(f&#34;No multibase encoding with code {repr(code)}.&#34;)
+            raise err.KeyError(f&#34;No multibase encoding with code {repr(code)}.&#34;)
         return _code_table[code]
     if name not in _name_table:
-        raise KeyError(f&#34;No multibase encoding named {repr(name)}.&#34;)
+        raise err.KeyError(f&#34;No multibase encoding named {repr(name)}.&#34;)
     return _name_table[name]</code></pre>
 </details>
 </dd>
@@ -963,8 +968,8 @@ Multibase(encoding='base32hexpad', code='t', status='candidate',
 <dd>
 <div class="desc"><p>Registers a given multibase encoding. The optional keyword argument <code>overwrite</code> (default: <code>False</code>)
 can be used to overwrite a multibase encoding with existing code.</p>
-<p>When <code>overwrite</code> is <code>False</code>, raises <code>ValueError</code> if a multibase encoding with the same name or code already exists.
-When <code>overwrite</code> is <code>True</code>, raises <code>ValueError</code> if a multibase encoding with the same name but different code already exists.</p>
+<p>When <code>overwrite</code> is <code>False</code>, raises <code><a title="multiformats.multibase.err.ValueError" href="err.html#multiformats.multibase.err.ValueError">ValueError</a></code> if a multibase encoding with the same name or code already exists.
+When <code>overwrite</code> is <code>True</code>, raises <code><a title="multiformats.multibase.err.ValueError" href="err.html#multiformats.multibase.err.ValueError">ValueError</a></code> if a multibase encoding with the same name but different code already exists.</p>
 <p>Example usage:</p>
 <pre><code class="language-py">&gt;&gt;&gt; base45 = Multibase(name=&quot;base45&quot;, code=&quot;:&quot;,
                        status=&quot;draft&quot;, description=&quot;base45 encoding&quot;)
@@ -982,8 +987,8 @@ Multibase(encoding='base45', code=':', status='draft',
         Registers a given multibase encoding. The optional keyword argument `overwrite` (default: `False`)
         can be used to overwrite a multibase encoding with existing code.
 
-        When `overwrite` is `False`, raises `ValueError` if a multibase encoding with the same name or code already exists.
-        When `overwrite` is `True`, raises `ValueError` if a multibase encoding with the same name but different code already exists.
+        When `overwrite` is `False`, raises `err.ValueError` if a multibase encoding with the same name or code already exists.
+        When `overwrite` is `True`, raises `err.ValueError` if a multibase encoding with the same name but different code already exists.
 
         Example usage:
 
@@ -999,9 +1004,9 @@ Multibase(encoding='base45', code=':', status='draft',
     validate(enc, Multibase)
     validate(overwrite, bool)
     if not overwrite and enc.code in _code_table:
-        raise ValueError(f&#34;Multibase encoding with code {repr(enc.code)} already exists: {_code_table[enc.code]}&#34;)
+        raise err.ValueError(f&#34;Multibase encoding with code {repr(enc.code)} already exists: {_code_table[enc.code]}&#34;)
     if enc.name in _name_table and _name_table[enc.name].code != enc.code:
-        raise ValueError(f&#34;Multibase encoding with name {repr(enc.name)} already exists: {_name_table[enc.name]}&#34;)
+        raise err.ValueError(f&#34;Multibase encoding with name {repr(enc.name)} already exists: {_name_table[enc.name]}&#34;)
     _code_table[enc.code] = enc
     _name_table[enc.name] = enc</code></pre>
 </details>
@@ -1041,7 +1046,7 @@ Multibase(encoding='base45', code=':', status='draft',
 </code></dt>
 <dd>
 <div class="desc"><p>Unregisters the multibase encoding with given name (if a string is passed) or code (if an int is passed).
-Raises <code>KeyError</code> if no such multibase encoding exists.</p>
+Raises <code><a title="multiformats.multibase.err.KeyError" href="err.html#multiformats.multibase.err.KeyError">KeyError</a></code> if no such multibase encoding exists.</p>
 <p>Example usage:</p>
 <pre><code class="language-py">&gt;&gt;&gt; base45 = Multibase(name=&quot;base45&quot;, code=&quot;:&quot;,
                        status=&quot;draft&quot;, description=&quot;base45 encoding&quot;)
@@ -1060,7 +1065,7 @@ False
 <pre><code class="python">def unregister(name: Optional[str] = None, *, code: Optional[str] = None) -&gt; None:
     &#34;&#34;&#34;
         Unregisters the multibase encoding with given name (if a string is passed) or code (if an int is passed).
-        Raises `KeyError` if no such multibase encoding exists.
+        Raises `err.KeyError` if no such multibase encoding exists.
 
         Example usage:
 
@@ -1087,8 +1092,8 @@ False
 <dd>
 <div class="desc"><p>Validates a multibase:</p>
 <ul>
-<li>raises <code>KeyError</code> if no multibase with the given name is registered</li>
-<li>raises <code>ValueError</code> if a multibase with the given name is registered, but is different from the one given</li>
+<li>raises <code><a title="multiformats.multibase.err.KeyError" href="err.html#multiformats.multibase.err.KeyError">KeyError</a></code> if no multibase with the given name is registered</li>
+<li>raises <code><a title="multiformats.multibase.err.ValueError" href="err.html#multiformats.multibase.err.ValueError">ValueError</a></code> if a multibase with the given name is registered, but is different from the one given</li>
 <li>raises no error if the given multibase is registered</li>
 </ul></div>
 <details class="source">
@@ -1099,14 +1104,14 @@ False
     &#34;&#34;&#34;
         Validates a multibase:
 
-        - raises `KeyError` if no multibase with the given name is registered
-        - raises `ValueError` if a multibase with the given name is registered, but is different from the one given
+        - raises `err.KeyError` if no multibase with the given name is registered
+        - raises `err.ValueError` if a multibase with the given name is registered, but is different from the one given
         - raises no error if the given multibase is registered
     &#34;&#34;&#34;
     validate(multibase, Multibase)
     mc = get(multibase.name)
     if mc != multibase:
-        raise ValueError(f&#34;Multibase named {multibase.name} exists, but is not the one given.&#34;)</code></pre>
+        raise err.ValueError(f&#34;Multibase named {multibase.name} exists, but is not the one given.&#34;)</code></pre>
 </details>
 </dd>
 </dl>
@@ -1168,7 +1173,7 @@ False
         validate(name, Optional[str])
         assert name is not None
         if not re.match(r&#34;^[a-z][a-z0-9_-]+$&#34;, name): # ensures len(name) &gt; 1
-            raise ValueError(f&#34;Invalid multibase encoding name {repr(name)}&#34;)
+            raise err.ValueError(f&#34;Invalid multibase encoding name {repr(name)}&#34;)
         return name
 
     @staticmethod
@@ -1182,7 +1187,7 @@ False
             &gt;&gt;&gt; Multibase.validate_code(&#34;0x00&#34;)
             &#39;\\x00&#39;
             &gt;&gt;&gt; Multibase.validate_code(&#34;hi&#34;)
-            ValueError: Multibase codes must be single-character strings
+            err.ValueError: Multibase codes must be single-character strings
             or the hex digits &#39;0xYZ&#39; of a single byte.
             ```
         &#34;&#34;&#34;
@@ -1191,15 +1196,15 @@ False
             ord_code = int(code, base=16)
             code = chr(ord_code)
         elif len(code) != 1:
-            raise ValueError(&#34;Multibase codes must be single-character strings or the hex digits &#39;0xYZ&#39; of a single byte.&#34;)
+            raise err.ValueError(&#34;Multibase codes must be single-character strings or the hex digits &#39;0xYZ&#39; of a single byte.&#34;)
         if ord(code) not in range(0x00, 0x80):
-            raise ValueError(&#34;Multibase codes must be ASCII characters.&#34;)
+            raise err.ValueError(&#34;Multibase codes must be ASCII characters.&#34;)
         return code
 
     @staticmethod
     def _validate_status(status: str) -&gt; Literal[&#34;draft&#34;, &#34;candidate&#34;, &#34;default&#34;]:
         if status not in (&#34;draft&#34;, &#34;candidate&#34;, &#34;default&#34;):
-            raise ValueError(f&#34;Invalid multibase encoding status {repr(status)}.&#34;)
+            raise err.ValueError(f&#34;Invalid multibase encoding status {repr(status)}.&#34;)
         return cast(Literal[&#34;draft&#34;, &#34;candidate&#34;, &#34;default&#34;], status)
 
     @property
@@ -1315,7 +1320,7 @@ False
         &#34;&#34;&#34;
         encoding = from_str(string)
         if encoding != self:
-            raise ValueError(f&#34;Expected {repr(self.name)} encoding, &#34;
+            raise err.ValueError(f&#34;Expected {repr(self.name)} encoding, &#34;
                              f&#34;found {repr(encoding.name)} encoding instead.&#34;)
         return self.raw_decoder(string[1:])
 
@@ -1373,7 +1378,7 @@ False
 <pre><code class="language-py">&gt;&gt;&gt; Multibase.validate_code(&quot;0x00&quot;)
 '\x00'
 &gt;&gt;&gt; Multibase.validate_code(&quot;hi&quot;)
-ValueError: Multibase codes must be single-character strings
+err.ValueError: Multibase codes must be single-character strings
 or the hex digits '0xYZ' of a single byte.
 </code></pre></div>
 <details class="source">
@@ -1391,7 +1396,7 @@ def validate_code(code: str) -&gt; str:
         &gt;&gt;&gt; Multibase.validate_code(&#34;0x00&#34;)
         &#39;\\x00&#39;
         &gt;&gt;&gt; Multibase.validate_code(&#34;hi&#34;)
-        ValueError: Multibase codes must be single-character strings
+        err.ValueError: Multibase codes must be single-character strings
         or the hex digits &#39;0xYZ&#39; of a single byte.
         ```
     &#34;&#34;&#34;
@@ -1400,9 +1405,9 @@ def validate_code(code: str) -&gt; str:
         ord_code = int(code, base=16)
         code = chr(ord_code)
     elif len(code) != 1:
-        raise ValueError(&#34;Multibase codes must be single-character strings or the hex digits &#39;0xYZ&#39; of a single byte.&#34;)
+        raise err.ValueError(&#34;Multibase codes must be single-character strings or the hex digits &#39;0xYZ&#39; of a single byte.&#34;)
     if ord(code) not in range(0x00, 0x80):
-        raise ValueError(&#34;Multibase codes must be ASCII characters.&#34;)
+        raise err.ValueError(&#34;Multibase codes must be ASCII characters.&#34;)
     return code</code></pre>
 </details>
 </dd>
@@ -1600,7 +1605,7 @@ b'Hello World!'
     &#34;&#34;&#34;
     encoding = from_str(string)
     if encoding != self:
-        raise ValueError(f&#34;Expected {repr(self.name)} encoding, &#34;
+        raise err.ValueError(f&#34;Expected {repr(self.name)} encoding, &#34;
                          f&#34;found {repr(encoding.name)} encoding instead.&#34;)
     return self.raw_decoder(string[1:])</code></pre>
 </details>
@@ -1694,6 +1699,7 @@ the resulting multibase string.</p>
 </li>
 <li><h3><a href="#header-submodules">Sub-modules</a></h3>
 <ul>
+<li><code><a title="multiformats.multibase.err" href="err.html">multiformats.multibase.err</a></code></li>
 <li><code><a title="multiformats.multibase.raw" href="raw.html">multiformats.multibase.raw</a></code></li>
 </ul>
 </li>

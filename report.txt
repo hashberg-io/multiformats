@@ -1,0 +1,185 @@
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ Multiformats implementation report v0.1.1.post7+gfa46bf4.d20211219                                   │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────┘
+───────────────────────────────────────────── Memory Usage ─────────────────────────────────────────────
+> python+psutil memory baseline: 7.2MiB
+> multiformats memory total:     4.0MiB
+┌───────────────────┬────────┬──────────┐
+│ Component         │ Memory │ Memory % │
+├───────────────────┼────────┼──────────┤
+│ typing-validation │ 1.0MiB │      25% │
+│ bases             │ 672KiB │      16% │
+│ pyskein           │ 112KiB │       3% │
+│ multiformats      │ 2.2MiB │      56% │
+└───────────────────┴────────┴──────────┘
+───────────────────────────────────────── Multihash functions ──────────────────────────────────────────
+> Multihash functions implemented: 330/356
+┌──────────────────────────────────┬──────────────────────────────┬──────────────────────────┬─────────┐
+│ Code                             │ Name                         │ Bitsize                  │ Implem. │
+├──────────────────────────────────┼──────────────────────────────┼──────────────────────────┼─────────┤
+│ 0x0                              │ identity                     │                          │ yes     │
+│ 0x11                             │ sha1-160                     │ 160                      │ yes     │
+│ {0x12, 0x13, 0x20, 0x1013}       │ sha2-Bitsize                 │ {256, 512, 1792, 3072}   │ 2/4     │
+│ {0x14, 0x15, 0x16, 0x17}         │ sha3-Bitsize                 │ {224, 256, 384, 512}     │ yes     │
+│ {0x18, 0x19}                     │ shake-Bitsize                │ {256, 512}               │ yes     │
+│ {0x1a, 0x1b, 0x1c, 0x1d}         │ keccak-Bitsize               │ {1792, 2048, 3072, 4096} │ no      │
+│ 0x1e                             │ blake3                       │                          │ no      │
+│ {0x22, 0x1022}                   │ murmur3-x64-Bitsize          │ {512, 1024}              │ no      │
+│ 0x23                             │ murmur3-32-256               │ 256                      │ no      │
+│ 0x56                             │ dbl-sha2-256-2048            │ 2048                     │ no      │
+│ 0xd4                             │ md4                          │                          │ no      │
+│ 0xd5                             │ md5                          │                          │ no      │
+│ 0xd6                             │ bmt                          │                          │ no      │
+│ 0x1012                           │ sha2-256-trunc254-padded     │                          │ no      │
+│ {0x1014, 0x1015}                 │ sha2-512-Bitsize             │ {1792, 2048}             │ no      │
+│ {0x1052, 0x1053, 0x1054, 0x1055} │ ripemd-Bitsize               │ {1024, 1280, 2048, 2560} │ no      │
+│ 0x1100                           │ x11                          │                          │ no      │
+│ 0x1d01                           │ kangarootwelve               │                          │ no      │
+│ 0x534d                           │ sm3-256-2048                 │ 2048                     │ no      │
+│ {0xb201, 0xb202, ..., 0xb240}    │ blake2b-Bitsize              │ {8, 16, ..., 512}        │ yes     │
+│ {0xb241, 0xb242, ..., 0xb260}    │ blake2s-Bitsize              │ {8, 16, ..., 256}        │ yes     │
+│ {0xb301, 0xb302, ..., 0xb320}    │ skein256-Bitsize             │ {8, 16, ..., 256}        │ yes     │
+│ {0xb321, 0xb322, ..., 0xb360}    │ skein512-Bitsize             │ {8, 16, ..., 512}        │ yes     │
+│ {0xb361, 0xb362, ..., 0xb3e0}    │ skein1024-Bitsize            │ {8, 16, ..., 1024}       │ yes     │
+│ 0xb401                           │ poseidon-bls12_381-a2-fc1    │                          │ no      │
+│ 0xb402                           │ poseidon-bls12_381-a2-fc1-sc │                          │ no      │
+└──────────────────────────────────┴──────────────────────────────┴──────────────────────────┴─────────┘
+───────────────────────────────────────── Multiaddr protocols ──────────────────────────────────────────
+> Multiaddr protocols implemented: 18/33
+┌──────────┬────────────────────┬─────────┐
+│ Code     │ Name               │ Implem. │
+├──────────┼────────────────────┼─────────┤
+│ 0x4      │ ip4                │ yes     │
+│ 0x6      │ tcp                │ yes     │
+│ 0x21     │ dccp               │ no      │
+│ 0x29     │ ip6                │ yes     │
+│ 0x2a     │ ip6zone            │ no      │
+│ 0x35     │ dns                │ no      │
+│ 0x36     │ dns4               │ no      │
+│ 0x37     │ dns6               │ no      │
+│ 0x38     │ dnsaddr            │ no      │
+│ 0x84     │ sctp               │ no      │
+│ 0x111    │ udp                │ yes     │
+│ 0x113    │ p2p-webrtc-star    │ yes     │
+│ 0x114    │ p2p-webrtc-direct  │ yes     │
+│ 0x115    │ p2p-stardust       │ yes     │
+│ 0x122    │ p2p-circuit        │ yes     │
+│ 0x12d    │ udt                │ yes     │
+│ 0x12e    │ utp                │ yes     │
+│ 0x190    │ unix               │ no      │
+│ 0x196    │ thread             │ no      │
+│ 0x1a5    │ p2p                │ no      │
+│ 0x1bb    │ https              │ yes     │
+│ 0x1bc    │ onion              │ no      │
+│ 0x1bd    │ onion3             │ no      │
+│ 0x1be    │ garlic64           │ no      │
+│ 0x1bf    │ garlic32           │ no      │
+│ 0x1c0    │ tls                │ yes     │
+│ 0x1c6    │ noise              │ yes     │
+│ 0x1cc    │ quic               │ yes     │
+│ 0x1dd    │ ws                 │ yes     │
+│ 0x1de    │ wss                │ yes     │
+│ 0x1df    │ p2p-websocket-star │ yes     │
+│ 0x1e0    │ http               │ yes     │
+│ 0x706c61 │ plaintextv2        │ no      │
+└──────────┴────────────────────┴─────────┘
+────────────────────────────────────────── Other Multicodecs ───────────────────────────────────────────
+┌──────────┬────────────────────────────┬───────────────┐
+│ Code     │ Name                       │ Tag           │
+├──────────┼────────────────────────────┼───────────────┤
+│ 0x1      │ cidv1                      │ cid           │
+│ 0x2      │ cidv2                      │ cid           │
+│ 0x3      │ cidv3                      │ cid           │
+│ 0x2f     │ path                       │ namespace     │
+│ 0x30     │ multicodec                 │ multiformat   │
+│ 0x31     │ multihash                  │ multiformat   │
+│ 0x32     │ multiaddr                  │ multiformat   │
+│ 0x33     │ multibase                  │ multiformat   │
+│ 0x50     │ protobuf                   │ serialization │
+│ 0x51     │ cbor                       │ ipld          │
+│ 0x55     │ raw                        │ ipld          │
+│ 0x60     │ rlp                        │ serialization │
+│ 0x63     │ bencode                    │ serialization │
+│ 0x70     │ dag-pb                     │ ipld          │
+│ 0x71     │ dag-cbor                   │ ipld          │
+│ 0x72     │ libp2p-key                 │ ipld          │
+│ 0x78     │ git-raw                    │ ipld          │
+│ 0x7b     │ torrent-info               │ ipld          │
+│ 0x7c     │ torrent-file               │ ipld          │
+│ 0x81     │ leofcoin-block             │ ipld          │
+│ 0x82     │ leofcoin-tx                │ ipld          │
+│ 0x83     │ leofcoin-pr                │ ipld          │
+│ 0x85     │ dag-jose                   │ ipld          │
+│ 0x86     │ dag-cose                   │ ipld          │
+│ 0x90     │ eth-block                  │ ipld          │
+│ 0x91     │ eth-block-list             │ ipld          │
+│ 0x92     │ eth-tx-trie                │ ipld          │
+│ 0x93     │ eth-tx                     │ ipld          │
+│ 0x94     │ eth-tx-receipt-trie        │ ipld          │
+│ 0x95     │ eth-tx-receipt             │ ipld          │
+│ 0x96     │ eth-state-trie             │ ipld          │
+│ 0x97     │ eth-account-snapshot       │ ipld          │
+│ 0x98     │ eth-storage-trie           │ ipld          │
+│ 0x99     │ eth-receipt-log-trie       │ ipld          │
+│ 0x9a     │ eth-reciept-log            │ ipld          │
+│ 0xa0     │ aes-128                    │ key           │
+│ 0xa1     │ aes-192                    │ key           │
+│ 0xa2     │ aes-256                    │ key           │
+│ 0xa3     │ chacha-128                 │ key           │
+│ 0xa4     │ chacha-256                 │ key           │
+│ 0xb0     │ bitcoin-block              │ ipld          │
+│ 0xb1     │ bitcoin-tx                 │ ipld          │
+│ 0xb2     │ bitcoin-witness-commitment │ ipld          │
+│ 0xc0     │ zcash-block                │ ipld          │
+│ 0xc1     │ zcash-tx                   │ ipld          │
+│ 0xca     │ caip-50                    │ multiformat   │
+│ 0xce     │ streamid                   │ namespace     │
+│ 0xd0     │ stellar-block              │ ipld          │
+│ 0xd1     │ stellar-tx                 │ ipld          │
+│ 0xe0     │ decred-block               │ ipld          │
+│ 0xe1     │ decred-tx                  │ ipld          │
+│ 0xe2     │ ipld-ns                    │ namespace     │
+│ 0xe3     │ ipfs-ns                    │ namespace     │
+│ 0xe4     │ swarm-ns                   │ namespace     │
+│ 0xe5     │ ipns-ns                    │ namespace     │
+│ 0xe6     │ zeronet                    │ namespace     │
+│ 0xe7     │ secp256k1-pub              │ key           │
+│ 0xea     │ bls12_381-g1-pub           │ key           │
+│ 0xeb     │ bls12_381-g2-pub           │ key           │
+│ 0xec     │ x25519-pub                 │ key           │
+│ 0xed     │ ed25519-pub                │ key           │
+│ 0xee     │ bls12_381-g1g2-pub         │ key           │
+│ 0xf0     │ dash-block                 │ ipld          │
+│ 0xf1     │ dash-tx                    │ ipld          │
+│ 0xfa     │ swarm-manifest             │ ipld          │
+│ 0xfb     │ swarm-feed                 │ ipld          │
+│ 0x129    │ dag-json                   │ ipld          │
+│ 0x1f0    │ swhid-1-snp                │ ipld          │
+│ 0x200    │ json                       │ ipld          │
+│ 0x201    │ messagepack                │ serialization │
+│ 0x301    │ libp2p-peer-record         │ libp2p        │
+│ 0x302    │ libp2p-relay-rsvp          │ libp2p        │
+│ 0x400    │ car-index-sorted           │ serialization │
+│ 0x401    │ car-multihash-index-sorted │ serialization │
+│ 0x1200   │ p256-pub                   │ key           │
+│ 0x1201   │ p384-pub                   │ key           │
+│ 0x1202   │ p521-pub                   │ key           │
+│ 0x1203   │ ed448-pub                  │ key           │
+│ 0x1204   │ x448-pub                   │ key           │
+│ 0x1205   │ rsa-pub                    │ key           │
+│ 0x1300   │ ed25519-priv               │ key           │
+│ 0x1301   │ secp256k1-priv             │ key           │
+│ 0x1302   │ x25519-priv                │ key           │
+│ 0xce11   │ zeroxcert-imprint-256      │ zeroxcert     │
+│ 0xf101   │ fil-commitment-unsealed    │ filecoin      │
+│ 0xf102   │ fil-commitment-sealed      │ filecoin      │
+│ 0x807124 │ holochain-adr-v0           │ holochain     │
+│ 0x817124 │ holochain-adr-v1           │ holochain     │
+│ 0x947124 │ holochain-key-v0           │ holochain     │
+│ 0x957124 │ holochain-key-v1           │ holochain     │
+│ 0xa27124 │ holochain-sig-v0           │ holochain     │
+│ 0xa37124 │ holochain-sig-v1           │ holochain     │
+│ 0xb19910 │ skynet-ns                  │ namespace     │
+│ 0xb29910 │ arweave-ns                 │ namespace     │
+│ 0xb39910 │ subspace-ns                │ namespace     │
+└──────────┴────────────────────────────┴───────────────┘

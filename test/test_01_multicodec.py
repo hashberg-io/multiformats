@@ -1,32 +1,57 @@
 """  Tests for the `multiformats.multicodec` module. """
 
+from typing import Dict, List, Union
+
+import pytest
+
 from multiformats import multicodec
 from multiformats.multicodec import Multicodec
 
-def test_exists() -> None:
+exists_cases = [
+    "identity",
+    0x00
+]
+
+@pytest.mark.parametrize("name_or_code", exists_cases)
+def test_exists(name_or_code: Union[str, int]) -> None:
     """ Tests `multicodec.exists`. """
-    assert multicodec.exists("identity")
-    assert multicodec.exists(code=0x00)
+    if isinstance(name_or_code, str):
+        assert multicodec.exists(name_or_code)
+    else:
+        assert multicodec.exists(code=name_or_code)
 
-def test_get() -> None:
+get_cases = {
+    "identity": {
+        "name": "identity",
+        "code": 0x00,
+        "hexcode": "0x00",
+        "tag": "multihash",
+        "status": "permanent",
+        "description": "raw binary",
+    }
+}
+
+@pytest.mark.parametrize("name, info", get_cases.items())
+def test_get(name: str, info: Dict[str, Union[str, int]]) -> None:
     """ Tests `multicodec.get`. """
-    m = multicodec.get("identity")
-    assert m.name == "identity"
-    assert m.code == 0x00
-    assert m.hexcode == "0x00"
-    assert m.tag == "multihash"
-    assert m.status == "permanent"
-    assert m.description == "raw binary"
+    m = multicodec.get(name)
+    for k, v in info.items():
+        assert hasattr(m, k)
+        assert getattr(m, k) == v
 
-def test_multicodec_contructor() -> None:
-    """ Tests `Multicodec.from_json`. """
-    m_json = {
+json_cases = [
+    {
         "name": "my-codec",
         "tag": "private",
         "code": "0x300001",
         "status": "draft",
         "description": "my private codec"
     }
+]
+
+@pytest.mark.parametrize("m_json", json_cases)
+def test_multicodec_contructor(m_json: Dict[str, str]) -> None:
+    """ Tests `Multicodec.from_json`. """
     m = Multicodec(**m_json)
     assert m.name == m_json["name"]
     assert m.code == int(m_json["code"], base=16)
@@ -35,26 +60,14 @@ def test_multicodec_contructor() -> None:
     assert m.description == m_json["description"]
     assert str(m) == f"Multicodec({', '.join(f'{k}={repr(v)}' for k, v in m_json.items())})"
 
-def test_multicodec_to_json() -> None:
+@pytest.mark.parametrize("m_json", json_cases)
+def test_multicodec_to_json(m_json: Dict[str, str]) -> None:
     """ Tests `Multicodec.to_json`. """
-    m_json = {
-        "name": "my-codec",
-        "tag": "private",
-        "code": "0x300001",
-        "status": "draft",
-        "description": "my private codec"
-    }
     assert Multicodec(**m_json).to_json() == m_json
 
-def test_register() -> None:
+@pytest.mark.parametrize("m_json", json_cases)
+def test_register(m_json: Dict[str, str]) -> None:
     """ Tests `multicodec.register`. """
-    m_json = {
-        "name": "my-codec",
-        "tag": "private",
-        "code": "0x300001",
-        "status": "draft",
-        "description": "my private codec"
-    }
     m = Multicodec(**m_json)
     assert not multicodec.exists(m.name)
     assert not multicodec.exists(code=m.code)
@@ -63,24 +76,16 @@ def test_register() -> None:
     assert multicodec.exists(code=m.code)
     assert multicodec.get(m.name) == multicodec.get(code=m.code) == m
 
-def test_unregister() -> None:
+@pytest.mark.parametrize("m_json", json_cases)
+def test_unregister(m_json: Dict[str, str]) -> None:
     """ Tests `multicodec.get`. """
-    m_json = {
-        "name": "my-codec",
-        "tag": "private",
-        "code": "0x300001",
-        "status": "draft",
-        "description": "my private codec"
-    }
     m = Multicodec(**m_json)
     assert multicodec.exists(m.name)
     assert multicodec.exists(code=m.code)
     m2_json = {
-        "name": "my-codec-2",
-        "tag": "private",
-        "code": "0x300002",
-        "status": "draft",
-        "description": "my second private codec"
+        **m_json,
+        "name": m_json["name"]+"-2",
+        "code": hex(int(m_json["code"], base=16)+1)
     }
     m2 = Multicodec(**m2_json)
     assert not multicodec.exists(m2.name)
@@ -93,93 +98,58 @@ def test_unregister() -> None:
     assert not multicodec.exists(m2.name)
     assert not multicodec.exists(code=m2.code)
 
-def test_table() -> None:
-    """ Tests `multicodec.table`. """
-    try:
-        m = next(multicodec.table())
-        assert m.name == "identity" and m.code == 0x00
-    except StopIteration:
-        assert False, "At least one multicodec exists."
-    try:
-        m = next(multicodec.table(tag="multihash"))
-        assert m.name == "identity" and m.code == 0x00
-    except StopIteration:
-        assert False, "At least one 'multihash' tagged multicodec exists."
-    try:
-        m = next(multicodec.table(tag=["private", "multiaddr"]))
-        assert m.name == "ip4" and m.code == 0x04
-    except StopIteration:
-        assert False, "At least one 'multiaddr' tagged multicodec exists."
-    try:
-        m = next(multicodec.table(tag="multiaddr", status="permanent"))
-        assert m.name == "ip4" and m.code == 0x04
-    except StopIteration:
-        assert False, "At least one 'permanent' and 'multiaddr' status multicodec exists."
-    try:
-        m = next(multicodec.table(tag=["private", "multiaddr"], status=["draft", "permanent"]))
-        assert m.name == "ip4" and m.code == 0x04
-    except StopIteration:
-        assert False, "At least one 'multiaddr' tagged multicodec exists."
-    try:
-        m = next(multicodec.table(status="draft"))
-        assert m.name == "cidv2" and m.code == 0x02
-    except StopIteration:
-        assert False, "At least one 'draft' status multicodec exists."
+table_cases = [
+    (None, None, "identity", 0x00),
+    ("multihash", None, "identity", 0x00),
+    (["private", "multiaddr"], None, "ip4", 0x04),
+    ("multiaddr", "permanent", "ip4", 0x04),
+    (["private", "multiaddr"], ["draft", "permanent"], "ip4", 0x04),
+    (None, "draft", "cidv2", 0x02),
+]
 
-def test_table_failure_modes() -> None:
-    """ Tests failure modes for codec table building. """
-    try:
-        multicodecs = [
-            Multicodec(name="identity", tag="multihash", code=0x00, status="permanent", description="raw binary"),
-            Multicodec(name="my-codec", tag="private", code=0x300001, status="draft", description="my private codec"),
-        ]
-        multicodec.build_multicodec_tables(multicodecs)
-        assert False, "Private use codes not allowed."
-    except ValueError:
-        pass
-    try:
-        multicodecs = [
+@pytest.mark.parametrize("tag, status, name, code", table_cases)
+def test_table(tag: Union[None, str, List[str]], status: Union[None, str, List[str]], name: str, code: int) -> None:
+    """ Tests `multicodec.table`. """
+    m = next(multicodec.table(tag=tag, status=status))
+    assert m.name == name and m.code == code
+
+table_failure_cases = [
+    [[
+        Multicodec(name="identity", tag="multihash", code=0x00, status="permanent", description="raw binary"),
+        Multicodec(name="my-codec", tag="private", code=0x300001, status="draft", description="my private codec"),
+    ], "Private use codes not allowed.", True],
+    [[
             Multicodec(name="identity", tag="multihash", code=0x00, status="permanent", description="raw binary"),
             Multicodec(name="my-codec", tag="private", code=0x00, status="permanent", description="my private codec"),
-        ]
-        multicodec.build_multicodec_tables(multicodecs)
-        assert False, "Repeated permanent codes not allowed."
-    except ValueError:
-        pass
-    try:
-        multicodecs = [
+    ], "Repeated permanent codes not allowed.", True],
+    [[
             Multicodec(name="identity", tag="multihash", code=0x00, status="permanent", description="raw binary"),
             Multicodec(name="my-codec", tag="private", code=0x00, status="draft", description="my private codec"),
-        ]
-        multicodec.build_multicodec_tables(multicodecs)
-    except ValueError:
-        assert False, "Repeated codes allowed if exactly one is permanent."
-    try:
-        multicodecs = [
+    ], "Repeated codes allowed if exactly one is permanent.", False],
+    [[
             Multicodec(name="identity", tag="multihash", code=0x00, status="draft", description="raw binary"),
             Multicodec(name="my-codec", tag="private", code=0x00, status="permanent", description="my private codec"),
-        ]
-        multicodec.build_multicodec_tables(multicodecs)
-    except ValueError:
-        assert False, "Repeated codes allowed if exactly one is permanent."
-    try:
-        multicodecs = [
+    ], "Repeated codes allowed if exactly one is permanent.", False],
+    [[
             Multicodec(name="identity", tag="multihash", code=0x00, status="draft", description="raw binary"),
             Multicodec(name="my-codec", tag="private", code=0x00, status="draft", description="my private codec"),
-        ]
-        multicodec.build_multicodec_tables(multicodecs)
-        assert False, "Repeated codes allowed if exactly one is permanent."
-    except ValueError:
-        pass
-    try:
-        multicodecs = [
+    ], "Repeated codes allowed if exactly one is permanent.", True],
+    [[
             Multicodec(name="identity", tag="multihash", code=0x00, status="permanent", description="raw binary"),
             Multicodec(name="identity", tag="private", code=0x01, status="draft", description="my private codec"),
-        ]
-        print(multicodec.build_multicodec_tables(multicodecs))
-        assert False, "Repeated names not allowed."
+    ], "Repeated names not allowed.", True],
+]
+
+@pytest.mark.parametrize("multicodecs, reason, fails", table_failure_cases)
+def test_table_failure_modes(multicodecs: List[Multicodec], reason: str, fails: bool) -> None:
+    """ Tests failure modes for codec table building. """
+    try:
+        multicodec.build_multicodec_tables(multicodecs)
+        assert not fails, reason
     except ValueError:
-        pass
+        assert fails, reason
+
+# TODO: make api test parametrised
 
 def test_api_failure_modes() -> None:
     """ Tests failure modes for the multicode API. """

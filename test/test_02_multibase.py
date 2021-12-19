@@ -2,6 +2,7 @@
 # pylint: disable = missing-docstring
 
 # import pytest
+# TODO: make tests parametrised
 
 from random import Random
 from multiformats import multibase

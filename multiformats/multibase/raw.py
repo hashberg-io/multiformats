@@ -40,6 +40,7 @@ from bases import (base2, base16, base8, base10, base36, base58btc, base58flickr
 from bases.encoding import BaseEncoding
 
 from multiformats.varint import BytesLike
+from . import err
 
 RawEncoder = Callable[[BytesLike], str]
 RawDecoder = Callable[[str], bytes]
@@ -84,7 +85,7 @@ _raw_encodings: Dict[str, RawEncoding] = {}
 
 def get(name: str) -> RawEncoding:
     """
-        Gets the raw encoding with given name. Raises `KeyError` if no such encoding exists.
+        Gets the raw encoding with given name. Raises `err.KeyError` if no such encoding exists.
 
         Example usage:
 
@@ -98,7 +99,7 @@ def get(name: str) -> RawEncoding:
     """
     validate(name, str)
     if name not in _raw_encodings:
-        raise KeyError(f"No raw encoding named {repr(name)}.")
+        raise err.KeyError(f"No raw encoding named {repr(name)}.")
     return _raw_encodings[name]
 
 
@@ -122,7 +123,7 @@ def register(name: str, enc: RawEncoding, *, overwrite: bool = False) -> None:
         Registers a raw encoding by name. The optional keyword argument `overwrite` (default: `False`)
         can be used to overwrite a multibase encoding with existing name.
 
-        If `overwrite` is `False`, raises `ValueError` if a raw encoding with the same name already exists.
+        If `overwrite` is `False`, raises `err.ValueError` if a raw encoding with the same name already exists.
 
         Example usage:
 
@@ -140,14 +141,14 @@ def register(name: str, enc: RawEncoding, *, overwrite: bool = False) -> None:
     validate(enc, RawEncoding)
     validate(overwrite, bool)
     if not overwrite and name in _raw_encodings:
-        raise ValueError(f"Raw encoding with name {repr(name)} already exists: {_raw_encodings[name]}")
+        raise err.ValueError(f"Raw encoding with name {repr(name)} already exists: {_raw_encodings[name]}")
     _raw_encodings[name] = enc
 
 
 def unregister(name: str) -> None:
     """
         Unregisters a raw encoding by name.
-        Raises `KeyError` if no such raw encoding exists.
+        Raises `err.KeyError` if no such raw encoding exists.
 
         Example usage:
 
@@ -159,7 +160,7 @@ def unregister(name: str) -> None:
     """
     validate(name, str)
     if name not in _raw_encodings:
-        raise KeyError(f"Raw encoding with name {repr(name)} does not exist.")
+        raise err.KeyError(f"Raw encoding with name {repr(name)} does not exist.")
     del _raw_encodings[name]
 
 

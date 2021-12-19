@@ -191,7 +191,7 @@ def _CID_validate_multihash_digest(digest: Union[str, BytesLike]) -&gt; Tuple[Mu
     if isinstance(digest, str):
         digest = bytes.fromhex(digest)
     raw_digest: BytesLike
-    code, raw_digest = multihash.decode_raw(digest)
+    code, raw_digest = multihash.unwrap_raw(digest)
     hashfun = _CID_validate_multihash(code)
     raw_digest = _CID_validate_raw_digest(raw_digest, hashfun)
     return hashfun, raw_digest
@@ -326,7 +326,7 @@ class CID:
             if not isinstance(raw_digest, bytes):
                 raw_digest = bytes(raw_digest)
             assert _hashfun == hashfun, &#34;You passed different multihashes to a _new_instance call with digest as a pair.&#34;
-            instance._digest = hashfun.encode(raw_digest)
+            instance._digest = hashfun.wrap(raw_digest)
         return instance
 
     @property
@@ -430,7 +430,7 @@ class CID:
             &#39;6e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;
             ```
         &#34;&#34;&#34;
-        return multihash.decode(self._digest)
+        return multihash.unwrap(self._digest)
 
     @property
     def human_readable(self) -&gt; str:
@@ -452,7 +452,7 @@ class CID:
 
     def encode(self, base: Union[None, str, Multibase] = None) -&gt; str:
         &#34;&#34;&#34;
-            Encodes the CID using a given multibase. If no multibase is give,
+            Encodes the CID using a given multibase. If no multibase is given,
             the CID&#39;s own multibase is used by default.
 
             Example usage:
@@ -641,10 +641,10 @@ class CID:
                 raise ValueError(&#34;CID versions 2 and 3 are reserved for future use.&#34;)
             if v != 1:
                 raise ValueError(f&#34;CIDv{v} is currently not supported.&#34;)
-            mc_code, _, cid = varint.decode_raw(cid) # multicodec
+            mc_code, _, cid = multicodec.unwrap_raw(cid) # multicodec
             digest = cid # multihash digest is what&#39;s left
         mc = multicodec.get(code=mc_code)
-        mh_code, _ = multihash.decode_raw(digest)
+        mh_code, _ = multihash.unwrap_raw(digest)
         mh = multihash.get(code=mh_code)
         return CID._new_instance(CID, mb, v, mc, mh, digest)
 
@@ -930,7 +930,7 @@ True
             if not isinstance(raw_digest, bytes):
                 raw_digest = bytes(raw_digest)
             assert _hashfun == hashfun, &#34;You passed different multihashes to a _new_instance call with digest as a pair.&#34;
-            instance._digest = hashfun.encode(raw_digest)
+            instance._digest = hashfun.wrap(raw_digest)
         return instance
 
     @property
@@ -1034,7 +1034,7 @@ True
             &#39;6e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;
             ```
         &#34;&#34;&#34;
-        return multihash.decode(self._digest)
+        return multihash.unwrap(self._digest)
 
     @property
     def human_readable(self) -&gt; str:
@@ -1056,7 +1056,7 @@ True
 
     def encode(self, base: Union[None, str, Multibase] = None) -&gt; str:
         &#34;&#34;&#34;
-            Encodes the CID using a given multibase. If no multibase is give,
+            Encodes the CID using a given multibase. If no multibase is given,
             the CID&#39;s own multibase is used by default.
 
             Example usage:
@@ -1245,10 +1245,10 @@ True
                 raise ValueError(&#34;CID versions 2 and 3 are reserved for future use.&#34;)
             if v != 1:
                 raise ValueError(f&#34;CIDv{v} is currently not supported.&#34;)
-            mc_code, _, cid = varint.decode_raw(cid) # multicodec
+            mc_code, _, cid = multicodec.unwrap_raw(cid) # multicodec
             digest = cid # multihash digest is what&#39;s left
         mc = multicodec.get(code=mc_code)
-        mh_code, _ = multihash.decode_raw(digest)
+        mh_code, _ = multihash.unwrap_raw(digest)
         mh = multihash.get(code=mh_code)
         return CID._new_instance(CID, mb, v, mc, mh, digest)
 
@@ -1467,10 +1467,10 @@ def decode(cid: Union[str, BytesLike]) -&gt; &#34;CID&#34;:
             raise ValueError(&#34;CID versions 2 and 3 are reserved for future use.&#34;)
         if v != 1:
             raise ValueError(f&#34;CIDv{v} is currently not supported.&#34;)
-        mc_code, _, cid = varint.decode_raw(cid) # multicodec
+        mc_code, _, cid = multicodec.unwrap_raw(cid) # multicodec
         digest = cid # multihash digest is what&#39;s left
     mc = multicodec.get(code=mc_code)
-    mh_code, _ = multihash.decode_raw(digest)
+    mh_code, _ = multihash.unwrap_raw(digest)
     mh = multihash.get(code=mh_code)
     return CID._new_instance(CID, mb, v, mc, mh, digest)</code></pre>
 </details>
@@ -1868,7 +1868,7 @@ def raw_digest(self) -&gt; bytes:
         &#39;6e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95&#39;
         ```
     &#34;&#34;&#34;
-    return multihash.decode(self._digest)</code></pre>
+    return multihash.unwrap(self._digest)</code></pre>
 </details>
 </dd>
 <dt id="multiformats.cid.CID.version"><code class="name">var <span class="ident">version</span> : Literal[0, 1]</code></dt>
@@ -1908,7 +1908,7 @@ def version(self) -&gt; CIDVersion:
 <span>def <span class="ident">encode</span></span>(<span>self, base: Union[ForwardRef(None), str, <a title="multiformats.multibase.Multibase" href="multibase/index.html#multiformats.multibase.Multibase">Multibase</a>] = None) ‑> str</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Encodes the CID using a given multibase. If no multibase is give,
+<div class="desc"><p>Encodes the CID using a given multibase. If no multibase is given,
 the CID's own multibase is used by default.</p>
 <p>Example usage:</p>
 <pre><code class="language-py">&gt;&gt;&gt; s = &quot;zb2rhe5P4gXftAwvA4eXQ5HJwsER2owDyS9sKaQRRVQPn93bA&quot;
@@ -1924,7 +1924,7 @@ the CID's own multibase is used by default.</p>
 </summary>
 <pre><code class="python">def encode(self, base: Union[None, str, Multibase] = None) -&gt; str:
     &#34;&#34;&#34;
-        Encodes the CID using a given multibase. If no multibase is give,
+        Encodes the CID using a given multibase. If no multibase is given,
         the CID&#39;s own multibase is used by default.
 
         Example usage:

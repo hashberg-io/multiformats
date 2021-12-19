@@ -61,21 +61,64 @@ Multicodec(name='identity', tag='multihash', code=0,
            status='permanent', description='raw binary')
 ```
 
-The `exists` and `get` functions can be used to check whether a multicodec with given name or code is known, and if so to get the corresponding object:
+Core functionality is provided by the `get`, `exists`, `wrap` and `unwrap` functions.
+The `get` and `exists` functions can be used to check whether a multicodec with given name or code is known,
+and if so to get the corresponding object:
 
 ```py
->>> from multiformats import multicodec
 >>> multicodec.exists("identity")
 True
->>> multicodec.exists(0x01)
+>>> multicodec.exists(code=0x01)
 True
 >>> multicodec.get("identity")
 Multicodec(name='identity', tag='multihash', code=0,
            status='permanent', description='raw binary')
->>> multicodec.get(0x01)
-Multicodec(name='cidv1', tag='ipld', code=1,
+>>> multicodec.get(code=0x01)
+Multicodec(name='cidv1', tag='cid', code=1,
            status='permanent', description='CIDv1')
 ```
+
+The `wrap` and `unwrap` functions can be use to wrap raw binary data into multicodec data
+(prepending the varint-encoded multicodec code) and to unwrap multicodec data into a pair
+of multicodec code and raw binary data:
+
+```py
+>>> raw_data = bytes([192, 168, 0, 254])
+>>> multicodec_data = wrap("ip4", raw_data)
+>>> raw_data.hex()
+  'c0a800fe'
+>>> multicodec_data.hex()
+'04c0a800fe'
+>>> varint.encode(0x04).hex()
+'04' #       0x04 ^^^^ is the multicodec code for 'ip4'
+>>> codec, raw_data = unwrap(multicodec_data)
+>>> raw_data.hex()
+  'c0a800fe'
+>>> codec
+Multicodec(name='ip4', tag='multiaddr', code='0x04', status='permanent', description='')
+```
+
+The `Multicodec.wrap` and `Multicodec.unwrap` methods perform analogous functionality
+with an object-oriented API, additionally enforcing that the unwrapped code is actually
+the code of the multicodec being used:
+
+```py
+>>> ip4 = multicodec.get("ip4")
+>>> ip4
+Multicodec(name='ip4', tag='multiaddr', code='0x04', status='permanent', description='')
+>>> raw_data = bytes([192, 168, 0, 254])
+>>> multicodec_data = ip4.wrap(raw_data)
+>>> raw_data.hex()
+  'c0a800fe'
+>>> multicodec_data.hex()
+'04c0a800fe'
+>>> varint.encode(0x04).hex()
+'04' #       0x04 ^^^^ is the multicodec code for 'ip4'
+>>> ip4.unwrap(multicodec_data).hex()
+  'c0a800fe'
+>>> ip4.unwrap(bytes.fromhex('00c0a800fe')) # 'identity' multicodec data
+multiformats.multicodec.err.ValueError: Found code 0x00 when unwrapping data, expected code 0x04.
+    ```
 
 The `table` function can be used to iterate through known multicodecs, optionally restrictiong to one or more tags and/or statuses:
 
@@ -143,44 +186,72 @@ For advanced usage, see the [API documentation](https://hashberg-io.github.io/mu
 ### Multihash
 
 The `multihash` module implements the [multihash spec](https://github.com/multiformats/multihash).
-The `exists` and `get` functions can be used to check whether a multihash multicodec with given name or code is known, and if so to get the corresponding object:
 
-
-Core functionality is provided by the `digest`, `encode`, `decode` functions.
-The `digest` function can be used to create a multihash digest directly from data:
+Core functionality is provided by the `digest`, `wrap`, `unwrap` functions, or the correspondingly-named methods of the `Multihash` class.
+The `digest` function and `Multihash.digest` method can be used to create a multihash digest directly from data:
 
 ```py
 >>> data = b"Hello world!"
->>> multihash_digest = multihash.digest(data, "sha2-256")
->>> multihash_digest.hex()
+>>> digest = multihash.digest(data, "sha2-256")
+>>> digest.hex()
 '1220c0535e4be2b79ffd93291305436bf889314e4a3faec05ecffcbb7df31ad9e51a'
 ```
+
+```py
+>>> sha2_256 = multihash.get("sha2-256")
+>>> digest = sha2_256.digest(data)
+>>> digest.hex()
+'1220c0535e4be2b79ffd93291305436bf889314e4a3faec05ecffcbb7df31ad9e51a'
+```
+
 By default, the full digest produced by the hash function is used.
 Optionally, a smaller digest size can be specified to produce truncated hashes:
 
 ```py
->>> multihash_digest = multihash.digest(data, "sha2-256", size=20)
-#                  optional truncated hash size, in bytes ^^^^^^^
+>>> digest = multihash.digest(data, "sha2-256", size=20)
+#        optional truncated hash size, in bytes ^^^^^^^
 >>> multihash_digest.hex()
 '1214c0535e4be2b79ffd93291305436bf889314e4a3f' # 20-bytes truncated hash
 ```
 
-The `decode` function can be used to extract the raw hash digest from a multihash digest:
+The `unwrap` function can be used to extract the raw digest from a multihash digest:
 
 ```py
->>> multihash_digest.hex()
+>>> digest.hex()
 '1214c0535e4be2b79ffd93291305436bf889314e4a3f'
->>> hash_digest = multihash.decode(multihash_digest)
->>> hash_digest.hex()
+>>> raw_digest = multihash.unwrap(digest)
+>>> raw_digest.hex()
     'c0535e4be2b79ffd93291305436bf889314e4a3f'
 ```
 
-The `encode` function can be used to encode a raw hash digest into a multihash digest:
+The `Multihash.unwrap` method performs the same functionality, but additionally checks
+that the multihash digest is valid for the multihash:
 
 ```py
->>> hash_digest.hex()
+>>> raw_digest = sha2_256.unwrap(digest)
+>>> raw_digest.hex()
     'c0535e4be2b79ffd93291305436bf889314e4a3f'
->>> multihash.encode(hash_digest, "sha2-256").hex()
+```
+
+```py
+>>> sha1 = multihash.get("sha1")
+>>> (sha2_256.code, sha1.code)
+(18, 17)
+>>> sha1.unwrap(digest)
+err.ValueError: Decoded code 18 differs from multihash code 17.
+```
+
+The `wrap` function and `Multihash.wrap` method can be used to wrap a raw digest into a multihash digest:
+
+```py
+>>> raw_digest.hex()
+    'c0535e4be2b79ffd93291305436bf889314e4a3f'
+>>> multihash.wrap(raw_digest, "sha2-256").hex()
+'1214c0535e4be2b79ffd93291305436bf889314e4a3f'
+```
+
+```py
+>>> sha2_256.wrap(raw_digest).hex()
 '1214c0535e4be2b79ffd93291305436bf889314e4a3f'
 ```
 

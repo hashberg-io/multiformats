@@ -11,8 +11,9 @@
                status='permanent', description='raw binary')
     ```
 
-    Core functionality is provided by the `get` and `exists` functions, which can be used to check
-    whether a multicodec with given name or code is known, and if so to get the corresponding object:
+    Core functionality is provided by the `get`, `exists`, `wrap` and `unwrap` functions.
+    The `get` and `exists` functions can be used to check whether a multicodec with given name or code is known,
+    and if so to get the corresponding object:
 
     ```py
     >>> multicodec.exists("identity")
@@ -25,6 +26,48 @@
     >>> multicodec.get(code=0x01)
     Multicodec(name='cidv1', tag='cid', code=1,
                status='permanent', description='CIDv1')
+    ```
+
+    The `wrap` and `unwrap` functions can be use to wrap raw binary data into multicodec data
+    (prepending the varint-encoded multicodec code) and to unwrap multicodec data into a pair
+    of multicodec and raw binary data:
+
+    ```py
+    >>> raw_data = bytes([192, 168, 0, 254])
+    >>> multicodec_data = wrap("ip4", raw_data)
+    >>> raw_data.hex()
+      'c0a800fe'
+    >>> multicodec_data.hex()
+    '04c0a800fe'
+    >>> varint.encode(0x04).hex()
+    '04' #       0x04 ^^^^ is the multicodec code for 'ip4'
+    >>> codec, raw_data = unwrap(multicodec_data)
+    >>> raw_data.hex()
+      'c0a800fe'
+    >>> codec
+    Multicodec(name='ip4', tag='multiaddr', code='0x04', status='permanent', description='')
+    ```
+
+    The `Multicodec.wrap` and `Multicodec.unwrap` methods perform analogous functionality
+    with an object-oriented API, additionally enforcing that the multicodec is being used to
+    unwrap the data is the multicodec that the data itself specifies:
+
+    ```py
+    >>> ip4 = multicodec.get("ip4")
+    >>> ip4
+    Multicodec(name='ip4', tag='multiaddr', code='0x04', status='permanent', description='')
+    >>> raw_data = bytes([192, 168, 0, 254])
+    >>> multicodec_data = ip4.wrap(raw_data)
+    >>> raw_data.hex()
+      'c0a800fe'
+    >>> multicodec_data.hex()
+    '04c0a800fe'
+    >>> varint.encode(0x04).hex()
+    '04' #       0x04 ^^^^ is the multicodec code for 'ip4'
+    >>> ip4.unwrap(multicodec_data).hex()
+      'c0a800fe'
+    >>> ip4.unwrap(bytes.fromhex('00c0a800fe')) # 'identity' multicodec data
+    multiformats.multicodec.err.ValueError: Found code 0x00 when unwrapping data, expected code 0x04.
     ```
 
     The `table` function can be used to iterate through known multicodecs, optionally restricting
@@ -43,13 +86,23 @@
 """
 
 import importlib.resources as importlib_resources
+from io import BufferedIOBase
 import json
 import re
 import sys
-from typing import AbstractSet, Any, cast, Dict, Iterable, Iterator, Mapping, Optional, Set, Sequence, Tuple, Type, Union
+from typing import AbstractSet, Any, cast, Dict, Iterable, Iterator, Mapping, Optional, overload, Set, Sequence, Tuple, Type, TypeVar, Union
 from typing_extensions import Literal
 from typing_validation import validate
 
+from multiformats import varint
+from multiformats.varint import BytesLike
+from . import err
+
+def _hexcode(code: int) -> str:
+    hexcode = hex(code)
+    if len(hexcode) % 2 != 0:
+        hexcode = "0x0"+hexcode[2:]
+    return hexcode
 
 class Multicodec:
     """
@@ -97,7 +150,7 @@ class Multicodec:
     @staticmethod
     def _validate_name(name: str) -> str:
         if not re.match(r"^[a-z][a-z0-9_-]+$", name):
-            raise ValueError(f"Invalid multicodec name {repr(name)}")
+            raise err.ValueError(f"Invalid multicodec name {repr(name)}")
         return name
 
     @staticmethod
@@ -110,13 +163,13 @@ class Multicodec:
                 code = code[2:]
             code = int(code, base=16)
         if code < 0:
-            raise ValueError(f"Invalid multicodec code {repr(code)}.")
+            raise err.ValueError(f"Invalid multicodec code {repr(code)}.")
         return code
 
     @staticmethod
     def _validate_status(status: str) -> Literal["draft", "permanent"]:
         if status not in ("draft", "permanent"):
-            raise ValueError(f"Invalid multicodec status {repr(status)}.")
+            raise err.ValueError(f"Invalid multicodec status {repr(status)}.")
         return cast(Literal["draft", "permanent"], status)
 
     @property
@@ -155,10 +208,7 @@ class Multicodec:
             '0x01'
             ```
         """
-        code = hex(self.code)
-        if len(code) % 2 != 0:
-            code = "0x0"+code[2:]
-        return code
+        return _hexcode(self._code)
 
     @property
     def status(self) -> Literal["draft", "permanent"]:
@@ -177,6 +227,63 @@ class Multicodec:
             i.e. whether it is in `range(0x300000, 0x400000)`.
         """
         return self.code in range(0x300000, 0x400000)
+
+    def wrap(self, raw_data: BytesLike) -> bytes:
+        """
+            Wraps raw binary data into multicodec data:
+
+            ```
+            <raw data> -> <code><raw data>
+            ```
+
+            Example usage:
+
+            ```py
+            >>> ip4 = multicodec.get("ip4")
+            >>> ip4
+            Multicodec(name='ip4', tag='multiaddr', code='0x04', status='permanent', description='')
+            >>> raw_data = bytes([192, 168, 0, 254])
+            >>> multicodec_data = ip4.wrap(raw_data)
+            >>> raw_data.hex()
+              'c0a800fe'
+            >>> multicodec_data.hex()
+            '04c0a800fe'
+            >>> varint.encode(0x04).hex()
+            '04' #       0x04 ^^^^ is the multicodec code for 'ip4'
+            ```
+        """
+        return varint.encode(self.code)+raw_data
+
+    def unwrap(self, multicodec_data: BytesLike) -> bytes:
+        """
+            Unwraps multicodec binary data to raw data:
+
+            ```
+            <code><raw data> -> <raw data>
+            ```
+
+            Additionally checks that the code listed by the data
+            matches the code of this multicodec.
+
+            Example usage:
+
+            ```py
+            >>> multicodec_data = bytes.fromhex("c0a800fe")
+            >>> raw_data = ip4.unwrap(multicodec_data)
+            >>> multicodec_data.hex()
+            '04c0a800fe'
+            >>> raw_data.hex()
+              'c0a800fe'
+            >>> varint.encode(0x04).hex()
+            '04' #       0x04 ^^^^ is the multicodec code for 'ip4'
+            ```
+        """
+        code, _, raw_data = unwrap_raw(multicodec_data)
+        # code, _, raw_data = varint.decode_raw(multicodec_data)
+        if code != self.code:
+            hexcode = _hexcode(code)
+            raise err.ValueError(f"Found code {hexcode} when unwrapping data, expected code {self.hexcode}.")
+        return bytes(raw_data)
 
     def to_json(self) -> Mapping[str, str]:
         """
@@ -201,7 +308,7 @@ class Multicodec:
 
     def __str__(self) -> str:
         if exists(self.name) and get(self.name) == self:
-            return f"multicodec.get({repr(self.name)})"
+            return f"multicodec({repr(self.name)}, tag={repr(self.tag)})"
         return repr(self)
 
     def __repr__(self) -> str:
@@ -225,7 +332,7 @@ class Multicodec:
 def get(name: Optional[str] = None, *, code: Optional[int] = None) -> Multicodec:
     """
         Gets the multicodec with given name or code.
-        Raises `KeyError` if no such multicodec exists.
+        Raises `err.KeyError` if no such multicodec exists.
         Exactly one of `name` and `code` must be specified.
 
         Example usage:
@@ -242,14 +349,34 @@ def get(name: Optional[str] = None, *, code: Optional[int] = None) -> Multicodec
     validate(name, Optional[str])
     validate(code, Optional[int])
     if (name is None) == (code is None):
-        raise ValueError("Must specify exactly one between 'name' and 'code'.")
+        raise err.ValueError("Must specify exactly one between 'name' and 'code'.")
     if name is not None:
         if name not in _name_table:
-            raise KeyError(f"No multicodec named {repr(name)}.")
+            raise err.KeyError(f"No multicodec named {repr(name)}.")
         return _name_table[name]
     if code not in _code_table:
-        raise KeyError(f"No multicodec with code {repr(code)}.")
+        raise err.KeyError(f"No multicodec with code {repr(code)}.")
     return _code_table[code]
+
+
+def multicodec(name: str, *, tag: Optional[str] = None) -> Multicodec:
+    """
+        An alias for `get`, for use with multicodec name only.
+        If a tag is passed, ensures that the multicodec tag matches the one given.
+
+        Example usage:
+
+        ```py
+        >>> from multiformats.multicodec import multicodec
+        >>> multicodec("identity")
+        Multicodec(name='identity', tag='multihash', code=0,
+                   status='permanent', description='raw binary')
+        ```
+    """
+    codec = get(name)
+    if tag is not None and codec.tag != tag:
+        raise err.KeyError(f"Multicodec {repr(name)} exists, but its tag is not {repr(tag)}.")
+    return codec
 
 
 def exists(name: Union[None, str, Multicodec] = None, *, code: Optional[int] = None) -> bool:
@@ -269,31 +396,103 @@ def exists(name: Union[None, str, Multicodec] = None, *, code: Optional[int] = N
     validate(name, Optional[str])
     validate(code, Optional[int])
     if (name is None) == (code is None):
-        raise ValueError("Must specify exactly one between 'name' and 'code'.")
+        raise err.ValueError("Must specify exactly one between 'name' and 'code'.")
     if name is not None:
         return name in _name_table
     return code in _code_table
+
+
+def wrap(codec: Union[str, int, Multicodec], raw_data: BytesLike) -> bytes:
+    """
+        Wraps raw binary data into multicodec data:
+
+        ```
+        <raw data> -> <code><raw data>
+        ```
+
+            Example usage:
+
+        ```py
+        >>> raw_data = bytes([192, 168, 0, 254])
+        >>> multicodec_data = multicodec.wrap("ip4", raw_data)
+        >>> raw_data.hex()
+          'c0a800fe'
+        >>> multicodec_data.hex()
+        '04c0a800fe'
+        >>> varint.encode(0x04).hex()
+        '04' #       0x04 ^^^^ is the multicodec code for 'ip4'
+        ```
+    """
+    if isinstance(codec, str):
+        codec = get(codec)
+    elif isinstance(codec, int):
+        codec = get(code=codec)
+    else:
+        validate(codec, Multicodec)
+    return codec.wrap(raw_data)
+
+def unwrap(multicodec_data: BytesLike) -> Tuple[Multicodec, bytes]:
+    """
+        Unwraps multicodec binary data to multicodec and raw data:
+
+        Example usage:
+
+        ```py
+        >>> multicodec_data = bytes.fromhex("c0a800fe")
+        >>> codec, raw_data = multicodec.unwrap(multicodec_data)
+        >>> multicodec_data.hex()
+        '04c0a800fe'
+        >>> raw_data.hex()
+          'c0a800fe'
+        >>> codec
+        Multicodec(name='ip4', tag='multiaddr', code='0x04', status='permanent', description='')
+        ```
+    """
+    code, _, raw_data = unwrap_raw(multicodec_data)
+    return get(code=code), bytes(raw_data)
+
+
+_BufferedIOT = TypeVar("_BufferedIOT", bound=BufferedIOBase)
+
+@overload
+def unwrap_raw(multicodec_data: BytesLike) -> Tuple[int, int, memoryview]:
+    ...
+
+@overload
+def unwrap_raw(multicodec_data: _BufferedIOT) -> Tuple[int, int, _BufferedIOT]:
+    ...
+
+def unwrap_raw(multicodec_data: Union[BytesLike, BufferedIOBase]) -> Tuple[int, int, Union[memoryview, BufferedIOBase]]:
+    """
+        An alias for `multiformats.varint.decode_raw`, returning a triple of multicodec code, bytes read and remaining bytes.
+        The multicodec code is validated, and `err.KeyError` is raised if not multicodec with such code exists.
+    """
+    code, n, raw_data = varint.decode_raw(multicodec_data)
+    if not exists(code=code):
+        raise err.KeyError(f"No multicodec is known with unwrapped code {_hexcode(code)}.")
+    return code, n, raw_data
+
 
 def validate_multicodec(multicodec: Multicodec) -> None:
     """
         Validates a multicodec:
 
-        - raises `KeyError` if no multicodec with the given name is registered
-        - raises `ValueError` if a multicodec with the given name is registered, but is different from the one given
+        - raises `err.KeyError` if no multicodec with the given name is registered
+        - raises `err.ValueError` if a multicodec with the given name is registered, but is different from the one given
         - raises no error if the given multicodec is registered
     """
     validate(multicodec, Multicodec)
     mc = get(multicodec.name)
     if mc != multicodec:
-        raise ValueError(f"Multicodec named {multicodec.name} exists, but is not the one given.")
+        raise err.ValueError(f"Multicodec named {multicodec.name} exists, but is not the one given.")
 
 def register(m: Multicodec, *, overwrite: bool = False) -> None:
     """
         Registers a given multicodec. The optional keyword argument `overwrite` (default: `False`)
         can be used to overwrite a multicodec with existing code.
 
-        When `overwrite` is `False`, raises `ValueError` if a multicodec with the same name or code already exists.
-        When `overwrite` is `True`, raises `ValueError` if a multicodec with the same name but different code already exists.
+        When `overwrite` is `False`, raises `err.ValueError` if a multicodec with the same name or code already exists.
+        When `overwrite` is `True`, raises `err.ValueError` if a multicodec with the same name but different code already exists.
 
         Example usage:
 
@@ -311,9 +510,9 @@ def register(m: Multicodec, *, overwrite: bool = False) -> None:
     validate(m, Multicodec)
     validate(overwrite, bool)
     if not overwrite and m.code in _code_table:
-        raise ValueError(f"Multicodec with code {repr(m.code)} already exists: {_code_table[m.code]}")
+        raise err.ValueError(f"Multicodec with code {repr(m.code)} already exists: {_code_table[m.code]}")
     if m.name in _name_table and _name_table[m.name].code != m.code:
-        raise ValueError(f"Multicodec with name {repr(m.name)} already exists: {_name_table[m.name]}")
+        raise err.ValueError(f"Multicodec with name {repr(m.name)} already exists: {_name_table[m.name]}")
     _code_table[m.code] = m
     _name_table[m.name] = m
 
@@ -321,7 +520,7 @@ def register(m: Multicodec, *, overwrite: bool = False) -> None:
 def unregister(name: Optional[str] = None, *, code: Optional[int] = None) -> None:
     """
         Unregisters the multicodec with given name or code.
-        Raises `KeyError` if no such multicodec exists.
+        Raises `err.KeyError` if no such multicodec exists.
 
         Example usage:
 
@@ -389,12 +588,12 @@ def build_multicodec_tables(multicodecs: Iterable[Multicodec], *,
         Creates code->multicodec and name->multicodec mappings from a finite iterable of multicodecs,
         returning the mappings.
         The keyword argument `allow_private_use` (default: `False`) can be used to allow multicodec entries
-        with private use codes in `range(0x300000, 0x400000)`: if set to `False`, a `ValueError` is raised
+        with private use codes in `range(0x300000, 0x400000)`: if set to `False`, a `err.ValueError` is raised
         if one such private use code is encountered.
 
-        Raises `ValueError` if the same multicodec code is encountered multiple times, unless exactly one
+        Raises `err.ValueError` if the same multicodec code is encountered multiple times, unless exactly one
         of the multicodecs has permanent status (in which case that codec is the one inserted in the table).
-        Raises `ValueError` if the same name is encountered multiple times.
+        Raises `err.ValueError` if the same name is encountered multiple times.
 
         Example usage:
 
@@ -409,24 +608,24 @@ def build_multicodec_tables(multicodecs: Iterable[Multicodec], *,
     overwritten_draft_codes: Set[int] = set()
     for m in multicodecs:
         if not allow_private_use and m.is_private_use:
-            raise ValueError(f"Private use multicodec not allowed: {m}")
+            raise err.ValueError(f"Private use multicodec not allowed: {m}")
         if m.code in code_table:
             if code_table[m.code].status == "permanent":
                 if m.status == "draft":
                     # this draft code has been superseded by a permanent one, skip it
                     continue
-                raise ValueError(f"Multicodec code {m.hexcode} appears multiple times in table.")
+                raise err.ValueError(f"Multicodec code {m.hexcode} appears multiple times in table.")
             if m.status != "permanent":
                 # overwriting draft code with another draft code: dodgy, need to check at the end
                 overwritten_draft_codes.add(m.code)
         code_table[m.code] = m
         if m.name in name_table:
-            raise ValueError(f"Multicodec name {m.name} appears multiple times in table.")
+            raise err.ValueError(f"Multicodec name {m.name} appears multiple times in table.")
         name_table[m.name] = m
     for code in overwritten_draft_codes:
         m = code_table[code]
         if m.status != "permanent":
-            raise ValueError(f"Code {m.code} appears multiple times in table, "
+            raise err.ValueError(f"Code {m.code} appears multiple times in table, "
                               "but none of the associated multicodecs is permanent.")
     return code_table, name_table
 

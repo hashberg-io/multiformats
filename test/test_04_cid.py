@@ -10,9 +10,9 @@ test_data = [
     b"Hello world!"*1024
 ]
 
-bases = ["base58btc", "base32"]
+bases = ["base58btc", "base32", "base64pad"]
 codecs = ["dag-pb", "raw"]
-hashfuns = ["sha2-256", "sha3-512"]
+hashfuns = ["sha2-256", "sha3-512", "skein1024-1024"]
 
 test_cases_v1 = [
     (base, 1, codec, hashfun)
@@ -27,61 +27,61 @@ test_cases_v0 = [
 test_cases = test_cases_v1+test_cases_v0
 
 @pytest.mark.parametrize("base, v, codec, hashfun", test_cases)
-def test_construct(base: str, v: int, codec: str, hashfun: str) -> None:
+@pytest.mark.parametrize("data", test_data)
+def test_construct(data: bytes, base: str, v: int, codec: str, hashfun: str) -> None:
     mb = multibase.get(base)
     mc = multicodec.get(codec)
     mh = multihash.get(hashfun)
-    for data in test_data:
-        digest = multihash.digest(data, hashfun)
-        raw_digest = multihash.decode(digest)
-        cids = [
-            CID(base, v, codec, digest),
-            CID(base, v, codec, (hashfun, raw_digest)),
-            CID(mb, v, mc.code, digest),
-            CID(mb, v, mc.code, (mh.code, raw_digest)),
-            CID(mb, v, mc, digest),
-            CID(mb, v, mc, (mh, raw_digest)),
-        ]
-        for cid in cids:
-            assert cid.base == mb
-            assert cid.version == v
-            assert cid.codec == mc
-            assert cid.hashfun == mh
-            assert cid.digest == digest
-            assert cid.raw_digest == raw_digest
+    digest = multihash.digest(data, hashfun)
+    raw_digest = multihash.unwrap(digest)
+    cids = [
+        CID(base, v, codec, digest),
+        CID(base, v, codec, (hashfun, raw_digest)),
+        CID(mb, v, mc.code, digest),
+        CID(mb, v, mc.code, (mh.code, raw_digest)),
+        CID(mb, v, mc, digest),
+        CID(mb, v, mc, (mh, raw_digest)),
+    ]
+    for cid in cids:
+        assert cid.base == mb
+        assert cid.version == v
+        assert cid.codec == mc
+        assert cid.hashfun == mh
+        assert cid.digest == digest
+        assert cid.raw_digest == raw_digest
 
 @pytest.mark.parametrize("base, v, codec, hashfun", test_cases_v1)
-def test_set(base: str, v: int, codec: str, hashfun: str) -> None:
-    for data in test_data:
-        digest = multihash.digest(data, hashfun)
-        cid = CID(base, v, codec, digest)
-        for new_base in ["base58btc", "base32", "base32pad", "base64", "base64pad", "proquint"]:
-            for new_codec in ["identity", "dag-pb", "dag-cbor", "raw"]:
-                new_cid = cid.set(base=new_base, codec=new_codec)
-                assert new_cid.base.name == new_base
-                assert new_cid.version == v
-                assert new_cid.codec.name == new_codec
-                assert new_cid.hashfun.name == hashfun
-                assert new_cid.digest == digest
+@pytest.mark.parametrize("data", test_data)
+def test_set(data: bytes, base: str, v: int, codec: str, hashfun: str) -> None:
+    digest = multihash.digest(data, hashfun)
+    cid = CID(base, v, codec, digest)
+    for new_base in ["base58btc", "base32", "base32pad", "base64", "base64pad", "proquint"]:
+        for new_codec in ["identity", "dag-pb", "dag-cbor", "raw"]:
+            new_cid = cid.set(base=new_base, codec=new_codec)
+            assert new_cid.base.name == new_base
+            assert new_cid.version == v
+            assert new_cid.codec.name == new_codec
+            assert new_cid.hashfun.name == hashfun
+            assert new_cid.digest == digest
 
 @pytest.mark.parametrize("base, v, codec, hashfun", test_cases)
-def test_encode_decode(base: str, v: int, codec: str, hashfun: str) -> None:
+@pytest.mark.parametrize("data", test_data)
+def test_encode_decode(data: bytes, base: str, v: int, codec: str, hashfun: str) -> None:
     mc = multicodec.get(codec)
-    for data in test_data:
-        digest = multihash.digest(data, hashfun)
-        cid = CID(base, v, codec, digest)
-        s = cid.encode()
-        b = bytes(cid)
-        assert s == str(cid)
-        if v == 1:
-            assert b == varint.encode(v)+varint.encode(mc.code)+digest
-        else:
-            assert b == digest
-        assert cid == CID.decode(s)
-        assert cid.set(base="base58btc") == CID.decode(b)
-        if v == 1:
-            for other_base in ["base58btc", "base32", "base32pad", "base64", "base64pad", "proquint"]:
-                assert cid.set(base=other_base) == CID.decode(cid.encode(other_base))
+    digest = multihash.digest(data, hashfun)
+    cid = CID(base, v, codec, digest)
+    s = cid.encode()
+    b = bytes(cid)
+    assert s == str(cid)
+    if v == 1:
+        assert b == varint.encode(v)+varint.encode(mc.code)+digest
+    else:
+        assert b == digest
+    assert cid == CID.decode(s)
+    assert cid.set(base="base58btc") == CID.decode(b)
+    if v == 1:
+        for other_base in ["base58btc", "base32", "base32pad", "base64", "base64pad", "proquint"]:
+            assert cid.set(base=other_base) == CID.decode(cid.encode(other_base))
 
 peer_id_test_cases = [
     ("30820122300d06092a864886f70d01010105000382010f003082010a02820101"

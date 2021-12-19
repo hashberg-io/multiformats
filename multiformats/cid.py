@@ -123,7 +123,7 @@ def _CID_validate_multihash_digest(digest: Union[str, BytesLike]) -> Tuple[Multi
     if isinstance(digest, str):
         digest = bytes.fromhex(digest)
     raw_digest: BytesLike
-    code, raw_digest = multihash.decode_raw(digest)
+    code, raw_digest = multihash.unwrap_raw(digest)
     hashfun = _CID_validate_multihash(code)
     raw_digest = _CID_validate_raw_digest(raw_digest, hashfun)
     return hashfun, raw_digest
@@ -258,7 +258,7 @@ class CID:
             if not isinstance(raw_digest, bytes):
                 raw_digest = bytes(raw_digest)
             assert _hashfun == hashfun, "You passed different multihashes to a _new_instance call with digest as a pair."
-            instance._digest = hashfun.encode(raw_digest)
+            instance._digest = hashfun.wrap(raw_digest)
         return instance
 
     @property
@@ -362,7 +362,7 @@ class CID:
             '6e6ff7950a36187a801613426e858dce686cd7d7e3c0fc42ee0330072d245c95'
             ```
         """
-        return multihash.decode(self._digest)
+        return multihash.unwrap(self._digest)
 
     @property
     def human_readable(self) -> str:
@@ -384,7 +384,7 @@ class CID:
 
     def encode(self, base: Union[None, str, Multibase] = None) -> str:
         """
-            Encodes the CID using a given multibase. If no multibase is give,
+            Encodes the CID using a given multibase. If no multibase is given,
             the CID's own multibase is used by default.
 
             Example usage:
@@ -573,10 +573,10 @@ class CID:
                 raise ValueError("CID versions 2 and 3 are reserved for future use.")
             if v != 1:
                 raise ValueError(f"CIDv{v} is currently not supported.")
-            mc_code, _, cid = varint.decode_raw(cid) # multicodec
+            mc_code, _, cid = multicodec.unwrap_raw(cid) # multicodec
             digest = cid # multihash digest is what's left
         mc = multicodec.get(code=mc_code)
-        mh_code, _ = multihash.decode_raw(digest)
+        mh_code, _ = multihash.unwrap_raw(digest)
         mh = multihash.get(code=mh_code)
         return CID._new_instance(CID, mb, v, mc, mh, digest)
 

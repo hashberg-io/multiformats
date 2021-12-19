@@ -31,8 +31,9 @@
 Multicodec(name='identity', tag='multihash', code=0,
            status='permanent', description='raw binary')
 </code></pre>
-<p>Core functionality is provided by the <code><a title="multiformats.multicodec.get" href="#multiformats.multicodec.get">get()</a></code> and <code><a title="multiformats.multicodec.exists" href="#multiformats.multicodec.exists">exists()</a></code> functions, which can be used to check
-whether a multicodec with given name or code is known, and if so to get the corresponding object:</p>
+<p>Core functionality is provided by the <code><a title="multiformats.multicodec.get" href="#multiformats.multicodec.get">get()</a></code>, <code><a title="multiformats.multicodec.exists" href="#multiformats.multicodec.exists">exists()</a></code>, <code><a title="multiformats.multicodec.wrap" href="#multiformats.multicodec.wrap">wrap()</a></code> and <code><a title="multiformats.multicodec.unwrap" href="#multiformats.multicodec.unwrap">unwrap()</a></code> functions.
+The <code><a title="multiformats.multicodec.get" href="#multiformats.multicodec.get">get()</a></code> and <code><a title="multiformats.multicodec.exists" href="#multiformats.multicodec.exists">exists()</a></code> functions can be used to check whether a multicodec with given name or code is known,
+and if so to get the corresponding object:</p>
 <pre><code class="language-py">&gt;&gt;&gt; multicodec.exists(&quot;identity&quot;)
 True
 &gt;&gt;&gt; multicodec.exists(code=0x01)
@@ -43,6 +44,42 @@ Multicodec(name='identity', tag='multihash', code=0,
 &gt;&gt;&gt; multicodec.get(code=0x01)
 Multicodec(name='cidv1', tag='cid', code=1,
            status='permanent', description='CIDv1')
+</code></pre>
+<p>The <code><a title="multiformats.multicodec.wrap" href="#multiformats.multicodec.wrap">wrap()</a></code> and <code><a title="multiformats.multicodec.unwrap" href="#multiformats.multicodec.unwrap">unwrap()</a></code> functions can be use to wrap raw binary data into multicodec data
+(prepending the varint-encoded multicodec code) and to unwrap multicodec data into a pair
+of multicodec and raw binary data:</p>
+<pre><code class="language-py">&gt;&gt;&gt; raw_data = bytes([192, 168, 0, 254])
+&gt;&gt;&gt; multicodec_data = wrap(&quot;ip4&quot;, raw_data)
+&gt;&gt;&gt; raw_data.hex()
+  'c0a800fe'
+&gt;&gt;&gt; multicodec_data.hex()
+'04c0a800fe'
+&gt;&gt;&gt; varint.encode(0x04).hex()
+'04' #       0x04 ^^^^ is the multicodec code for 'ip4'
+&gt;&gt;&gt; codec, raw_data = unwrap(multicodec_data)
+&gt;&gt;&gt; raw_data.hex()
+  'c0a800fe'
+&gt;&gt;&gt; codec
+Multicodec(name='ip4', tag='multiaddr', code='0x04', status='permanent', description='')
+</code></pre>
+<p>The <code><a title="multiformats.multicodec.Multicodec.wrap" href="#multiformats.multicodec.Multicodec.wrap">Multicodec.wrap()</a></code> and <code><a title="multiformats.multicodec.Multicodec.unwrap" href="#multiformats.multicodec.Multicodec.unwrap">Multicodec.unwrap()</a></code> methods perform analogous functionality
+with an object-oriented API, additionally enforcing that the multicodec is being used to
+unwrap the data is the multicodec that the data itself specifies:</p>
+<pre><code class="language-py">&gt;&gt;&gt; ip4 = multicodec.get(&quot;ip4&quot;)
+&gt;&gt;&gt; ip4
+Multicodec(name='ip4', tag='multiaddr', code='0x04', status='permanent', description='')
+&gt;&gt;&gt; raw_data = bytes([192, 168, 0, 254])
+&gt;&gt;&gt; multicodec_data = ip4.wrap(raw_data)
+&gt;&gt;&gt; raw_data.hex()
+  'c0a800fe'
+&gt;&gt;&gt; multicodec_data.hex()
+'04c0a800fe'
+&gt;&gt;&gt; varint.encode(0x04).hex()
+'04' #       0x04 ^^^^ is the multicodec code for 'ip4'
+&gt;&gt;&gt; ip4.unwrap(multicodec_data).hex()
+  'c0a800fe'
+&gt;&gt;&gt; ip4.unwrap(bytes.fromhex('00c0a800fe')) # 'identity' multicodec data
+multiformats.multicodec.err.ValueError: Found code 0x00 when unwrapping data, expected code 0x04.
 </code></pre>
 <p>The <code><a title="multiformats.multicodec.table" href="#multiformats.multicodec.table">table()</a></code> function can be used to iterate through known multicodecs, optionally restricting
 to one or more tags and/or statuses:</p>
@@ -71,8 +108,9 @@ to one or more tags and/or statuses:</p>
                status=&#39;permanent&#39;, description=&#39;raw binary&#39;)
     ```
 
-    Core functionality is provided by the `get` and `exists` functions, which can be used to check
-    whether a multicodec with given name or code is known, and if so to get the corresponding object:
+    Core functionality is provided by the `get`, `exists`, `wrap` and `unwrap` functions.
+    The `get` and `exists` functions can be used to check whether a multicodec with given name or code is known,
+    and if so to get the corresponding object:
 
     ```py
     &gt;&gt;&gt; multicodec.exists(&#34;identity&#34;)
@@ -85,6 +123,48 @@ to one or more tags and/or statuses:</p>
     &gt;&gt;&gt; multicodec.get(code=0x01)
     Multicodec(name=&#39;cidv1&#39;, tag=&#39;cid&#39;, code=1,
                status=&#39;permanent&#39;, description=&#39;CIDv1&#39;)
+    ```
+
+    The `wrap` and `unwrap` functions can be use to wrap raw binary data into multicodec data
+    (prepending the varint-encoded multicodec code) and to unwrap multicodec data into a pair
+    of multicodec and raw binary data:
+
+    ```py
+    &gt;&gt;&gt; raw_data = bytes([192, 168, 0, 254])
+    &gt;&gt;&gt; multicodec_data = wrap(&#34;ip4&#34;, raw_data)
+    &gt;&gt;&gt; raw_data.hex()
+      &#39;c0a800fe&#39;
+    &gt;&gt;&gt; multicodec_data.hex()
+    &#39;04c0a800fe&#39;
+    &gt;&gt;&gt; varint.encode(0x04).hex()
+    &#39;04&#39; #       0x04 ^^^^ is the multicodec code for &#39;ip4&#39;
+    &gt;&gt;&gt; codec, raw_data = unwrap(multicodec_data)
+    &gt;&gt;&gt; raw_data.hex()
+      &#39;c0a800fe&#39;
+    &gt;&gt;&gt; codec
+    Multicodec(name=&#39;ip4&#39;, tag=&#39;multiaddr&#39;, code=&#39;0x04&#39;, status=&#39;permanent&#39;, description=&#39;&#39;)
+    ```
+
+    The `Multicodec.wrap` and `Multicodec.unwrap` methods perform analogous functionality
+    with an object-oriented API, additionally enforcing that the multicodec is being used to
+    unwrap the data is the multicodec that the data itself specifies:
+
+    ```py
+    &gt;&gt;&gt; ip4 = multicodec.get(&#34;ip4&#34;)
+    &gt;&gt;&gt; ip4
+    Multicodec(name=&#39;ip4&#39;, tag=&#39;multiaddr&#39;, code=&#39;0x04&#39;, status=&#39;permanent&#39;, description=&#39;&#39;)
+    &gt;&gt;&gt; raw_data = bytes([192, 168, 0, 254])
+    &gt;&gt;&gt; multicodec_data = ip4.wrap(raw_data)
+    &gt;&gt;&gt; raw_data.hex()
+      &#39;c0a800fe&#39;
+    &gt;&gt;&gt; multicodec_data.hex()
+    &#39;04c0a800fe&#39;
+    &gt;&gt;&gt; varint.encode(0x04).hex()
+    &#39;04&#39; #       0x04 ^^^^ is the multicodec code for &#39;ip4&#39;
+    &gt;&gt;&gt; ip4.unwrap(multicodec_data).hex()
+      &#39;c0a800fe&#39;
+    &gt;&gt;&gt; ip4.unwrap(bytes.fromhex(&#39;00c0a800fe&#39;)) # &#39;identity&#39; multicodec data
+    multiformats.multicodec.err.ValueError: Found code 0x00 when unwrapping data, expected code 0x04.
     ```
 
     The `table` function can be used to iterate through known multicodecs, optionally restricting
@@ -103,13 +183,23 @@ to one or more tags and/or statuses:</p>
 &#34;&#34;&#34;
 
 import importlib.resources as importlib_resources
+from io import BufferedIOBase
 import json
 import re
 import sys
-from typing import AbstractSet, Any, cast, Dict, Iterable, Iterator, Mapping, Optional, Set, Sequence, Tuple, Type, Union
+from typing import AbstractSet, Any, cast, Dict, Iterable, Iterator, Mapping, Optional, overload, Set, Sequence, Tuple, Type, TypeVar, Union
 from typing_extensions import Literal
 from typing_validation import validate
 
+from multiformats import varint
+from multiformats.varint import BytesLike
+from . import err
+
+def _hexcode(code: int) -&gt; str:
+    hexcode = hex(code)
+    if len(hexcode) % 2 != 0:
+        hexcode = &#34;0x0&#34;+hexcode[2:]
+    return hexcode
 
 class Multicodec:
     &#34;&#34;&#34;
@@ -157,7 +247,7 @@ class Multicodec:
     @staticmethod
     def _validate_name(name: str) -&gt; str:
         if not re.match(r&#34;^[a-z][a-z0-9_-]+$&#34;, name):
-            raise ValueError(f&#34;Invalid multicodec name {repr(name)}&#34;)
+            raise err.ValueError(f&#34;Invalid multicodec name {repr(name)}&#34;)
         return name
 
     @staticmethod
@@ -170,13 +260,13 @@ class Multicodec:
                 code = code[2:]
             code = int(code, base=16)
         if code &lt; 0:
-            raise ValueError(f&#34;Invalid multicodec code {repr(code)}.&#34;)
+            raise err.ValueError(f&#34;Invalid multicodec code {repr(code)}.&#34;)
         return code
 
     @staticmethod
     def _validate_status(status: str) -&gt; Literal[&#34;draft&#34;, &#34;permanent&#34;]:
         if status not in (&#34;draft&#34;, &#34;permanent&#34;):
-            raise ValueError(f&#34;Invalid multicodec status {repr(status)}.&#34;)
+            raise err.ValueError(f&#34;Invalid multicodec status {repr(status)}.&#34;)
         return cast(Literal[&#34;draft&#34;, &#34;permanent&#34;], status)
 
     @property
@@ -215,10 +305,7 @@ class Multicodec:
             &#39;0x01&#39;
             ```
         &#34;&#34;&#34;
-        code = hex(self.code)
-        if len(code) % 2 != 0:
-            code = &#34;0x0&#34;+code[2:]
-        return code
+        return _hexcode(self._code)
 
     @property
     def status(self) -&gt; Literal[&#34;draft&#34;, &#34;permanent&#34;]:
@@ -237,6 +324,63 @@ class Multicodec:
             i.e. whether it is in `range(0x300000, 0x400000)`.
         &#34;&#34;&#34;
         return self.code in range(0x300000, 0x400000)
+
+    def wrap(self, raw_data: BytesLike) -&gt; bytes:
+        &#34;&#34;&#34;
+            Wraps raw binary data into multicodec data:
+
+            ```
+            &lt;raw data&gt; -&gt; &lt;code&gt;&lt;raw data&gt;
+            ```
+
+            Example usage:
+
+            ```py
+            &gt;&gt;&gt; ip4 = multicodec.get(&#34;ip4&#34;)
+            &gt;&gt;&gt; ip4
+            Multicodec(name=&#39;ip4&#39;, tag=&#39;multiaddr&#39;, code=&#39;0x04&#39;, status=&#39;permanent&#39;, description=&#39;&#39;)
+            &gt;&gt;&gt; raw_data = bytes([192, 168, 0, 254])
+            &gt;&gt;&gt; multicodec_data = ip4.wrap(raw_data)
+            &gt;&gt;&gt; raw_data.hex()
+              &#39;c0a800fe&#39;
+            &gt;&gt;&gt; multicodec_data.hex()
+            &#39;04c0a800fe&#39;
+            &gt;&gt;&gt; varint.encode(0x04).hex()
+            &#39;04&#39; #       0x04 ^^^^ is the multicodec code for &#39;ip4&#39;
+            ```
+        &#34;&#34;&#34;
+        return varint.encode(self.code)+raw_data
+
+    def unwrap(self, multicodec_data: BytesLike) -&gt; bytes:
+        &#34;&#34;&#34;
+            Unwraps multicodec binary data to raw data:
+
+            ```
+            &lt;code&gt;&lt;raw data&gt; -&gt; &lt;raw data&gt;
+            ```
+
+            Additionally checks that the code listed by the data
+            matches the code of this multicodec.
+
+            Example usage:
+
+            ```py
+            &gt;&gt;&gt; multicodec_data = bytes.fromhex(&#34;c0a800fe&#34;)
+            &gt;&gt;&gt; raw_data = ip4.unwrap(multicodec_data)
+            &gt;&gt;&gt; multicodec_data.hex()
+            &#39;04c0a800fe&#39;
+            &gt;&gt;&gt; raw_data.hex()
+              &#39;c0a800fe&#39;
+            &gt;&gt;&gt; varint.encode(0x04).hex()
+            &#39;04&#39; #       0x04 ^^^^ is the multicodec code for &#39;ip4&#39;
+            ```
+        &#34;&#34;&#34;
+        code, _, raw_data = unwrap_raw(multicodec_data)
+        # code, _, raw_data = varint.decode_raw(multicodec_data)
+        if code != self.code:
+            hexcode = _hexcode(code)
+            raise err.ValueError(f&#34;Found code {hexcode} when unwrapping data, expected code {self.hexcode}.&#34;)
+        return bytes(raw_data)
 
     def to_json(self) -&gt; Mapping[str, str]:
         &#34;&#34;&#34;
@@ -261,7 +405,7 @@ class Multicodec:
 
     def __str__(self) -&gt; str:
         if exists(self.name) and get(self.name) == self:
-            return f&#34;multicodec.get({repr(self.name)})&#34;
+            return f&#34;multicodec({repr(self.name)}, tag={repr(self.tag)})&#34;
         return repr(self)
 
     def __repr__(self) -&gt; str:
@@ -285,7 +429,7 @@ class Multicodec:
 def get(name: Optional[str] = None, *, code: Optional[int] = None) -&gt; Multicodec:
     &#34;&#34;&#34;
         Gets the multicodec with given name or code.
-        Raises `KeyError` if no such multicodec exists.
+        Raises `err.KeyError` if no such multicodec exists.
         Exactly one of `name` and `code` must be specified.
 
         Example usage:
@@ -302,14 +446,34 @@ def get(name: Optional[str] = None, *, code: Optional[int] = None) -&gt; Multico
     validate(name, Optional[str])
     validate(code, Optional[int])
     if (name is None) == (code is None):
-        raise ValueError(&#34;Must specify exactly one between &#39;name&#39; and &#39;code&#39;.&#34;)
+        raise err.ValueError(&#34;Must specify exactly one between &#39;name&#39; and &#39;code&#39;.&#34;)
     if name is not None:
         if name not in _name_table:
-            raise KeyError(f&#34;No multicodec named {repr(name)}.&#34;)
+            raise err.KeyError(f&#34;No multicodec named {repr(name)}.&#34;)
         return _name_table[name]
     if code not in _code_table:
-        raise KeyError(f&#34;No multicodec with code {repr(code)}.&#34;)
+        raise err.KeyError(f&#34;No multicodec with code {repr(code)}.&#34;)
     return _code_table[code]
+
+
+def multicodec(name: str, *, tag: Optional[str] = None) -&gt; Multicodec:
+    &#34;&#34;&#34;
+        An alias for `get`, for use with multicodec name only.
+        If a tag is passed, ensures that the multicodec tag matches the one given.
+
+        Example usage:
+
+        ```py
+        &gt;&gt;&gt; from multiformats.multicodec import multicodec
+        &gt;&gt;&gt; multicodec(&#34;identity&#34;)
+        Multicodec(name=&#39;identity&#39;, tag=&#39;multihash&#39;, code=0,
+                   status=&#39;permanent&#39;, description=&#39;raw binary&#39;)
+        ```
+    &#34;&#34;&#34;
+    codec = get(name)
+    if tag is not None and codec.tag != tag:
+        raise err.KeyError(f&#34;Multicodec {repr(name)} exists, but its tag is not {repr(tag)}.&#34;)
+    return codec
 
 
 def exists(name: Union[None, str, Multicodec] = None, *, code: Optional[int] = None) -&gt; bool:
@@ -329,31 +493,103 @@ def exists(name: Union[None, str, Multicodec] = None, *, code: Optional[int] = N
     validate(name, Optional[str])
     validate(code, Optional[int])
     if (name is None) == (code is None):
-        raise ValueError(&#34;Must specify exactly one between &#39;name&#39; and &#39;code&#39;.&#34;)
+        raise err.ValueError(&#34;Must specify exactly one between &#39;name&#39; and &#39;code&#39;.&#34;)
     if name is not None:
         return name in _name_table
     return code in _code_table
+
+
+def wrap(codec: Union[str, int, Multicodec], raw_data: BytesLike) -&gt; bytes:
+    &#34;&#34;&#34;
+        Wraps raw binary data into multicodec data:
+
+        ```
+        &lt;raw data&gt; -&gt; &lt;code&gt;&lt;raw data&gt;
+        ```
+
+            Example usage:
+
+        ```py
+        &gt;&gt;&gt; raw_data = bytes([192, 168, 0, 254])
+        &gt;&gt;&gt; multicodec_data = multicodec.wrap(&#34;ip4&#34;, raw_data)
+        &gt;&gt;&gt; raw_data.hex()
+          &#39;c0a800fe&#39;
+        &gt;&gt;&gt; multicodec_data.hex()
+        &#39;04c0a800fe&#39;
+        &gt;&gt;&gt; varint.encode(0x04).hex()
+        &#39;04&#39; #       0x04 ^^^^ is the multicodec code for &#39;ip4&#39;
+        ```
+    &#34;&#34;&#34;
+    if isinstance(codec, str):
+        codec = get(codec)
+    elif isinstance(codec, int):
+        codec = get(code=codec)
+    else:
+        validate(codec, Multicodec)
+    return codec.wrap(raw_data)
+
+def unwrap(multicodec_data: BytesLike) -&gt; Tuple[Multicodec, bytes]:
+    &#34;&#34;&#34;
+        Unwraps multicodec binary data to multicodec and raw data:
+
+        Example usage:
+
+        ```py
+        &gt;&gt;&gt; multicodec_data = bytes.fromhex(&#34;c0a800fe&#34;)
+        &gt;&gt;&gt; codec, raw_data = multicodec.unwrap(multicodec_data)
+        &gt;&gt;&gt; multicodec_data.hex()
+        &#39;04c0a800fe&#39;
+        &gt;&gt;&gt; raw_data.hex()
+          &#39;c0a800fe&#39;
+        &gt;&gt;&gt; codec
+        Multicodec(name=&#39;ip4&#39;, tag=&#39;multiaddr&#39;, code=&#39;0x04&#39;, status=&#39;permanent&#39;, description=&#39;&#39;)
+        ```
+    &#34;&#34;&#34;
+    code, _, raw_data = unwrap_raw(multicodec_data)
+    return get(code=code), bytes(raw_data)
+
+
+_BufferedIOT = TypeVar(&#34;_BufferedIOT&#34;, bound=BufferedIOBase)
+
+@overload
+def unwrap_raw(multicodec_data: BytesLike) -&gt; Tuple[int, int, memoryview]:
+    ...
+
+@overload
+def unwrap_raw(multicodec_data: _BufferedIOT) -&gt; Tuple[int, int, _BufferedIOT]:
+    ...
+
+def unwrap_raw(multicodec_data: Union[BytesLike, BufferedIOBase]) -&gt; Tuple[int, int, Union[memoryview, BufferedIOBase]]:
+    &#34;&#34;&#34;
+        An alias for `multiformats.varint.decode_raw`, returning a triple of multicodec code, bytes read and remaining bytes.
+        The multicodec code is validated, and `err.KeyError` is raised if not multicodec with such code exists.
+    &#34;&#34;&#34;
+    code, n, raw_data = varint.decode_raw(multicodec_data)
+    if not exists(code=code):
+        raise err.KeyError(f&#34;No multicodec is known with unwrapped code {_hexcode(code)}.&#34;)
+    return code, n, raw_data
+
 
 def validate_multicodec(multicodec: Multicodec) -&gt; None:
     &#34;&#34;&#34;
         Validates a multicodec:
 
-        - raises `KeyError` if no multicodec with the given name is registered
-        - raises `ValueError` if a multicodec with the given name is registered, but is different from the one given
+        - raises `err.KeyError` if no multicodec with the given name is registered
+        - raises `err.ValueError` if a multicodec with the given name is registered, but is different from the one given
         - raises no error if the given multicodec is registered
     &#34;&#34;&#34;
     validate(multicodec, Multicodec)
     mc = get(multicodec.name)
     if mc != multicodec:
-        raise ValueError(f&#34;Multicodec named {multicodec.name} exists, but is not the one given.&#34;)
+        raise err.ValueError(f&#34;Multicodec named {multicodec.name} exists, but is not the one given.&#34;)
 
 def register(m: Multicodec, *, overwrite: bool = False) -&gt; None:
     &#34;&#34;&#34;
         Registers a given multicodec. The optional keyword argument `overwrite` (default: `False`)
         can be used to overwrite a multicodec with existing code.
 
-        When `overwrite` is `False`, raises `ValueError` if a multicodec with the same name or code already exists.
-        When `overwrite` is `True`, raises `ValueError` if a multicodec with the same name but different code already exists.
+        When `overwrite` is `False`, raises `err.ValueError` if a multicodec with the same name or code already exists.
+        When `overwrite` is `True`, raises `err.ValueError` if a multicodec with the same name but different code already exists.
 
         Example usage:
 
@@ -371,9 +607,9 @@ def register(m: Multicodec, *, overwrite: bool = False) -&gt; None:
     validate(m, Multicodec)
     validate(overwrite, bool)
     if not overwrite and m.code in _code_table:
-        raise ValueError(f&#34;Multicodec with code {repr(m.code)} already exists: {_code_table[m.code]}&#34;)
+        raise err.ValueError(f&#34;Multicodec with code {repr(m.code)} already exists: {_code_table[m.code]}&#34;)
     if m.name in _name_table and _name_table[m.name].code != m.code:
-        raise ValueError(f&#34;Multicodec with name {repr(m.name)} already exists: {_name_table[m.name]}&#34;)
+        raise err.ValueError(f&#34;Multicodec with name {repr(m.name)} already exists: {_name_table[m.name]}&#34;)
     _code_table[m.code] = m
     _name_table[m.name] = m
 
@@ -381,7 +617,7 @@ def register(m: Multicodec, *, overwrite: bool = False) -&gt; None:
 def unregister(name: Optional[str] = None, *, code: Optional[int] = None) -&gt; None:
     &#34;&#34;&#34;
         Unregisters the multicodec with given name or code.
-        Raises `KeyError` if no such multicodec exists.
+        Raises `err.KeyError` if no such multicodec exists.
 
         Example usage:
 
@@ -449,12 +685,12 @@ def build_multicodec_tables(multicodecs: Iterable[Multicodec], *,
         Creates code-&gt;multicodec and name-&gt;multicodec mappings from a finite iterable of multicodecs,
         returning the mappings.
         The keyword argument `allow_private_use` (default: `False`) can be used to allow multicodec entries
-        with private use codes in `range(0x300000, 0x400000)`: if set to `False`, a `ValueError` is raised
+        with private use codes in `range(0x300000, 0x400000)`: if set to `False`, a `err.ValueError` is raised
         if one such private use code is encountered.
 
-        Raises `ValueError` if the same multicodec code is encountered multiple times, unless exactly one
+        Raises `err.ValueError` if the same multicodec code is encountered multiple times, unless exactly one
         of the multicodecs has permanent status (in which case that codec is the one inserted in the table).
-        Raises `ValueError` if the same name is encountered multiple times.
+        Raises `err.ValueError` if the same name is encountered multiple times.
 
         Example usage:
 
@@ -469,24 +705,24 @@ def build_multicodec_tables(multicodecs: Iterable[Multicodec], *,
     overwritten_draft_codes: Set[int] = set()
     for m in multicodecs:
         if not allow_private_use and m.is_private_use:
-            raise ValueError(f&#34;Private use multicodec not allowed: {m}&#34;)
+            raise err.ValueError(f&#34;Private use multicodec not allowed: {m}&#34;)
         if m.code in code_table:
             if code_table[m.code].status == &#34;permanent&#34;:
                 if m.status == &#34;draft&#34;:
                     # this draft code has been superseded by a permanent one, skip it
                     continue
-                raise ValueError(f&#34;Multicodec code {m.hexcode} appears multiple times in table.&#34;)
+                raise err.ValueError(f&#34;Multicodec code {m.hexcode} appears multiple times in table.&#34;)
             if m.status != &#34;permanent&#34;:
                 # overwriting draft code with another draft code: dodgy, need to check at the end
                 overwritten_draft_codes.add(m.code)
         code_table[m.code] = m
         if m.name in name_table:
-            raise ValueError(f&#34;Multicodec name {m.name} appears multiple times in table.&#34;)
+            raise err.ValueError(f&#34;Multicodec name {m.name} appears multiple times in table.&#34;)
         name_table[m.name] = m
     for code in overwritten_draft_codes:
         m = code_table[code]
         if m.status != &#34;permanent&#34;:
-            raise ValueError(f&#34;Code {m.code} appears multiple times in table, &#34;
+            raise err.ValueError(f&#34;Code {m.code} appears multiple times in table, &#34;
                               &#34;but none of the associated multicodecs is permanent.&#34;)
     return code_table, name_table
 
@@ -505,6 +741,13 @@ __pdoc__ = {
 </details>
 </section>
 <section>
+<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+<dl>
+<dt><code class="name"><a title="multiformats.multicodec.err" href="err.html">multiformats.multicodec.err</a></code></dt>
+<dd>
+<div class="desc"><p>Errors for the <code><a title="multiformats.multicodec" href="#multiformats.multicodec">multiformats.multicodec</a></code> module.</p></div>
+</dd>
+</dl>
 </section>
 <section>
 </section>
@@ -544,7 +787,7 @@ True
     validate(name, Optional[str])
     validate(code, Optional[int])
     if (name is None) == (code is None):
-        raise ValueError(&#34;Must specify exactly one between &#39;name&#39; and &#39;code&#39;.&#34;)
+        raise err.ValueError(&#34;Must specify exactly one between &#39;name&#39; and &#39;code&#39;.&#34;)
     if name is not None:
         return name in _name_table
     return code in _code_table</code></pre>
@@ -555,7 +798,7 @@ True
 </code></dt>
 <dd>
 <div class="desc"><p>Gets the multicodec with given name or code.
-Raises <code>KeyError</code> if no such multicodec exists.
+Raises <code><a title="multiformats.multicodec.err.KeyError" href="err.html#multiformats.multicodec.err.KeyError">KeyError</a></code> if no such multicodec exists.
 Exactly one of <code>name</code> and <code>code</code> must be specified.</p>
 <p>Example usage:</p>
 <pre><code class="language-py">&gt;&gt;&gt; multicodec.get(&quot;identity&quot;)
@@ -572,7 +815,7 @@ Multicodec(name='cidv1', tag='ipld', code=1,
 <pre><code class="python">def get(name: Optional[str] = None, *, code: Optional[int] = None) -&gt; Multicodec:
     &#34;&#34;&#34;
         Gets the multicodec with given name or code.
-        Raises `KeyError` if no such multicodec exists.
+        Raises `err.KeyError` if no such multicodec exists.
         Exactly one of `name` and `code` must be specified.
 
         Example usage:
@@ -589,14 +832,50 @@ Multicodec(name='cidv1', tag='ipld', code=1,
     validate(name, Optional[str])
     validate(code, Optional[int])
     if (name is None) == (code is None):
-        raise ValueError(&#34;Must specify exactly one between &#39;name&#39; and &#39;code&#39;.&#34;)
+        raise err.ValueError(&#34;Must specify exactly one between &#39;name&#39; and &#39;code&#39;.&#34;)
     if name is not None:
         if name not in _name_table:
-            raise KeyError(f&#34;No multicodec named {repr(name)}.&#34;)
+            raise err.KeyError(f&#34;No multicodec named {repr(name)}.&#34;)
         return _name_table[name]
     if code not in _code_table:
-        raise KeyError(f&#34;No multicodec with code {repr(code)}.&#34;)
+        raise err.KeyError(f&#34;No multicodec with code {repr(code)}.&#34;)
     return _code_table[code]</code></pre>
+</details>
+</dd>
+<dt id="multiformats.multicodec.multicodec"><code class="name flex">
+<span>def <span class="ident">multicodec</span></span>(<span>name: str, *, tag: Optional[str] = None) ‑> <a title="multiformats.multicodec.Multicodec" href="#multiformats.multicodec.Multicodec">Multicodec</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>An alias for <code><a title="multiformats.multicodec.get" href="#multiformats.multicodec.get">get()</a></code>, for use with multicodec name only.
+If a tag is passed, ensures that the multicodec tag matches the one given.</p>
+<p>Example usage:</p>
+<pre><code class="language-py">&gt;&gt;&gt; from multiformats.multicodec import multicodec
+&gt;&gt;&gt; multicodec(&quot;identity&quot;)
+Multicodec(name='identity', tag='multihash', code=0,
+           status='permanent', description='raw binary')
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def multicodec(name: str, *, tag: Optional[str] = None) -&gt; Multicodec:
+    &#34;&#34;&#34;
+        An alias for `get`, for use with multicodec name only.
+        If a tag is passed, ensures that the multicodec tag matches the one given.
+
+        Example usage:
+
+        ```py
+        &gt;&gt;&gt; from multiformats.multicodec import multicodec
+        &gt;&gt;&gt; multicodec(&#34;identity&#34;)
+        Multicodec(name=&#39;identity&#39;, tag=&#39;multihash&#39;, code=0,
+                   status=&#39;permanent&#39;, description=&#39;raw binary&#39;)
+        ```
+    &#34;&#34;&#34;
+    codec = get(name)
+    if tag is not None and codec.tag != tag:
+        raise err.KeyError(f&#34;Multicodec {repr(name)} exists, but its tag is not {repr(tag)}.&#34;)
+    return codec</code></pre>
 </details>
 </dd>
 <dt id="multiformats.multicodec.register"><code class="name flex">
@@ -605,8 +884,8 @@ Multicodec(name='cidv1', tag='ipld', code=1,
 <dd>
 <div class="desc"><p>Registers a given multicodec. The optional keyword argument <code>overwrite</code> (default: <code>False</code>)
 can be used to overwrite a multicodec with existing code.</p>
-<p>When <code>overwrite</code> is <code>False</code>, raises <code>ValueError</code> if a multicodec with the same name or code already exists.
-When <code>overwrite</code> is <code>True</code>, raises <code>ValueError</code> if a multicodec with the same name but different code already exists.</p>
+<p>When <code>overwrite</code> is <code>False</code>, raises <code><a title="multiformats.multicodec.err.ValueError" href="err.html#multiformats.multicodec.err.ValueError">ValueError</a></code> if a multicodec with the same name or code already exists.
+When <code>overwrite</code> is <code>True</code>, raises <code><a title="multiformats.multicodec.err.ValueError" href="err.html#multiformats.multicodec.err.ValueError">ValueError</a></code> if a multicodec with the same name but different code already exists.</p>
 <p>Example usage:</p>
 <pre><code class="language-py">    &gt;&gt;&gt; m = Multicodec(&quot;my-multicodec&quot;, &quot;my-tag&quot;, 0x300001, &quot;draft&quot;, &quot;...&quot;)
     &gt;&gt;&gt; multicodec.register(m)
@@ -626,8 +905,8 @@ When <code>overwrite</code> is <code>True</code>, raises <code>ValueError</code>
         Registers a given multicodec. The optional keyword argument `overwrite` (default: `False`)
         can be used to overwrite a multicodec with existing code.
 
-        When `overwrite` is `False`, raises `ValueError` if a multicodec with the same name or code already exists.
-        When `overwrite` is `True`, raises `ValueError` if a multicodec with the same name but different code already exists.
+        When `overwrite` is `False`, raises `err.ValueError` if a multicodec with the same name or code already exists.
+        When `overwrite` is `True`, raises `err.ValueError` if a multicodec with the same name but different code already exists.
 
         Example usage:
 
@@ -645,9 +924,9 @@ When <code>overwrite</code> is <code>True</code>, raises <code>ValueError</code>
     validate(m, Multicodec)
     validate(overwrite, bool)
     if not overwrite and m.code in _code_table:
-        raise ValueError(f&#34;Multicodec with code {repr(m.code)} already exists: {_code_table[m.code]}&#34;)
+        raise err.ValueError(f&#34;Multicodec with code {repr(m.code)} already exists: {_code_table[m.code]}&#34;)
     if m.name in _name_table and _name_table[m.name].code != m.code:
-        raise ValueError(f&#34;Multicodec with name {repr(m.name)} already exists: {_name_table[m.name]}&#34;)
+        raise err.ValueError(f&#34;Multicodec with name {repr(m.name)} already exists: {_name_table[m.name]}&#34;)
     _code_table[m.code] = m
     _name_table[m.name] = m</code></pre>
 </details>
@@ -723,7 +1002,7 @@ to multicodecs with a given <code>tag</code> or <code>status</code> respectively
 </code></dt>
 <dd>
 <div class="desc"><p>Unregisters the multicodec with given name or code.
-Raises <code>KeyError</code> if no such multicodec exists.</p>
+Raises <code><a title="multiformats.multicodec.err.KeyError" href="err.html#multiformats.multicodec.err.KeyError">KeyError</a></code> if no such multicodec exists.</p>
 <p>Example usage:</p>
 <pre><code class="language-py">&gt;&gt;&gt; multicodec.unregister(code=0x01) # cidv1
 &gt;&gt;&gt; multicodec.unregister(code=0x01)
@@ -736,7 +1015,7 @@ False
 <pre><code class="python">def unregister(name: Optional[str] = None, *, code: Optional[int] = None) -&gt; None:
     &#34;&#34;&#34;
         Unregisters the multicodec with given name or code.
-        Raises `KeyError` if no such multicodec exists.
+        Raises `err.KeyError` if no such multicodec exists.
 
         Example usage:
 
@@ -751,14 +1030,75 @@ False
     del _name_table[m.name]</code></pre>
 </details>
 </dd>
+<dt id="multiformats.multicodec.unwrap"><code class="name flex">
+<span>def <span class="ident">unwrap</span></span>(<span>multicodec_data: Union[bytes, bytearray, memoryview]) ‑> Tuple[<a title="multiformats.multicodec.Multicodec" href="#multiformats.multicodec.Multicodec">Multicodec</a>, bytes]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Unwraps multicodec binary data to multicodec and raw data:</p>
+<p>Example usage:</p>
+<pre><code class="language-py">&gt;&gt;&gt; multicodec_data = bytes.fromhex(&quot;c0a800fe&quot;)
+&gt;&gt;&gt; codec, raw_data = multicodec.unwrap(multicodec_data)
+&gt;&gt;&gt; multicodec_data.hex()
+'04c0a800fe'
+&gt;&gt;&gt; raw_data.hex()
+  'c0a800fe'
+&gt;&gt;&gt; codec
+Multicodec(name='ip4', tag='multiaddr', code='0x04', status='permanent', description='')
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def unwrap(multicodec_data: BytesLike) -&gt; Tuple[Multicodec, bytes]:
+    &#34;&#34;&#34;
+        Unwraps multicodec binary data to multicodec and raw data:
+
+        Example usage:
+
+        ```py
+        &gt;&gt;&gt; multicodec_data = bytes.fromhex(&#34;c0a800fe&#34;)
+        &gt;&gt;&gt; codec, raw_data = multicodec.unwrap(multicodec_data)
+        &gt;&gt;&gt; multicodec_data.hex()
+        &#39;04c0a800fe&#39;
+        &gt;&gt;&gt; raw_data.hex()
+          &#39;c0a800fe&#39;
+        &gt;&gt;&gt; codec
+        Multicodec(name=&#39;ip4&#39;, tag=&#39;multiaddr&#39;, code=&#39;0x04&#39;, status=&#39;permanent&#39;, description=&#39;&#39;)
+        ```
+    &#34;&#34;&#34;
+    code, _, raw_data = unwrap_raw(multicodec_data)
+    return get(code=code), bytes(raw_data)</code></pre>
+</details>
+</dd>
+<dt id="multiformats.multicodec.unwrap_raw"><code class="name flex">
+<span>def <span class="ident">unwrap_raw</span></span>(<span>multicodec_data: Union[bytes, bytearray, memoryview, io.BufferedIOBase]) ‑> Tuple[int, int, Union[memoryview, io.BufferedIOBase]]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>An alias for <code><a title="multiformats.varint.decode_raw" href="../varint.html#multiformats.varint.decode_raw">decode_raw()</a></code>, returning a triple of multicodec code, bytes read and remaining bytes.
+The multicodec code is validated, and <code><a title="multiformats.multicodec.err.KeyError" href="err.html#multiformats.multicodec.err.KeyError">KeyError</a></code> is raised if not multicodec with such code exists.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def unwrap_raw(multicodec_data: Union[BytesLike, BufferedIOBase]) -&gt; Tuple[int, int, Union[memoryview, BufferedIOBase]]:
+    &#34;&#34;&#34;
+        An alias for `multiformats.varint.decode_raw`, returning a triple of multicodec code, bytes read and remaining bytes.
+        The multicodec code is validated, and `err.KeyError` is raised if not multicodec with such code exists.
+    &#34;&#34;&#34;
+    code, n, raw_data = varint.decode_raw(multicodec_data)
+    if not exists(code=code):
+        raise err.KeyError(f&#34;No multicodec is known with unwrapped code {_hexcode(code)}.&#34;)
+    return code, n, raw_data</code></pre>
+</details>
+</dd>
 <dt id="multiformats.multicodec.validate_multicodec"><code class="name flex">
 <span>def <span class="ident">validate_multicodec</span></span>(<span>multicodec: <a title="multiformats.multicodec.Multicodec" href="#multiformats.multicodec.Multicodec">Multicodec</a>) ‑> None</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Validates a multicodec:</p>
 <ul>
-<li>raises <code>KeyError</code> if no multicodec with the given name is registered</li>
-<li>raises <code>ValueError</code> if a multicodec with the given name is registered, but is different from the one given</li>
+<li>raises <code><a title="multiformats.multicodec.err.KeyError" href="err.html#multiformats.multicodec.err.KeyError">KeyError</a></code> if no multicodec with the given name is registered</li>
+<li>raises <code><a title="multiformats.multicodec.err.ValueError" href="err.html#multiformats.multicodec.err.ValueError">ValueError</a></code> if a multicodec with the given name is registered, but is different from the one given</li>
 <li>raises no error if the given multicodec is registered</li>
 </ul></div>
 <details class="source">
@@ -769,14 +1109,66 @@ False
     &#34;&#34;&#34;
         Validates a multicodec:
 
-        - raises `KeyError` if no multicodec with the given name is registered
-        - raises `ValueError` if a multicodec with the given name is registered, but is different from the one given
+        - raises `err.KeyError` if no multicodec with the given name is registered
+        - raises `err.ValueError` if a multicodec with the given name is registered, but is different from the one given
         - raises no error if the given multicodec is registered
     &#34;&#34;&#34;
     validate(multicodec, Multicodec)
     mc = get(multicodec.name)
     if mc != multicodec:
-        raise ValueError(f&#34;Multicodec named {multicodec.name} exists, but is not the one given.&#34;)</code></pre>
+        raise err.ValueError(f&#34;Multicodec named {multicodec.name} exists, but is not the one given.&#34;)</code></pre>
+</details>
+</dd>
+<dt id="multiformats.multicodec.wrap"><code class="name flex">
+<span>def <span class="ident">wrap</span></span>(<span>codec: Union[str, int, <a title="multiformats.multicodec.Multicodec" href="#multiformats.multicodec.Multicodec">Multicodec</a>], raw_data: Union[bytes, bytearray, memoryview]) ‑> bytes</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Wraps raw binary data into multicodec data:</p>
+<pre><code>&lt;raw data&gt; -&gt; &lt;code&gt;&lt;raw data&gt;
+</code></pre>
+<pre><code>Example usage:
+</code></pre>
+<pre><code class="language-py">&gt;&gt;&gt; raw_data = bytes([192, 168, 0, 254])
+&gt;&gt;&gt; multicodec_data = multicodec.wrap(&quot;ip4&quot;, raw_data)
+&gt;&gt;&gt; raw_data.hex()
+  'c0a800fe'
+&gt;&gt;&gt; multicodec_data.hex()
+'04c0a800fe'
+&gt;&gt;&gt; varint.encode(0x04).hex()
+'04' #       0x04 ^^^^ is the multicodec code for 'ip4'
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def wrap(codec: Union[str, int, Multicodec], raw_data: BytesLike) -&gt; bytes:
+    &#34;&#34;&#34;
+        Wraps raw binary data into multicodec data:
+
+        ```
+        &lt;raw data&gt; -&gt; &lt;code&gt;&lt;raw data&gt;
+        ```
+
+            Example usage:
+
+        ```py
+        &gt;&gt;&gt; raw_data = bytes([192, 168, 0, 254])
+        &gt;&gt;&gt; multicodec_data = multicodec.wrap(&#34;ip4&#34;, raw_data)
+        &gt;&gt;&gt; raw_data.hex()
+          &#39;c0a800fe&#39;
+        &gt;&gt;&gt; multicodec_data.hex()
+        &#39;04c0a800fe&#39;
+        &gt;&gt;&gt; varint.encode(0x04).hex()
+        &#39;04&#39; #       0x04 ^^^^ is the multicodec code for &#39;ip4&#39;
+        ```
+    &#34;&#34;&#34;
+    if isinstance(codec, str):
+        codec = get(codec)
+    elif isinstance(codec, int):
+        codec = get(code=codec)
+    else:
+        validate(codec, Multicodec)
+    return codec.wrap(raw_data)</code></pre>
 </details>
 </dd>
 </dl>
@@ -847,7 +1239,7 @@ False
     @staticmethod
     def _validate_name(name: str) -&gt; str:
         if not re.match(r&#34;^[a-z][a-z0-9_-]+$&#34;, name):
-            raise ValueError(f&#34;Invalid multicodec name {repr(name)}&#34;)
+            raise err.ValueError(f&#34;Invalid multicodec name {repr(name)}&#34;)
         return name
 
     @staticmethod
@@ -860,13 +1252,13 @@ False
                 code = code[2:]
             code = int(code, base=16)
         if code &lt; 0:
-            raise ValueError(f&#34;Invalid multicodec code {repr(code)}.&#34;)
+            raise err.ValueError(f&#34;Invalid multicodec code {repr(code)}.&#34;)
         return code
 
     @staticmethod
     def _validate_status(status: str) -&gt; Literal[&#34;draft&#34;, &#34;permanent&#34;]:
         if status not in (&#34;draft&#34;, &#34;permanent&#34;):
-            raise ValueError(f&#34;Invalid multicodec status {repr(status)}.&#34;)
+            raise err.ValueError(f&#34;Invalid multicodec status {repr(status)}.&#34;)
         return cast(Literal[&#34;draft&#34;, &#34;permanent&#34;], status)
 
     @property
@@ -905,10 +1297,7 @@ False
             &#39;0x01&#39;
             ```
         &#34;&#34;&#34;
-        code = hex(self.code)
-        if len(code) % 2 != 0:
-            code = &#34;0x0&#34;+code[2:]
-        return code
+        return _hexcode(self._code)
 
     @property
     def status(self) -&gt; Literal[&#34;draft&#34;, &#34;permanent&#34;]:
@@ -927,6 +1316,63 @@ False
             i.e. whether it is in `range(0x300000, 0x400000)`.
         &#34;&#34;&#34;
         return self.code in range(0x300000, 0x400000)
+
+    def wrap(self, raw_data: BytesLike) -&gt; bytes:
+        &#34;&#34;&#34;
+            Wraps raw binary data into multicodec data:
+
+            ```
+            &lt;raw data&gt; -&gt; &lt;code&gt;&lt;raw data&gt;
+            ```
+
+            Example usage:
+
+            ```py
+            &gt;&gt;&gt; ip4 = multicodec.get(&#34;ip4&#34;)
+            &gt;&gt;&gt; ip4
+            Multicodec(name=&#39;ip4&#39;, tag=&#39;multiaddr&#39;, code=&#39;0x04&#39;, status=&#39;permanent&#39;, description=&#39;&#39;)
+            &gt;&gt;&gt; raw_data = bytes([192, 168, 0, 254])
+            &gt;&gt;&gt; multicodec_data = ip4.wrap(raw_data)
+            &gt;&gt;&gt; raw_data.hex()
+              &#39;c0a800fe&#39;
+            &gt;&gt;&gt; multicodec_data.hex()
+            &#39;04c0a800fe&#39;
+            &gt;&gt;&gt; varint.encode(0x04).hex()
+            &#39;04&#39; #       0x04 ^^^^ is the multicodec code for &#39;ip4&#39;
+            ```
+        &#34;&#34;&#34;
+        return varint.encode(self.code)+raw_data
+
+    def unwrap(self, multicodec_data: BytesLike) -&gt; bytes:
+        &#34;&#34;&#34;
+            Unwraps multicodec binary data to raw data:
+
+            ```
+            &lt;code&gt;&lt;raw data&gt; -&gt; &lt;raw data&gt;
+            ```
+
+            Additionally checks that the code listed by the data
+            matches the code of this multicodec.
+
+            Example usage:
+
+            ```py
+            &gt;&gt;&gt; multicodec_data = bytes.fromhex(&#34;c0a800fe&#34;)
+            &gt;&gt;&gt; raw_data = ip4.unwrap(multicodec_data)
+            &gt;&gt;&gt; multicodec_data.hex()
+            &#39;04c0a800fe&#39;
+            &gt;&gt;&gt; raw_data.hex()
+              &#39;c0a800fe&#39;
+            &gt;&gt;&gt; varint.encode(0x04).hex()
+            &#39;04&#39; #       0x04 ^^^^ is the multicodec code for &#39;ip4&#39;
+            ```
+        &#34;&#34;&#34;
+        code, _, raw_data = unwrap_raw(multicodec_data)
+        # code, _, raw_data = varint.decode_raw(multicodec_data)
+        if code != self.code:
+            hexcode = _hexcode(code)
+            raise err.ValueError(f&#34;Found code {hexcode} when unwrapping data, expected code {self.hexcode}.&#34;)
+        return bytes(raw_data)
 
     def to_json(self) -&gt; Mapping[str, str]:
         &#34;&#34;&#34;
@@ -951,7 +1397,7 @@ False
 
     def __str__(self) -&gt; str:
         if exists(self.name) and get(self.name) == self:
-            return f&#34;multicodec.get({repr(self.name)})&#34;
+            return f&#34;multicodec({repr(self.name)}, tag={repr(self.tag)})&#34;
         return repr(self)
 
     def __repr__(self) -&gt; str:
@@ -992,7 +1438,7 @@ def validate_code(code: Union[int, str]) -&gt; int:
             code = code[2:]
         code = int(code, base=16)
     if code &lt; 0:
-        raise ValueError(f&#34;Invalid multicodec code {repr(code)}.&#34;)
+        raise err.ValueError(f&#34;Invalid multicodec code {repr(code)}.&#34;)
     return code</code></pre>
 </details>
 </dd>
@@ -1054,10 +1500,7 @@ def hexcode(self) -&gt; str:
         &#39;0x01&#39;
         ```
     &#34;&#34;&#34;
-    code = hex(self.code)
-    if len(code) % 2 != 0:
-        code = &#34;0x0&#34;+code[2:]
-    return code</code></pre>
+    return _hexcode(self._code)</code></pre>
 </details>
 </dd>
 <dt id="multiformats.multicodec.Multicodec.is_private_use"><code class="name">var <span class="ident">is_private_use</span> : bool</code></dt>
@@ -1164,6 +1607,112 @@ def tag(self) -&gt; str:
     }</code></pre>
 </details>
 </dd>
+<dt id="multiformats.multicodec.Multicodec.unwrap"><code class="name flex">
+<span>def <span class="ident">unwrap</span></span>(<span>self, multicodec_data: Union[bytes, bytearray, memoryview]) ‑> bytes</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Unwraps multicodec binary data to raw data:</p>
+<pre><code>&lt;code&gt;&lt;raw data&gt; -&gt; &lt;raw data&gt;
+</code></pre>
+<p>Additionally checks that the code listed by the data
+matches the code of this multicodec.</p>
+<p>Example usage:</p>
+<pre><code class="language-py">&gt;&gt;&gt; multicodec_data = bytes.fromhex(&quot;c0a800fe&quot;)
+&gt;&gt;&gt; raw_data = ip4.unwrap(multicodec_data)
+&gt;&gt;&gt; multicodec_data.hex()
+'04c0a800fe'
+&gt;&gt;&gt; raw_data.hex()
+  'c0a800fe'
+&gt;&gt;&gt; varint.encode(0x04).hex()
+'04' #       0x04 ^^^^ is the multicodec code for 'ip4'
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def unwrap(self, multicodec_data: BytesLike) -&gt; bytes:
+    &#34;&#34;&#34;
+        Unwraps multicodec binary data to raw data:
+
+        ```
+        &lt;code&gt;&lt;raw data&gt; -&gt; &lt;raw data&gt;
+        ```
+
+        Additionally checks that the code listed by the data
+        matches the code of this multicodec.
+
+        Example usage:
+
+        ```py
+        &gt;&gt;&gt; multicodec_data = bytes.fromhex(&#34;c0a800fe&#34;)
+        &gt;&gt;&gt; raw_data = ip4.unwrap(multicodec_data)
+        &gt;&gt;&gt; multicodec_data.hex()
+        &#39;04c0a800fe&#39;
+        &gt;&gt;&gt; raw_data.hex()
+          &#39;c0a800fe&#39;
+        &gt;&gt;&gt; varint.encode(0x04).hex()
+        &#39;04&#39; #       0x04 ^^^^ is the multicodec code for &#39;ip4&#39;
+        ```
+    &#34;&#34;&#34;
+    code, _, raw_data = unwrap_raw(multicodec_data)
+    # code, _, raw_data = varint.decode_raw(multicodec_data)
+    if code != self.code:
+        hexcode = _hexcode(code)
+        raise err.ValueError(f&#34;Found code {hexcode} when unwrapping data, expected code {self.hexcode}.&#34;)
+    return bytes(raw_data)</code></pre>
+</details>
+</dd>
+<dt id="multiformats.multicodec.Multicodec.wrap"><code class="name flex">
+<span>def <span class="ident">wrap</span></span>(<span>self, raw_data: Union[bytes, bytearray, memoryview]) ‑> bytes</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Wraps raw binary data into multicodec data:</p>
+<pre><code>&lt;raw data&gt; -&gt; &lt;code&gt;&lt;raw data&gt;
+</code></pre>
+<p>Example usage:</p>
+<pre><code class="language-py">&gt;&gt;&gt; ip4 = multicodec.get(&quot;ip4&quot;)
+&gt;&gt;&gt; ip4
+Multicodec(name='ip4', tag='multiaddr', code='0x04', status='permanent', description='')
+&gt;&gt;&gt; raw_data = bytes([192, 168, 0, 254])
+&gt;&gt;&gt; multicodec_data = ip4.wrap(raw_data)
+&gt;&gt;&gt; raw_data.hex()
+  'c0a800fe'
+&gt;&gt;&gt; multicodec_data.hex()
+'04c0a800fe'
+&gt;&gt;&gt; varint.encode(0x04).hex()
+'04' #       0x04 ^^^^ is the multicodec code for 'ip4'
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def wrap(self, raw_data: BytesLike) -&gt; bytes:
+    &#34;&#34;&#34;
+        Wraps raw binary data into multicodec data:
+
+        ```
+        &lt;raw data&gt; -&gt; &lt;code&gt;&lt;raw data&gt;
+        ```
+
+        Example usage:
+
+        ```py
+        &gt;&gt;&gt; ip4 = multicodec.get(&#34;ip4&#34;)
+        &gt;&gt;&gt; ip4
+        Multicodec(name=&#39;ip4&#39;, tag=&#39;multiaddr&#39;, code=&#39;0x04&#39;, status=&#39;permanent&#39;, description=&#39;&#39;)
+        &gt;&gt;&gt; raw_data = bytes([192, 168, 0, 254])
+        &gt;&gt;&gt; multicodec_data = ip4.wrap(raw_data)
+        &gt;&gt;&gt; raw_data.hex()
+          &#39;c0a800fe&#39;
+        &gt;&gt;&gt; multicodec_data.hex()
+        &#39;04c0a800fe&#39;
+        &gt;&gt;&gt; varint.encode(0x04).hex()
+        &#39;04&#39; #       0x04 ^^^^ is the multicodec code for &#39;ip4&#39;
+        ```
+    &#34;&#34;&#34;
+    return varint.encode(self.code)+raw_data</code></pre>
+</details>
+</dd>
 </dl>
 </dd>
 </dl>
@@ -1180,14 +1729,23 @@ def tag(self) -&gt; str:
 <li><code><a title="multiformats" href="../index.html">multiformats</a></code></li>
 </ul>
 </li>
+<li><h3><a href="#header-submodules">Sub-modules</a></h3>
+<ul>
+<li><code><a title="multiformats.multicodec.err" href="err.html">multiformats.multicodec.err</a></code></li>
+</ul>
+</li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="two-column">
 <li><code><a title="multiformats.multicodec.exists" href="#multiformats.multicodec.exists">exists</a></code></li>
 <li><code><a title="multiformats.multicodec.get" href="#multiformats.multicodec.get">get</a></code></li>
+<li><code><a title="multiformats.multicodec.multicodec" href="#multiformats.multicodec.multicodec">multicodec</a></code></li>
 <li><code><a title="multiformats.multicodec.register" href="#multiformats.multicodec.register">register</a></code></li>
 <li><code><a title="multiformats.multicodec.table" href="#multiformats.multicodec.table">table</a></code></li>
 <li><code><a title="multiformats.multicodec.unregister" href="#multiformats.multicodec.unregister">unregister</a></code></li>
+<li><code><a title="multiformats.multicodec.unwrap" href="#multiformats.multicodec.unwrap">unwrap</a></code></li>
+<li><code><a title="multiformats.multicodec.unwrap_raw" href="#multiformats.multicodec.unwrap_raw">unwrap_raw</a></code></li>
 <li><code><a title="multiformats.multicodec.validate_multicodec" href="#multiformats.multicodec.validate_multicodec">validate_multicodec</a></code></li>
+<li><code><a title="multiformats.multicodec.wrap" href="#multiformats.multicodec.wrap">wrap</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
@@ -1203,7 +1761,9 @@ def tag(self) -&gt; str:
 <li><code><a title="multiformats.multicodec.Multicodec.status" href="#multiformats.multicodec.Multicodec.status">status</a></code></li>
 <li><code><a title="multiformats.multicodec.Multicodec.tag" href="#multiformats.multicodec.Multicodec.tag">tag</a></code></li>
 <li><code><a title="multiformats.multicodec.Multicodec.to_json" href="#multiformats.multicodec.Multicodec.to_json">to_json</a></code></li>
+<li><code><a title="multiformats.multicodec.Multicodec.unwrap" href="#multiformats.multicodec.Multicodec.unwrap">unwrap</a></code></li>
 <li><code><a title="multiformats.multicodec.Multicodec.validate_code" href="#multiformats.multicodec.Multicodec.validate_code">validate_code</a></code></li>
+<li><code><a title="multiformats.multicodec.Multicodec.wrap" href="#multiformats.multicodec.Multicodec.wrap">wrap</a></code></li>
 </ul>
 </li>
 </ul>
