@@ -38,7 +38,7 @@ pip install --upgrade multiformats
 
 ### Varint
 
-The `varint` module implements the [unsigned-varint spec](https://github.com/multiformats/unsigned-varint). Functionality is provided by the `encode` and `decode` functions, converting between non-negative `int` values and the corresponding varint `bytes`: 
+The [`varint`](https://hashberg-io.github.io/multiformats/multiformats/varint.html) module implements the [unsigned-varint spec](https://github.com/multiformats/unsigned-varint). Functionality is provided by the [`encode`](https://hashberg-io.github.io/multiformats/multiformats/varint.html#multiformats.varint.encode) and [`decode`](https://hashberg-io.github.io/multiformats/multiformats/varint.html#multiformats.varint.encode) functions, converting between non-negative `int` values and the corresponding varint `bytes`: 
 
 ```py
 >>> from multiformats import varint
@@ -53,7 +53,7 @@ For advanced usage, see the [API documentation](https://hashberg-io.github.io/mu
 
 ### Multicodec
 
-The `multicodec` module implements the [multicodec spec](https://github.com/multiformats/multicodec). The `Multicodec` class provides a container for multicodec data:
+The [`multicodec`](https://hashberg-io.github.io/multiformats/multiformats/multicodec/index.html) module implements the [multicodec spec](https://github.com/multiformats/multicodec). The [`Multicodec`](https://hashberg-io.github.io/multiformats/multiformats/multicodec/index.html#multiformats.multicodec.Multicodec) class provides a container for multicodec data:
 
 ```py
 >>> Multicodec("identity", "multihash", 0x00, "permanent", "raw binary")
@@ -61,8 +61,8 @@ Multicodec(name='identity', tag='multihash', code=0,
            status='permanent', description='raw binary')
 ```
 
-Core functionality is provided by the `get`, `exists`, `wrap` and `unwrap` functions.
-The `get` and `exists` functions can be used to check whether a multicodec with given name or code is known,
+Core functionality is provided by the [`get`](https://hashberg-io.github.io/multiformats/multiformats/multicodec/index.html#multiformats.multicodec.get), [`exists`](https://hashberg-io.github.io/multiformats/multiformats/multicodec/index.html#multiformats.multicodec.exists), [`wrap`](https://hashberg-io.github.io/multiformats/multiformats/multicodec/index.html#multiformats.multicodec.wrap) and [`unwrap`](https://hashberg-io.github.io/multiformats/multiformats/multicodec/index.html#multiformats.multicodec.unwrap) functions.
+The [`get`](https://hashberg-io.github.io/multiformats/multiformats/multicodec/index.html#multiformats.multicodec.get) and [`exists`](https://hashberg-io.github.io/multiformats/multiformats/multicodec/index.html#multiformats.multicodec.exists) functions can be used to check whether a multicodec with given name or code is known,
 and if so to get the corresponding object:
 
 ```py
@@ -78,7 +78,7 @@ Multicodec(name='cidv1', tag='cid', code=1,
            status='permanent', description='CIDv1')
 ```
 
-The `wrap` and `unwrap` functions can be use to wrap raw binary data into multicodec data
+The [`wrap`](https://hashberg-io.github.io/multiformats/multiformats/multicodec/index.html#multiformats.multicodec.wrap) and [`unwrap`](https://hashberg-io.github.io/multiformats/multiformats/multicodec/index.html#multiformats.multicodec.unwrap) functions can be use to wrap raw binary data into multicodec data
 (prepending the varint-encoded multicodec code) and to unwrap multicodec data into a pair
 of multicodec code and raw binary data:
 
@@ -98,7 +98,7 @@ of multicodec code and raw binary data:
 Multicodec(name='ip4', tag='multiaddr', code='0x04', status='permanent', description='')
 ```
 
-The `Multicodec.wrap` and `Multicodec.unwrap` methods perform analogous functionality
+The [`Multicodec.wrap`](https://hashberg-io.github.io/multiformats/multiformats/multicodec/index.html#multiformats.multicodec.Multicodec.wrap) and [`Multicodec.unwrap`](https://hashberg-io.github.io/multiformats/multiformats/multicodec/index.html#multiformats.multicodec.Multicodec.unwrap) methods perform analogous functionality
 with an object-oriented API, additionally enforcing that the unwrapped code is actually
 the code of the multicodec being used:
 
@@ -118,9 +118,9 @@ Multicodec(name='ip4', tag='multiaddr', code='0x04', status='permanent', descrip
   'c0a800fe'
 >>> ip4.unwrap(bytes.fromhex('00c0a800fe')) # 'identity' multicodec data
 multiformats.multicodec.err.ValueError: Found code 0x00 when unwrapping data, expected code 0x04.
-    ```
+```
 
-The `table` function can be used to iterate through known multicodecs, optionally restrictiong to one or more tags and/or statuses:
+The [`table`](https://hashberg-io.github.io/multiformats/multiformats/multicodec/index.html#multiformats.multicodec.table) function can be used to iterate through known multicodecs, optionally restrictiong to one or more tags and/or statuses:
 
 ```py
 >>> len(list(multicodec.table())) # multicodec.table() returns an iterator
@@ -137,7 +137,7 @@ For advanced usage, see the [API documentation](https://hashberg-io.github.io/mu
 
 ### Multibase
 
-The `multibase` module implements the [multibase spec](https://github.com/multiformats/multibase). The `Multibase` class provides a container for multibase data:
+The [`multibase`](https://hashberg-io.github.io/multiformats/multiformats/multibase/index.html) module implements the [multibase spec](https://github.com/multiformats/multibase). The [`Multibase`](https://hashberg-io.github.io/multiformats/multiformats/multibase/index.html#multiformats.multibase.Multibase) class provides a container for multibase data:
 
 ```py
 >>> Multibase(name="base16", code="f",
@@ -145,7 +145,7 @@ The `multibase` module implements the [multibase spec](https://github.com/multif
     Multibase(name='base16', code='f', status='default', description='hexadecimal')
 ```
 
-Core functionality is provided by the `encode` and `decode` functions, which can be used to
+Core functionality is provided by the [`encode`](https://hashberg-io.github.io/multiformats/multiformats/multibase/index.html#multiformats.multibase.encode) and [`decode`](https://hashberg-io.github.io/multiformats/multiformats/multibase/index.html#multiformats.multibase.decode) functions, which can be used to
 encode a bytestring into a string using a chosen multibase encoding and to decode a string
 into a bytestring using the multibase encoding specified by its first character:
 
@@ -156,7 +156,7 @@ into a bytestring using the multibase encoding specified by its first character:
 b'Hello World!'
 ```
 
-The multibase encoding specified by a given string is accessible using the `from_str` function:
+The multibase encoding specified by a given string is accessible using the [`from_str`](https://hashberg-io.github.io/multiformats/multiformats/multibase/index.html#multiformats.multibase.from_str) function:
 ```py
 >>> multibase.from_str('bjbswy3dpeblw64tmmqqq')
 Multibase(encoding='base32', code='b',
@@ -164,7 +164,7 @@ Multibase(encoding='base32', code='b',
           description='rfc4648 case-insensitive - no padding')
 ```
 
-The `exists` and `get` functions can be used to check whether a multibase with given name or code is known, and if so to get the corresponding object:
+The [`exists`](https://hashberg-io.github.io/multiformats/multiformats/multibase/index.html#multiformats.multibase.exists) and [`get`](https://hashberg-io.github.io/multiformats/multiformats/multibase/index.html#multiformats.multibase.get) functions can be used to check whether a multibase with given name or code is known, and if so to get the corresponding object:
 
 ```py
 >>> multibase.exists("base32")
@@ -185,10 +185,10 @@ For advanced usage, see the [API documentation](https://hashberg-io.github.io/mu
 
 ### Multihash
 
-The `multihash` module implements the [multihash spec](https://github.com/multiformats/multihash).
+The [`multihash`](https://hashberg-io.github.io/multiformats/multiformats/multihash/index.html) module implements the [multihash spec](https://github.com/multiformats/multihash).
 
-Core functionality is provided by the `digest`, `wrap`, `unwrap` functions, or the correspondingly-named methods of the `Multihash` class.
-The `digest` function and `Multihash.digest` method can be used to create a multihash digest directly from data:
+Core functionality is provided by the [`digest`](https://hashberg-io.github.io/multiformats/multiformats/multihash/index.html#multiformats.multihash.digest), [`wrap`](https://hashberg-io.github.io/multiformats/multiformats/multihash/index.html#multiformats.multihash.wrap), [`unwrap`](https://hashberg-io.github.io/multiformats/multiformats/multihash/index.html#multiformats.multihash.unwrap) functions, or the correspondingly-named methods [`Multihash.wrap`](https://hashberg-io.github.io/multiformats/multiformats/multihash/index.html#multiformats.multihash.Multihash.wrap) and [`Multihash.unwrap`](https://hashberg-io.github.io/multiformats/multiformats/multihash/index.html#multiformats.multihash.Multihash.unwrap) of the [`Multihash`](https://hashberg-io.github.io/multiformats/multiformats/multihash/index.html#multiformats.multihash.Multihash) class.
+The [`digest`](https://hashberg-io.github.io/multiformats/multiformats/multihash/index.html#multiformats.multihash.digest) function and [`Multihash.digest`](https://hashberg-io.github.io/multiformats/multiformats/multihash/index.html#multiformats.multihash.Multihash.digest) method can be used to create a multihash digest directly from data:
 
 ```py
 >>> data = b"Hello world!"
@@ -214,7 +214,7 @@ Optionally, a smaller digest size can be specified to produce truncated hashes:
 '1214c0535e4be2b79ffd93291305436bf889314e4a3f' # 20-bytes truncated hash
 ```
 
-The `unwrap` function can be used to extract the raw digest from a multihash digest:
+The [`unwrap`](https://hashberg-io.github.io/multiformats/multiformats/multihash/index.html#multiformats.multihash.unwrap) function can be used to extract the raw digest from a multihash digest:
 
 ```py
 >>> digest.hex()
@@ -224,7 +224,7 @@ The `unwrap` function can be used to extract the raw digest from a multihash dig
     'c0535e4be2b79ffd93291305436bf889314e4a3f'
 ```
 
-The `Multihash.unwrap` method performs the same functionality, but additionally checks
+The [`Multihash.unwrap`](https://hashberg-io.github.io/multiformats/multiformats/multihash/index.html#multiformats.multihash.Multihash.unwrap) method performs the same functionality, but additionally checks
 that the multihash digest is valid for the multihash:
 
 ```py
@@ -241,7 +241,7 @@ that the multihash digest is valid for the multihash:
 err.ValueError: Decoded code 18 differs from multihash code 17.
 ```
 
-The `wrap` function and `Multihash.wrap` method can be used to wrap a raw digest into a multihash digest:
+The [`wrap`](https://hashberg-io.github.io/multiformats/multiformats/multihash/index.html#multiformats.multihash.wrap) function and [`Multihash.wrap`](https://hashberg-io.github.io/multiformats/multiformats/multihash/index.html#multiformats.multihash.Multihash.wrap) method can be used to wrap a raw digest into a multihash digest:
 
 ```py
 >>> raw_digest.hex()
@@ -255,7 +255,7 @@ The `wrap` function and `Multihash.wrap` method can be used to wrap a raw digest
 '1214c0535e4be2b79ffd93291305436bf889314e4a3f'
 ```
 
-The multihash multicodec specified by a given multihash digest is accessible using the `from_digest` function:
+The multihash multicodec specified by a given multihash digest is accessible using the [`from_digest`](https://hashberg-io.github.io/multiformats/multiformats/multihash/index.html#multiformats.multihash.from_digest) function:
 
 ```py
 >>> multihash.from_digest(multihash_digest)
@@ -316,9 +316,9 @@ For advanced usage, see the [API documentation](https://hashberg-io.github.io/mu
 
 ### CID
 
-The `cid` module implements the [CID spec](https://github.com/multiformats/cid).
+The [`cid`](https://hashberg-io.github.io/multiformats/multiformats/cid.html) module implements the [CID spec](https://github.com/multiformats/cid).
 
-Core functionality is provided by the `CID` class, which can be imported directly from `multiformats`:
+Core functionality is provided by the [`CID`](https://hashberg-io.github.io/multiformats/multiformats/cid.html#multiformats.cid.CID) class, which can be imported directly from `multiformats`:
 
 ```py
 >>> from multiformats import CID
@@ -364,7 +364,7 @@ CIDs can be converted to bytestrings or (multi)base encoded strings:
 'bafkreidon73zkcrwdb5iafqtijxildoonbwnpv7dyd6ef3qdgads2jc4su'
 ```
 
-Additionally, the `CID.peer_id` static method can be used to pack the raw hash of a public key into
+Additionally, the [`CID.peer_id`](https://hashberg-io.github.io/multiformats/multiformats/cid.html#multiformats.cid.CID.peer_id) static method can be used to pack the raw hash of a public key into
 a CIDv1 [PeerID](https://docs.libp2p.io/concepts/peer-id/), according to the [PeerID spec](https://github.com/libp2p/specs/blob/master/peer-ids/peer-ids.md):
 
 ```py
@@ -386,9 +386,9 @@ For advanced usage, see the [API documentation](https://hashberg-io.github.io/mu
 
 ### Multiaddr
 
-The `multiaddr` module implements the [multiaddr spec](https://github.com/multiformats/multiaddr).
+The [`multiaddr`](https://hashberg-io.github.io/multiformats/multiformats/multiaddr/index.html) module implements the [multiaddr spec](https://github.com/multiformats/multiaddr).
 
-Core functionality is provided by the `Proto` class:
+Core functionality is provided by the [`Proto`](https://hashberg-io.github.io/multiformats/multiformats/multiaddr/index.html#multiformats.multiaddr.Proto) class:
 
 ```py
 >>> from multiformats import Proto
@@ -450,7 +450,7 @@ Bytes for multiaddrs are computed according to the [`(TLV)+` multiaddr encoding]
 '047f00000191022382cc03'
 ```
 
-The `parse` and `decode` functions create multiaddrs from their human-readable strings and encoded bytes respectively:
+The [`parse`](https://hashberg-io.github.io/multiformats/multiformats/multiaddr/index.html#multiformats.multiaddr.parse) and [`decode`](https://hashberg-io.github.io/multiformats/multiformats/multiaddr/index.html#multiformats.multiaddr.decode) functions create multiaddrs from their human-readable strings and encoded bytes respectively:
 
 ```py
     >>> from multiformats import multiaddr
@@ -462,7 +462,7 @@ The `parse` and `decode` functions create multiaddrs from their human-readable s
     Multiaddr(Addr('ip4', '127.0.0.1'), Addr('udp', '9090'), Proto('quic'))
 ```
 
-For uniformity of API, the same functionality as the `Proto` class is provided by the `proto` function:
+For uniformity of API, the same functionality as the [`Proto`](https://hashberg-io.github.io/multiformats/multiformats/multiaddr/index.html#multiformats.multiaddr.Proto) class is provided by the [`proto`](https://hashberg-io.github.io/multiformats/multiformats/multiaddr/index.html#multiformats.multiaddr.proto) function:
 
 ```py
 >>> ip4 = multiaddr.proto("ip4")
