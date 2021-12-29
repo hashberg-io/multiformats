@@ -28,3 +28,5 @@ The above will import the following names:
 
 The first five are modules implementing the homonymous specifications,
 while :class:`~multiformats.cid.CID` is a class for Content IDentifiers.
+
+GitHub repo: https://github.com/hashberg-io/multiformats

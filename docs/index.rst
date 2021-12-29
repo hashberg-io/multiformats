@@ -4,6 +4,9 @@ Multiformats: Python implementation of multiformat protocols
 
 A Python implementation of the `multiformat protocols <https://multiformats.io/>`_.
 
+GitHub repo: https://github.com/hashberg-io/multiformats
+
+
 .. toctree::
     :maxdepth: 3
     :caption: Contents
