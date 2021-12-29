@@ -2,7 +2,7 @@
     "pkg_name": "multiformats",
     "pkg_path": "..",
     "apidocs_folder": "api",
-    "toc_filename": "api-toc",
+    "toc_filename": "api-toc.rst",
     "include_members": {
         "multiformats.varint": ["BytesLike"],
         "multiformats.multihash.raw": ["Hashfun", "MultihashImpl"],
@@ -15,5 +15,6 @@
         "multiformats.cid": ["CIDVersionNumbers", "byteslike"],
         "multiformats.multiaddr.raw": ["ip4_encoder", "ip4_decoder", "ip6_encoder", "ip6_decoder", "tcp_udp_encoder", "tcp_udp_decoder"]
     },
+    "include_modules": [],
     "exclude_modules": []
 }

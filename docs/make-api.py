@@ -2,21 +2,23 @@
     A script to generate .rst files for API documentation.
 """
 
+import glob
 import importlib
 import inspect
 import json
+import os
 import pkgutil
 from typing import Dict, List, Optional, Tuple
 import sys
 
 from typing_validation import validate
 
-def _list_package_contents(pkg_path: str, pkg_name: str) -> List[str]:
+def _list_package_contents(pkg_name: str) -> List[str]:
     modules = [pkg_name]
-    for submod in pkgutil.iter_modules([pkg_path+"/"+pkg_name.replace(".", "/")]):
+    for submod in pkgutil.iter_modules([pkg_name.replace(".", "/")]):
         submod_fullname = pkg_name+"."+submod.name
         if submod.ispkg:
-            for subsubmod_name in _list_package_contents(pkg_path, submod_fullname):
+            for subsubmod_name in _list_package_contents(submod_fullname):
                 modules.append(subsubmod_name)
         else:
             modules.append(submod_fullname)
@@ -29,8 +31,8 @@ def make_apidocs() -> None:
     err_msg = """Expected a 'make-api.json' file, with the following structure:
 {
     "pkg_name": str,
-    "pkg_path": str,
     "apidocs_folder": str,
+    "pkg_path": str,
     "toc_filename": Optional[str],
     "include_members": Dict[str, List[str]],
     "exclude_members": Dict[str, List[str]],
@@ -55,6 +57,8 @@ Set "toc_filename" to null to avoid generating a table of contents file.
             validate(include_members, Dict[str, List[str]])
             exclude_members = config.get("exclude_members", None)
             validate(exclude_members, Dict[str, List[str]])
+            include_modules = config.get("include_modules", None)
+            validate(include_modules, List[str])
             exclude_modules = config.get("exclude_modules", None)
             validate(exclude_modules, List[str])
     except FileNotFoundError:
@@ -64,14 +68,30 @@ Set "toc_filename" to null to avoid generating a table of contents file.
         print(err_msg)
         sys.exit(1)
 
-    modules = _list_package_contents(pkg_path, pkg_name)
+    cwd = os.getcwd()
+    os.chdir(pkg_path)
+    sys.path = [os.getcwd()]+sys.path
+    modules = _list_package_contents(pkg_name)
+    modules_dict = {
+        mod_name: importlib.import_module(mod_name)
+        for mod_name in modules
+    }
+    for mod_name in include_modules:
+        if mod_name not in modules_dict:
+            modules_dict[mod_name] = importlib.import_module(mod_name)
+    os.chdir(cwd)
 
-    for mod_name in modules:
+    print(f"Removing all docfiles from {apidocs_folder}/")
+    for apidoc_file in glob.glob(f"{apidocs_folder}/*.rst"):
+        print(f"    {apidoc_file}")
+        os.remove(apidoc_file)
+    print()
+
+    for mod_name, mod in modules_dict.items():
         if mod_name in exclude_modules:
             continue
         filename = f"{apidocs_folder}/{mod_name}.rst"
-        print(filename)
-        mod = importlib.import_module(mod_name)
+        print(f"Writing API docfile {filename}")
         lines: List[str] = [
             mod_name,
             "="*len(mod_name),
@@ -150,12 +170,15 @@ Set "toc_filename" to null to avoid generating a table of contents file.
         "    :caption: API Documentation",
         ""
     ]
-    for mod_name in modules:
-        toctable_lines.append(f"    {apidocs_folder}/{mod_name}")
+    print(f"Writing TOC for API docfiles at {toc_filename}")
+    for mod_name in modules_dict:
+        line = f"    {apidocs_folder}/{mod_name}"
+        toctable_lines.append(line)
+        print(line)
     toctable_lines.append("")
+    print()
 
-    print(f"{toc_filename}.rst")
-    with open(f"{toc_filename}.rst", "w") as f:
+    with open(toc_filename, "w") as f:
         f.write("\n".join(toctable_lines))
 
 if __name__ == "__main__":
