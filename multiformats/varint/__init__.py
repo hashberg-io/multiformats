@@ -1,16 +1,9 @@
 """
-    Implementation of the [unsigned-varint spec](https://github.com/multiformats/unsigned-varint).
+    Implementation of the `unsigned-varint spec <https://github.com/multiformats/unsigned-varint>`_.
 
-    Functionality is provided by the `encode` and `decode` functions, converting between non-negative
-    `int` values and the corresponding varint `bytes`:
+    Suggested usage:
 
-    ```py
     >>> from multiformats import varint
-    >>> varint.encode(128)
-    b'\\x80\\x01'
-    >>> varint.decode(b'\\x80\\x01')
-    128
-    ```
 """
 
 from io import BufferedIOBase
@@ -21,23 +14,26 @@ from typing_validation import validate
 _max_num_bytes: int = 9
 
 BytesLike = Union[bytes, bytearray, memoryview]
+""" Type alias for bytes-like objects. """
+
 byteslike: Final = (bytes, bytearray, memoryview)
+""" Tuple of bytes-like objects types (for use with :obj:`isinstance` checks). """
 
 def encode(x: int) -> bytes:
     """
         Encodes a non-negative integer as an unsigned varint, returning the encoded bytes.
 
-        Raises `ValueError` if:
-        - `x < 0` (varints encode unsigned integers)
-        - `x >= 2**63` (from specs, varints are limited to 9 bytes)
-
         Example usage:
 
-        ```py
         >>> from multiformats import varint
         >>> varint.encode(128)
         b'\\x80\\x01'
-        ```
+
+        :param x: the non-negative integer to encode
+        :type x: :obj:`int`
+
+        :raises ValueError: if `x < 0` (varints encode unsigned integers)
+        :raises ValueError: if `x >= 2**63` (from specs, varints are limited to 9 bytes)
     """
     validate(x, int)
     if x < 0:
@@ -55,45 +51,44 @@ def encode(x: int) -> bytes:
             raise ValueError(f"Varints must be at most {_max_num_bytes} bytes long.")
     return bytes(varint_bytelist)
 
-def decode(varint: Union[BytesLike, BufferedIOBase]) -> int:
+
+def decode(b: Union[BytesLike, BufferedIOBase]) -> int:
     """
-        Decodes an unsigned varint from a `bytes` object or a buffered binary stream.
-        If a stream is passed, only the bytes encoding the varint are read from it.
-        If a `bytes`-like object is passed, the varint encoding must use all bytes.
+        Decodes an unsigned varint from a bytes-like object or a buffered binary stream.
 
-        Raises `ValueError` if:
-
-        - `varint` contains no bytes (from specs, the number 0 is encoded as 0b0000_0000)
-        - the 9th byte of `varint` is a continuation byte (from specs, no number >= 2**63 is allowed)
-        - the last byte of `varint` is a continuation byte (invalid format)
-        - the decoded integer could be encoded in fewer bytes than were read (from specs, encoding must be minimal)
-        - `varint` is a `bytes`-like object and the number of bytes used by the encoding is fewer than its length
-
-        The last point is a designed choice aimed to reduce errors when decoding fixed-length bytestrings (rather than streams).
-        If this behaviour is undesirable, consider using `decode_head` instead.
+        - if a stream is passed, only the bytes encoding the varint are read from it
+        - if a `bytes`-like object is passed, the varint encoding must use all bytes
 
         Example usage with bytes:
 
-        ```py
         >>> from multiformats import varint
         >>> varint.decode(b'\\x80\\x01')
         128
-        ```
 
         Example usage with streams, for the (typical) situation where the varint is only part of the data:
 
-        ```py
         >>> from io import BytesIO
         >>> stream = BytesIO(b"\\x80\\x01\\x12\\xff\\x01")
         >>> varint.decode(stream)
         128
         >>> stream.read() # what's left in the stream
         b'\\x12\\xff\\x01'
-        ```
+
+        :param b: the bytes-like object or stream from which to decode a varint
+        :type b: :obj:`~multiformats.varint.BytesLike` or :obj:`~io.BufferedIOBase`
+
+        :raises ValueError: if the input contains no bytes (from specs, the number 0 is encoded as ``0b00000000``)
+        :raises ValueError: if the 9th byte of the input is a continuation byte (from specs, no number >= 2**63 is allowed)
+        :raises ValueError: if the last byte of the input is a continuation byte (invalid format)
+        :raises ValueError: if the decoded integer could be encoded in fewer bytes than were read (from specs, encoding must be minimal)
+        :raises ValueError: if the input is a bytes-like object and the number of bytes used by the encoding is fewer than its length
+
+        The last point is a designed choice aimed to reduce errors when decoding fixed-length bytestrings (rather than streams).
+        If this behaviour is undesirable, consider using `decode_head` instead.
 
     """
-    x, num_bytes_read, _ = decode_raw(varint)
-    if isinstance(varint, byteslike) and len(varint) > num_bytes_read:
+    x, num_bytes_read, _ = decode_raw(b)
+    if isinstance(b, byteslike) and len(b) > num_bytes_read:
         raise ValueError("A bytes-like object was passed, but not all bytes were used by the encoding.")
     return x
 
@@ -105,22 +100,21 @@ def _no_next_byte_error(num_bytes_read: int) -> ValueError:
 _BufferedIOT = TypeVar("_BufferedIOT", bound=BufferedIOBase)
 
 @overload
-def decode_raw(varint: BytesLike) -> Tuple[int, int, memoryview]:
+def decode_raw(b: BytesLike) -> Tuple[int, int, memoryview]:
     ...
 
 @overload
-def decode_raw(varint: _BufferedIOT) -> Tuple[int, int, _BufferedIOT]:
+def decode_raw(b: _BufferedIOT) -> Tuple[int, int, _BufferedIOT]:
     ...
 
-def decode_raw(varint: Union[BytesLike, BufferedIOBase]) -> Tuple[int, int, Union[memoryview, BufferedIOBase]]:
+def decode_raw(b: Union[BytesLike, BufferedIOBase]) -> Tuple[int, int, Union[memoryview, BufferedIOBase]]:
     """
-        Specialised version of `decode` for partial decoding, returning a pair `(x, n)` of
-        the decoded varint `x` and the number `n` of bytes read from the start and/or consumed from the stream.
-        Unlike `decode`, doesn't raise `ValueError` if not all bytes were read in the process.
+        Specialised version of :func:`~multiformats.varint.decode` for partial decoding, returning a pair ``(x, n)`` of
+        the decoded varint ``x`` and the number ``n`` of bytes read from the start and/or consumed from the stream.
+        Unlike :func:`~multiformats.varint.decode`, this function doesn't raise `ValueError` in case not all bytes are read in the process.
 
         Example usage with bytes:
 
-        ```py
         >>> bs = b"\\x80\\x01\\x12\\xff\\x01"
         >>> x, n, m = varint.decode_raw(bs)
         >>> x
@@ -134,14 +128,12 @@ def decode_raw(varint: Union[BytesLike, BufferedIOBase]) -> Tuple[int, int, Unio
         b'\\x12\\xff\\x01'
         # memoryview on remaining bytes
         # note: bytes(m) did not consume the bytes
-        ```
 
         Example usage with streams, for the (typical) situation where the varint is only part of the data:
 
-        ```py
         >>> from io import BytesIO
         >>> stream = BytesIO(b"\\x80\\x01\\x12\\xff\\x01")
-        >>> x, n = varint.decode_head(stream) # same as decode, but additionally returns number of bytes read
+        >>> x, n = varint.decode_head(stream)
         >>> x
         128
         >>> n
@@ -156,28 +148,32 @@ def decode_raw(varint: Union[BytesLike, BufferedIOBase]) -> Tuple[int, int, Unio
         b'\\x12\\xff\\x01'
         # 2 bytes were consumed decoding the varint, so 3 bytes were left in the stream
         # note: stream.read() consumed the bytes
-        ```
+
+        :param b: the bytes-like object or stream from which to decode a varint
+        :type b: :obj:`~multiformats.varint.BytesLike` or :obj:`~io.BufferedIOBase`
+
+        :raises ValueError: same reasons as :func:`~multiformats.varint.decode`, except for the last (where no error is raised)
 
     """
-    if isinstance(varint, BufferedIOBase):
+    if isinstance(b, BufferedIOBase):
         stream_mode = True
-        validate(varint, BufferedIOBase)
+        validate(b, BufferedIOBase)
     else:
         stream_mode = False
-        validate(varint, BytesLike)
+        validate(b, BytesLike)
     expect_next = True
     num_bytes_read = 0
     x = 0
     while expect_next:
         if stream_mode:
-            _next_byte: bytes = cast(BufferedIOBase, varint).read(1)
+            _next_byte: bytes = cast(BufferedIOBase, b).read(1)
             if len(_next_byte) == 0:
                 raise _no_next_byte_error(num_bytes_read)
             next_byte: int = _next_byte[0]
         else:
-            if num_bytes_read >= len(cast(BytesLike, varint)):
+            if num_bytes_read >= len(cast(BytesLike, b)):
                 raise _no_next_byte_error(num_bytes_read)
-            next_byte = cast(BytesLike, varint)[num_bytes_read]
+            next_byte = cast(BytesLike, b)[num_bytes_read]
         x += (next_byte & 0b0111_1111) << (7 * num_bytes_read)
         expect_next = (next_byte >> 7) == 0b1
         num_bytes_read += 1
@@ -186,5 +182,5 @@ def decode_raw(varint: Union[BytesLike, BufferedIOBase]) -> Tuple[int, int, Unio
     if num_bytes_read > 1 and x < 2**(7*(num_bytes_read-1)):
         raise ValueError(f"Number {x} was not minimally encoded (as a {num_bytes_read} bytes varint).")
     if stream_mode:
-        return x, num_bytes_read, cast(BufferedIOBase, varint)
-    return x, num_bytes_read, memoryview(cast(BytesLike, varint))[num_bytes_read:]
+        return x, num_bytes_read, cast(BufferedIOBase, b)
+    return x, num_bytes_read, memoryview(cast(BytesLike, b))[num_bytes_read:]

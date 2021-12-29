@@ -1,0 +1,28 @@
+
+Multiformats: Python implementation of multiformat protocols
+============================================================
+
+A Python implementation of the `multiformat protocols <https://multiformats.io/>`_.
+
+.. toctree::
+    :maxdepth: 3
+    :caption: Contents
+
+    getting-started
+    varint
+    multicodec
+    multibase
+    multihash
+    cid
+    multiaddr
+    implementation-report
+
+.. include:: api-toc.rst
+
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`

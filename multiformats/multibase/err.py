@@ -1,13 +1,13 @@
 """
-    Errors for the `multiformats.multibase` module.
+    Errors for the :mod:`~multiformats.multibase` module.
 """
 
 import builtins
 
-class KeyError(builtins.KeyError): # pylint: disable = redefined-builtin
-    """ Class `multiformats.multibase` key errors. """
+class MultibaseKeyError(builtins.KeyError): # pylint: disable = redefined-builtin
+    """ Class for :mod:`~multiformats.multibase` key errors. """
     ...
 
-class ValueError(builtins.ValueError): # pylint: disable = redefined-builtin
-    """ Class `multiformats.multibase` value errors. """
+class MultibaseValueError(builtins.ValueError): # pylint: disable = redefined-builtin
+    """ Class :mod:`~multiformats.multibase` value errors. """
     ...

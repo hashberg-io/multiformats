@@ -1,5 +1,18 @@
 """
-    This package implements existing multiformat protocols, according to the [Multiformats](https://multiformats.io/) specifications.
+    Implementation of multiformat protocols, according to the `Multiformats <https://multiformats.io/>`_ specifications.
+
+    Suggested usage:
+
+    >>> from multiformats import *
+
+    The above will import the following names:
+
+    .. code-block:: python
+
+        varint, multicodec, multibase, multihash, multiaddr, CID
+
+    The first five are modules implementing homonymous specifications,
+    while :class:`~multiformats.cid.CID` is a class for Content IDentifiers.
 """
 
 __version__ = "0.1.2"
@@ -10,7 +23,6 @@ from . import multibase
 from . import multihash
 from .cid import CID
 from . import multiaddr
-from .multiaddr import Proto
 
 __all__ = [
     "varint",
@@ -19,7 +31,4 @@ __all__ = [
     "multihash",
     "multiaddr",
     "CID",
-    "Proto",
 ]
-
-__pdoc__ = {name: False for name in ["CID", "Proto"]}

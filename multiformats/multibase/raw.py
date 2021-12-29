@@ -1,33 +1,31 @@
 """
     Implementation of raw data encodings used by multibase encodings.
 
-    The majority of the encodings is provided by the [`bases`](https://github.com/hashberg-io/bases) library,
-    as instances of the `BaseEncoding` class. The following custom encodings are also implemented:
+    The majority of the encodings is provided by the `bases <https://github.com/hashberg-io/bases>`_ library,
+    as instances of its :class:`bases.encoding.BaseEncoding` class. The following custom encodings are also implemented:
 
     - multibase identity
     - multibase proquints
 
-    Core functionality is provided by the `get` and `exists` functions, which can be used to check
-    whether a raw encoding with given name is known, and if so to get the corresponding object:
+    Core functionality is provided by the :func:`get` and :func:`exists` functions,
+    which can be used to check whether a raw encoding with given name is known, and if so to get the corresponding object:
 
-    ```py
     >>> from multiformats.multibase import raw_encoding
     >>> raw_encoding.exists("base10")
     True
     >>> raw_encoding.get("base10")
     ZeropadBaseEncoding(StringAlphabet('0123456789'))
-    ```
 
-    The raw encoding objects have `encode` and `decode` methods that can be used to
-    convert between bytestrings and strings (not including the multibase code):
+    The raw encoding objects have :meth:`CustomEncoding.encode` and
+    :meth:`CustomEncoding.decode` methods that can be used to convert between
+    bytestrings and strings (not including the multibase code):
 
-    ```py
     >>> base16 = raw_encoding.get("base16")
     >>> base16.encode(bytes([0xAB, 0xCD]))
     'abcd'
     >>> base16.decode('abcd')
     b'\\xab\\xcd'
-    ```
+
 """
 
 import binascii
@@ -40,7 +38,7 @@ from bases import (base2, base16, base8, base10, base36, base58btc, base58flickr
 from bases.encoding import BaseEncoding
 
 from multiformats.varint import BytesLike
-from . import err
+from .err import MultibaseKeyError, MultibaseValueError
 
 RawEncoder = Callable[[BytesLike], str]
 RawDecoder = Callable[[str], bytes]
@@ -63,6 +61,9 @@ class CustomEncoding:
     def encode(self, b: BytesLike) -> str:
         """
             Calls the custom raw encoder.
+
+            :param b: the bytestring to be encoded
+            :type b: :obj:`~multiformats.varint.BytesLike`
         """
         raw_encoder: Callable[[BytesLike], str] = self._raw_encoder # type: ignore
         return raw_encoder(b)
@@ -70,6 +71,9 @@ class CustomEncoding:
     def decode(self, s: str) -> bytes:
         """
             Calls the custom raw decoder.
+
+            :param s: the string to be decoded
+            :type s: :obj:`str`
         """
         raw_decoder: Callable[[str], bytes] = self._raw_decoder # type: ignore
         return raw_decoder(s)
@@ -85,21 +89,22 @@ _raw_encodings: Dict[str, RawEncoding] = {}
 
 def get(name: str) -> RawEncoding:
     """
-        Gets the raw encoding with given name. Raises `err.KeyError` if no such encoding exists.
+        Gets the raw encoding with given name.
 
         Example usage:
 
-        ```py
         >>> raw_encoding.get("base16")
         ZeropadBaseEncoding(
             StringAlphabet('0123456789abcdef',
                            case_sensitive=False),
             block_nchars=2)
-        ```
+
+
+        :raises KeyError: if no such encoding exists
     """
     validate(name, str)
     if name not in _raw_encodings:
-        raise err.KeyError(f"No raw encoding named {repr(name)}.")
+        raise MultibaseKeyError(f"No raw encoding named {repr(name)}.")
     return _raw_encodings[name]
 
 
@@ -109,10 +114,9 @@ def exists(name: str) -> bool:
 
         Example usage:
 
-        ```py
         >>> raw_encoding.exists("base16")
         True
-        ```
+
     """
     validate(name, str)
     return name in _raw_encodings
@@ -120,14 +124,10 @@ def exists(name: str) -> bool:
 
 def register(name: str, enc: RawEncoding, *, overwrite: bool = False) -> None:
     """
-        Registers a raw encoding by name. The optional keyword argument `overwrite` (default: `False`)
-        can be used to overwrite a multibase encoding with existing name.
-
-        If `overwrite` is `False`, raises `err.ValueError` if a raw encoding with the same name already exists.
+        Registers a raw encoding by name.
 
         Example usage:
 
-        ```py
         >>> from bases import base45
         >>> raw_encoding.register("base45upper", base45)
         >>> raw_encoding.get("base45upper")
@@ -135,38 +135,47 @@ def register(name: str, enc: RawEncoding, *, overwrite: bool = False) -> None:
             StringAlphabet('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:',
                            case_sensitive=False),
             block_size={1: 2, 2: 3}, reverse_blocks=True)
-        ```
+
+        :param name: the name for the encoding being registered
+        :type name: :obj:`str`
+        :param enc: the raw encoding being registered
+        :type enc: :class:`bases.encoding.BaseEncoding` or :class:`CustomEncoding`
+        :param overwrite: whether to overwrite an existing encoding with same name (default :obj:`False`)
+        :type overwirte: :obj:`bool`, *optional*
+
+        :raises ValueError: if ``overwrite`` is :obj:`False` and a raw encoding with the same name already exists.
     """
     validate(name, str)
     validate(enc, RawEncoding)
     validate(overwrite, bool)
     if not overwrite and name in _raw_encodings:
-        raise err.ValueError(f"Raw encoding with name {repr(name)} already exists: {_raw_encodings[name]}")
+        raise MultibaseValueError(f"Raw encoding with name {repr(name)} already exists: {_raw_encodings[name]}")
     _raw_encodings[name] = enc
 
 
 def unregister(name: str) -> None:
     """
         Unregisters a raw encoding by name.
-        Raises `err.KeyError` if no such raw encoding exists.
 
         Example usage:
 
-        ```py
         >>> raw_encoding.unregister("base45upper")
         >>> raw_encoding.exists("base45upper")
         False
-        ```
+
+        :param name: the raw encoding name to unregister
+        :type name: :obj:`str`
+        :raises KeyError: if no such raw encoding exists
     """
     validate(name, str)
     if name not in _raw_encodings:
-        raise err.KeyError(f"Raw encoding with name {repr(name)} does not exist.")
+        raise MultibaseKeyError(f"Raw encoding with name {repr(name)} does not exist.")
     del _raw_encodings[name]
 
 
 def identity_raw_encoder(b: BytesLike) -> str:
     """
-        Implementation of the raw identity encoder according to the [multibase spec](https://github.com/multiformats/multibase/).
+        Implementation of the raw identity encoder according to the `multibase spec <https://github.com/multiformats/multibase/>`_.
     """
     if isinstance(b, (bytes, bytearray)):
         return b.decode("utf-8") # type: ignore
@@ -178,7 +187,7 @@ identity_raw_encoder.__repr__ = lambda: "identity_raw_encoder" # type: ignore
 
 def identity_raw_decoder(s: str) -> bytes:
     """
-        Implementation of the raw identity decoder according to the [multibase spec](https://github.com/multiformats/multibase/).
+        Implementation of the raw identity decoder according to the `multibase spec <https://github.com/multiformats/multibase/>`_.
     """
     validate(s, str)
     return s.encode("utf-8")
@@ -196,8 +205,8 @@ _proquint_vowels_revdir = MappingProxyType({char: idx for idx, char in enumerate
 
 def proquint_raw_encoder(b: BytesLike) -> str:
     """
-        Implementation of the proquint encoder according to the [proquint spec](https://arxiv.org/html/0901.4016),
-        with additional 'ro-' prefix as prescribed by the [multibase spec](https://github.com/multiformats/multibase/)
+        Implementation of the proquint encoder according to the `proquint spec <https://arxiv.org/html/0901.4016>`_,
+        with additional 'ro-' prefix as prescribed by the `multibase spec <https://github.com/multiformats/multibase/>`_
         and extended to include odd-length bytestrings (adding a final 3-letter block, using two zero pad bits).
     """
     validate(b, BytesLike)
@@ -232,8 +241,8 @@ proquint_raw_encoder.__repr__ = lambda: "proquint_raw_encoder" # type: ignore
 
 def proquint_raw_decoder(s: str) -> bytes:
     """
-        Implementation of the proquint decoder according to the [proquint spec](https://arxiv.org/html/0901.4016),
-        with additional 'ro-' prefix as prescribed by the [multibase spec](https://github.com/multiformats/multibase/)
+        Implementation of the proquint decoder according to the `proquint spec <https://arxiv.org/html/0901.4016>`_,
+        with additional 'ro-' prefix as prescribed by the `multibase spec <https://github.com/multiformats/multibase/>`_
         and extended to include odd-length bytestrings (adding a final 3-letter block, using two zero pad bits).
     """
     # pylint: disable = too-many-branches
@@ -315,12 +324,3 @@ register("base64", base64.nopad())
 register("base64pad", base64)
 register("base64url", base64url.nopad())
 register("base64urlpad", base64url)
-
-
-# additional docs info
-__pdoc__ = {
-    "identity_raw_encoder": False, # exclude from docs
-    "identity_raw_decoder": False, # exclude from docs
-    "proquint_raw_encoder": False, # exclude from docs
-    "proquint_raw_decoder": False, # exclude from docs
-}

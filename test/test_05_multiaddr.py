@@ -2,13 +2,15 @@
 
 from random import Random
 import sys
-from typing import List, Optional, Union
+from typing import List, Union
 
 import pytest
 
 from multiformats import multicodec, multiaddr
 from multiformats.multicodec import Multicodec
+from multiformats.multicodec.err import MulticodecKeyError
 from multiformats.multiaddr import Proto, Addr, Multiaddr
+from multiformats.multiaddr.err import MultiaddrKeyError, MultiaddrValueError
 
 
 implemented_protocols: List[Proto] = []
@@ -67,11 +69,11 @@ def test_invalid_parse(multiaddr_str: str) -> None:
     try:
         multiaddr.parse(multiaddr_str)
         assert False
-    except multiaddr.err.ValueError: # invalid string
+    except MultiaddrValueError: # invalid string
         pass
-    except multiaddr.err.KeyError: # protocol not implemented
+    except MultiaddrKeyError: # protocol not implemented
         pass
-    except multicodec.err.KeyError: # protocol does not exist
+    except MulticodecKeyError: # protocol does not exist
         pass
 
 valid_multiaddr_strings = [
@@ -119,7 +121,7 @@ valid_multiaddr_strings = [
 def test_valid_parse(multiaddr_str: str) -> None:
     try:
         multiaddr.parse(multiaddr_str)
-    except multiaddr.err.KeyError: # protocol not implemented
+    except multiaddr.err.MultiaddrKeyError: # protocol not implemented
         pass
 
 @pytest.mark.parametrize("multiaddr_str", valid_multiaddr_strings)
@@ -128,7 +130,7 @@ def test_parse_str(multiaddr_str: str) -> None:
         ma = multiaddr.parse(multiaddr_str)
         str(ma)
         assert str(ma) == multiaddr_str
-    except multiaddr.err.KeyError: # protocol not implemented
+    except multiaddr.err.MultiaddrKeyError: # protocol not implemented
         pass
 
 @pytest.mark.parametrize("multiaddr_str", valid_multiaddr_strings)
@@ -137,7 +139,7 @@ def test_bytes_decode(multiaddr_str: str) -> None:
         ma = multiaddr.parse(multiaddr_str)
         bytes(ma)
         assert ma == multiaddr.decode(bytes(ma))
-    except multiaddr.err.KeyError: # protocol not implemented
+    except multiaddr.err.MultiaddrKeyError: # protocol not implemented
         pass
 
 rand = Random(0)
@@ -155,7 +157,7 @@ def random_addr(proto: Proto) -> Union[Proto, Addr]:
         else:
             addr_bytes = rand.getrandbits(addr_size*8).to_bytes(addr_size, byteorder="big")
         if not proto.is_addr_valid(addr_bytes):
-            with pytest.raises(multiaddr.err.ValueError):
+            with pytest.raises(multiaddr.err.MultiaddrValueError):
                 proto/addr_bytes # pylint: disable = pointless-statement
             continue
         return proto/addr_bytes

@@ -1,16 +1,16 @@
 ┌──────────────────────────────────────────────────────────────────────────────────────────────────────┐
-│ Multiformats implementation report v0.1.1.post7+gfa46bf4.d20211219                                   │
+│ Multiformats implementation report v0.1.2.post3+g474dabd.d20211228                                   │
 └──────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ───────────────────────────────────────────── Memory Usage ─────────────────────────────────────────────
-> python+psutil memory baseline: 7.2MiB
-> multiformats memory total:     4.0MiB
+> python+psutil memory baseline: 7.3MiB
+> multiformats memory total:     3.4MiB
 ┌───────────────────┬────────┬──────────┐
 │ Component         │ Memory │ Memory % │
 ├───────────────────┼────────┼──────────┤
-│ typing-validation │ 1.0MiB │      25% │
-│ bases             │ 672KiB │      16% │
-│ pyskein           │ 112KiB │       3% │
-│ multiformats      │ 2.2MiB │      56% │
+│ typing-validation │ 168KiB │       5% │
+│ bases             │ 608KiB │      17% │
+│ pyskein           │  88KiB │       3% │
+│ multiformats      │ 2.6MiB │      75% │
 └───────────────────┴────────┴──────────┘
 ───────────────────────────────────────── Multihash functions ──────────────────────────────────────────
 > Multihash functions implemented: 330/356

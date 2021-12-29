@@ -1,0 +1,17 @@
+.. toctree::
+    :maxdept: 2
+    :caption: API Documentation
+    api/multiformats
+    api/multiformats.cid
+    api/multiformats.multiaddr
+    api/multiformats.multiaddr.err
+    api/multiformats.multiaddr.raw
+    api/multiformats.multibase
+    api/multiformats.multibase.err
+    api/multiformats.multibase.raw
+    api/multiformats.multicodec
+    api/multiformats.multicodec.err
+    api/multiformats.multihash
+    api/multiformats.multihash.err
+    api/multiformats.multihash.raw
+    api/multiformats.varint

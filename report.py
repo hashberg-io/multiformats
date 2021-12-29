@@ -71,7 +71,7 @@ code2str: Callable[[int], str] = hex if hex_codes else str # type: ignore
 
 version = get_version(root='.', version_scheme="post-release")
 
-console = Console(record=True)
+console = Console(record=True, width=104)
 console.print(Panel(f"Multiformats implementation report [bold blue]v{version}[white]"))
 
 
