@@ -58,7 +58,7 @@ The above will import the following names:
 
     varint, multicodec, multibase, multihash, multiaddr, CID
 
-The first five are modules implementing the homonymous specifications, while :class:`~multiformats.cid.CID` is a class for Content IDentifiers.
+The first five are modules implementing the homonymous specifications, while ``CID`` is a class for Content IDentifiers.
 Below are some basic usage examples, to get you started: for detailed documentation, see https://multiformats.readthedocs.io/
 
 
