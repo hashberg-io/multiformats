@@ -39,13 +39,13 @@ Addr('ip4', '192.168.1.1')
 >>> str(a)
 '/ip4/192.168.1.1'
 >>> bytes(a)
-b'\\x04\\xc0\\xa8\\x01\\x01'
+b'\x04\xc0\xa8\x01\x01'
 
 Address values can be specified as strings, integers, or `bytes`-like objects:
 
 >>> ip4/"192.168.1.1"
 Addr('ip4', '192.168.1.1')
->>> ip4/b'\\xc0\\xa8\\x01\\x01' # ip4/bytes([192, 168, 1, 1])
+>>> ip4/b'\xc0\xa8\x01\x01' # ip4/bytes([192, 168, 1, 1])
 Addr('ip4', '192.168.1.1')
 >>> udp = multiaddr.proto("udp")
 >>> udp/9090 # udp/"9090"
