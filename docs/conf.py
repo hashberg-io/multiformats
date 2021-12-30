@@ -53,7 +53,10 @@ typehints_fully_qualified = False
 typehints_document_rtype = True
 simplify_optional_unions = True
 add_module_names = False
-intersphinx_mapping = {'python': ('https://docs.python.org/3', None)}
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3', None),
+    'bases': ('http://bases.readthedocs.io/en/latest', None)
+}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

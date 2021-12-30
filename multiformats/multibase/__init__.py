@@ -80,13 +80,13 @@ class Multibase:
 
     @staticmethod
     def validate_code(code: str) -> str:
-        """
+        r"""
             Validates a multibase code and transforms it to single-character format (if in hex format).
 
             Example usage:
 
             >>> Multibase.validate_code("0x00")
-            '\\x00'
+            '\x00'
             >>> Multibase.validate_code("hi")
             MultibaseValueError: Multibase codes must be single-character strings
             or the hex digits '0xYZ' of a single byte.
@@ -127,7 +127,7 @@ class Multibase:
 
     @property
     def code_printable(self) -> str:
-        """
+        r"""
             Printable version of :meth:`Multibase.code`:
 
             - if the code is a single non-printable ASCII character, returns the hex string of its byte
@@ -135,9 +135,9 @@ class Multibase:
 
             Example usage:
 
-            >>> identity = multibase.get(code="\\x00")
+            >>> identity = multibase.get(code="\x00")
             >>> identity.code
-            '\\x00'
+            '\x00'
             >>> identity.code_printable
             '0x00'
 

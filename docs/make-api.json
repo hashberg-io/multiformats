@@ -11,7 +11,7 @@
     "exclude_members": {
         "multiformats.multicodec": ["build_multicodec_tables"],
         "multiformats.multibase": ["build_multibase_tables"],
-        "multiformats.multibase.raw": ["identity_raw_encoder", "identity_raw_decoder", "proquint_raw_encoder", "proquint_raw_decoder"],
+        "multiformats.multibase.raw": ["identity_raw_encoder", "identity_raw_decoder", "proquint_raw_encoder", "proquint_raw_decoder", "RawEncoder", "RawDecoder"],
         "multiformats.cid": ["CIDVersionNumbers", "byteslike"],
         "multiformats.multiaddr.raw": ["ip4_encoder", "ip4_decoder", "ip6_encoder", "ip6_decoder", "tcp_udp_encoder", "tcp_udp_decoder"]
     },

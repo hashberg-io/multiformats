@@ -1,8 +1,8 @@
-"""
+r"""
     Implementation of raw data encodings used by multibase encodings.
 
     The majority of the encodings is provided by the `bases <https://github.com/hashberg-io/bases>`_ library,
-    as instances of its :class:`bases.encoding.BaseEncoding` class. The following custom encodings are also implemented:
+    as instances of its :class:`~bases.encoding.base.BaseEncoding` class. The following custom encodings are also implemented:
 
     - multibase identity
     - multibase proquints
@@ -24,7 +24,7 @@
     >>> base16.encode(bytes([0xAB, 0xCD]))
     'abcd'
     >>> base16.decode('abcd')
-    b'\\xab\\xcd'
+    b'\xab\xcd'
 
 """
 
@@ -41,7 +41,10 @@ from multiformats.varint import BytesLike
 from .err import MultibaseKeyError, MultibaseValueError
 
 RawEncoder = Callable[[BytesLike], str]
+""" Type alias for a raw base encoder. """
+
 RawDecoder = Callable[[str], bytes]
+""" Type alias for a raw base decoder. """
 
 class CustomEncoding:
     """
@@ -49,10 +52,10 @@ class CustomEncoding:
         The raw encoder and decoder are expected to validate their own arguments.
     """
 
-    _raw_encoder: Callable[[bytes], str]
-    _raw_decoder: Callable[[str], bytes]
+    _raw_encoder: RawEncoder
+    _raw_decoder: RawDecoder
 
-    def __init__(self, raw_encoder: Callable[[bytes], str], raw_decoder: Callable[[str], bytes]):
+    def __init__(self, raw_encoder: RawEncoder, raw_decoder: RawDecoder):
         # validate(raw_encoder, Callable[[bytes], str]) # TODO: not yet supported by typing-validation
         # validate(raw_decoder, Callable[[str], bytes]) # TODO: not yet supported by typing-validation
         self._raw_encoder = raw_encoder # type: ignore
@@ -65,7 +68,7 @@ class CustomEncoding:
             :param b: the bytestring to be encoded
             :type b: :obj:`~multiformats.varint.BytesLike`
         """
-        raw_encoder: Callable[[BytesLike], str] = self._raw_encoder # type: ignore
+        raw_encoder: RawEncoder = self._raw_encoder # type: ignore
         return raw_encoder(b)
 
     def decode(self, s: str) -> bytes:
@@ -75,7 +78,7 @@ class CustomEncoding:
             :param s: the string to be decoded
             :type s: :obj:`str`
         """
-        raw_decoder: Callable[[str], bytes] = self._raw_decoder # type: ignore
+        raw_decoder: RawDecoder = self._raw_decoder # type: ignore
         return raw_decoder(s)
 
     def __repr__(self) -> str:
@@ -99,8 +102,12 @@ def get(name: str) -> RawEncoding:
                            case_sensitive=False),
             block_nchars=2)
 
+        :param name: the name for the encoding
+        :type name: :obj:`str`
 
         :raises KeyError: if no such encoding exists
+
+        :rtype: :class:`CustomEncoding` or :class:`~bases.encoding.base.BaseEncoding`
     """
     validate(name, str)
     if name not in _raw_encodings:
@@ -116,6 +123,9 @@ def exists(name: str) -> bool:
 
         >>> raw_encoding.exists("base16")
         True
+
+        :param name: the name for the encoding
+        :type name: :obj:`str`
 
     """
     validate(name, str)
@@ -139,7 +149,7 @@ def register(name: str, enc: RawEncoding, *, overwrite: bool = False) -> None:
         :param name: the name for the encoding being registered
         :type name: :obj:`str`
         :param enc: the raw encoding being registered
-        :type enc: :class:`bases.encoding.BaseEncoding` or :class:`CustomEncoding`
+        :type enc: :class:`~bases.encoding.base.BaseEncoding` or :class:`CustomEncoding`
         :param overwrite: whether to overwrite an existing encoding with same name (default :obj:`False`)
         :type overwirte: :obj:`bool`, *optional*
 
