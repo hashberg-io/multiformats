@@ -464,8 +464,8 @@ class CID:
         return f"CID({repr(mb)}, {v}, {repr(mc)}, {repr(d.hex())})"
 
     @property
-    def _as_tuple(self) -> Tuple[Type["CID"], Multibase, int, Multicodec, bytes]:
-        return (CID, self.base, self.version, self.codec, self.digest)
+    def _as_tuple(self) -> Tuple[Type["CID"], int, Multicodec, bytes]:
+        return (CID, self.version, self.codec, self.digest)
 
     def __hash__(self) -> int:
         return hash(self._as_tuple)
