@@ -79,7 +79,6 @@ stellar-block,                  ipld,           0xd0,           draft,     Stell
 stellar-tx,                     ipld,           0xd1,           draft,     Stellar Tx
 md4,                            multihash,      0xd4,           draft,
 md5,                            multihash,      0xd5,           draft,
-bmt,                            multihash,      0xd6,           draft,     Binary Merkle Tree Hash
 decred-block,                   ipld,           0xe0,           draft,     Decred Block
 decred-tx,                      ipld,           0xe1,           draft,     Decred Tx
 ipld-ns,                        namespace,      0xe2,           draft,     IPLD path
@@ -88,6 +87,7 @@ swarm-ns,                       namespace,      0xe4,           draft,     Swarm
 ipns-ns,                        namespace,      0xe5,           draft,     IPNS path
 zeronet,                        namespace,      0xe6,           draft,     ZeroNet site address
 secp256k1-pub,                  key,            0xe7,           draft,     Secp256k1 public key (compressed)
+dnslink,                        namespace,      0xe8,           permanent, DNSLink path
 bls12_381-g1-pub,               key,            0xea,           draft,     BLS12-381 public key in the G1 field
 bls12_381-g2-pub,               key,            0xeb,           draft,     BLS12-381 public key in the G2 field
 x25519-pub,                     key,            0xec,           draft,     Curve25519 public key
@@ -101,6 +101,7 @@ udp,                            multiaddr,      0x0111,         draft,
 p2p-webrtc-star,                multiaddr,      0x0113,         draft,
 p2p-webrtc-direct,              multiaddr,      0x0114,         draft,
 p2p-stardust,                   multiaddr,      0x0115,         draft,
+webrtc,                         multiaddr,      0x0118,         draft,     WebRTC
 p2p-circuit,                    multiaddr,      0x0122,         permanent,
 dag-json,                       ipld,           0x0129,         permanent, MerkleDAG json
 udt,                            multiaddr,      0x012d,         draft,
@@ -117,6 +118,8 @@ garlic32,                       multiaddr,      0x01bf,         draft,     I2P b
 tls,                            multiaddr,      0x01c0,         draft,
 noise,                          multiaddr,      0x01c6,         draft,
 quic,                           multiaddr,      0x01cc,         permanent,
+webtransport,                   multiaddr,      0x01d1,         draft,
+certhash,                       multiaddr,      0x01d2,         draft,     TLS certificate's fingerprint as a multihash
 ws,                             multiaddr,      0x01dd,         permanent,
 wss,                            multiaddr,      0x01de,         permanent,
 p2p-websocket-star,             multiaddr,      0x01df,         permanent,
@@ -124,10 +127,13 @@ http,                           multiaddr,      0x01e0,         draft,
 swhid-1-snp,                    ipld,           0x01f0,         draft,     SoftWare Heritage persistent IDentifier version 1 snapshot
 json,                           ipld,           0x0200,         permanent, JSON (UTF-8-encoded)
 messagepack,                    serialization,  0x0201,         draft,     MessagePack
+car,                            serialization,  0x0202,         draft,     Content Addressable aRchive (CAR)
 libp2p-peer-record,             libp2p,         0x0301,         permanent, libp2p peer record type
 libp2p-relay-rsvp,              libp2p,         0x0302,         permanent, libp2p relay reservation voucher
 car-index-sorted,               serialization,  0x0400,         draft,     CARv2 IndexSorted index format
 car-multihash-index-sorted,     serialization,  0x0401,         draft,     CARv2 MultihashIndexSorted index format
+transport-bitswap,              transport,      0x0900,         draft,     Bitswap datatransfer
+transport-graphsync-filecoinv1, transport,      0x0910,         draft,     Filecoin graphsync datatransfer
 sha2-256-trunc254-padded,       multihash,      0x1012,         permanent, SHA2-256 with the two most significant bits from the last byte zeroed (as via a mask with 0b00111111) - used for proving trees as in Filecoin
 sha2-224,                       multihash,      0x1013,         permanent, aka SHA-224; as specified by FIPS 180-4.
 sha2-512-224,                   multihash,      0x1014,         permanent, aka SHA-512/224; as specified by FIPS 180-4.
@@ -144,6 +150,7 @@ p521-pub,                       key,            0x1202,         draft,     P-521
 ed448-pub,                      key,            0x1203,         draft,     Ed448 public Key
 x448-pub,                       key,            0x1204,         draft,     X448 public Key
 rsa-pub,                        key,            0x1205,         draft,     RSA public key. DER-encoded ASN.1 type RSAPublicKey according to IETF RFC 8017 (PKCS #1)
+sm2-pub,                        key,            0x1206,         draft,     SM2 public key (compressed)
 ed25519-priv,                   key,            0x1300,         draft,     Ed25519 private key
 secp256k1-priv,                 key,            0x1301,         draft,     Secp256k1 private key
 x25519-priv,                    key,            0x1302,         draft,     Curve25519 private key
@@ -471,6 +478,9 @@ skein1024-1016,                 multihash,      0xb3df,         draft,
 skein1024-1024,                 multihash,      0xb3e0,         draft,
 poseidon-bls12_381-a2-fc1,      multihash,      0xb401,         permanent, Poseidon using BLS12-381 and arity of 2 with Filecoin parameters
 poseidon-bls12_381-a2-fc1-sc,   multihash,      0xb402,         draft,     Poseidon using BLS12-381 and arity of 2 with Filecoin parameters - high-security variant
+ssz,                            serialization,  0xb501,         draft,     SimpleSerialize (SSZ) serialization
+ssz-sha2-256-bmt,               multihash,      0xb502,         draft,     SSZ Merkle tree root using SHA2-256 as the hashing function and SSZ serialization for the block binary
+iscc,                           softhash,       0xcc01,         draft,     ISCC (International Standard Content Code) - similarity preserving hash
 zeroxcert-imprint-256,          zeroxcert,      0xce11,         draft,     0xcert Asset Imprint (root hash)
 fil-commitment-unsealed,        filecoin,       0xf101,         permanent, Filecoin piece or sector data commitment merkle node/root (CommP & CommD)
 fil-commitment-sealed,          filecoin,       0xf102,         permanent, Filecoin sector data commitment merkle node/root - sealed and replicated (CommR)
@@ -484,3 +494,4 @@ holochain-sig-v1,               holochain,      0xa37124,       draft,     Holoc
 skynet-ns,                      namespace,      0xb19910,       draft,     Skynet Namespace
 arweave-ns,                     namespace,      0xb29910,       draft,     Arweave Namespace
 subspace-ns,                    namespace,      0xb39910,       draft,     Subspace Network Namespace
+kumandra-ns,                    namespace,      0xb49910,       draft,     Kumandra Network Namespace

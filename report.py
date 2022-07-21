@@ -6,38 +6,43 @@
 if __name__ != "__main__":
     raise RuntimeError("usage: report.py [-h] [-d]")
 
-
 # == Memory profiling ==
+import gc
 
 # `psutil` is not a dependency for the `multiformats` library
 import psutil # type: ignore
 
 mem_usage = {}
 
+gc.collect()
 baseline = psutil.Process().memory_full_info().uss / (1024 * 1024)
 prev = baseline
 
+import typing_extensions
+
+gc.collect()
+diff = psutil.Process().memory_full_info().uss / (1024 * 1024)-prev
+mem_usage["typing-extensions"] = diff
+prev += diff
+
 import typing_validation
 
+gc.collect()
 diff = psutil.Process().memory_full_info().uss / (1024 * 1024)-prev
 mem_usage["typing-validation"] = diff
 prev += diff
 
 import bases
 
+gc.collect()
 diff = psutil.Process().memory_full_info().uss / (1024 * 1024)-prev
 mem_usage["bases"] = diff
-prev += diff
-
-import skein # type: ignore
-
-diff = psutil.Process().memory_full_info().uss / (1024 * 1024)-prev
-mem_usage["pyskein"] = diff
 prev += diff
 
 import multiformats
 from multiformats import *
 
+gc.collect()
 diff = psutil.Process().memory_full_info().uss / (1024 * 1024)-prev
 mem_usage["multiformats"] = diff
 
@@ -49,6 +54,7 @@ mem_usage_pct = {k: v/mem_usage_total for k, v in mem_usage.items()}
 
 import argparse
 from typing import Any, Callable, Collection, Dict, List, Optional, Tuple, Union
+from typing_extensions import Literal
 
 # `rich` is not a dependency for the `multiformats` library
 from rich.console import Console
@@ -71,7 +77,7 @@ code2str: Callable[[int], str] = hex if hex_codes else str # type: ignore
 
 version = get_version(root='.', version_scheme="post-release")
 
-console = Console(record=True, width=104)
+console = Console(record=True, width=110)
 console.print(Panel(f"Multiformats implementation report [bold blue]v{version}[white]"))
 
 
@@ -95,14 +101,17 @@ console.print(table)
 
 
 # == Group multihash multicodecs together ==
-# TODO: introduce grouped multicodecs doing this directly, to reduce mem footprint
+# TODO: consider introduce grouped multicodecs doing this directly, to reduce mem footprint (currently footprint is negligible)
 
 _multihash_indices: Dict[str, int] = {}
-_grouped_multicodecs: List[Tuple[str, str, Optional[List[int]], List[int], List[bool]]] = []
+_grouped_multicodecs: List[Tuple[str, str, Optional[List[int]], List[int], List[bool], Literal["draft", "permanent"]]] = []
 for codec in multicodec.table(tag="multihash"):
     is_implemented = multihash.is_implemented(codec.name)
     tokens = codec.name.split("-")
-    label = "-".join(tokens[:-1])
+    if len(tokens) == 1:
+        label = codec.name
+    else:
+        label = "-".join(tokens[:-1])
     max_digest_size: Optional[int] = None
     try:
         max_digest_size = multihash.raw.get(codec.name)[1]
@@ -110,20 +119,20 @@ for codec in multicodec.table(tag="multihash"):
         pass
     if max_digest_size is None:
         try:
-            max_digest_size = int(tokens[-1])
+            max_digest_size = int(tokens[-1])//8
         except ValueError:
             pass
     if max_digest_size is None:
-        _grouped_multicodecs.append((codec.name, codec.tag, None, [codec.code], [is_implemented]))
+        _grouped_multicodecs.append((codec.name, codec.tag, None, [codec.code], [is_implemented], codec.status))
         continue
     bitsize = max_digest_size*8
     if label not in _multihash_indices:
         _multihash_indices[label] = len(_grouped_multicodecs)
-        _grouped_multicodecs.append((codec.name, codec.tag, [bitsize], [codec.code], [is_implemented]))
+        _grouped_multicodecs.append((codec.name, codec.tag, [bitsize], [codec.code], [is_implemented], codec.status))
     else:
         bitsize_list = _grouped_multicodecs[_multihash_indices[label]][2]
         if bitsize_list is None:
-            _grouped_multicodecs.append((codec.name, codec.tag, None, [codec.code], [is_implemented]))
+            _grouped_multicodecs.append((codec.name, codec.tag, None, [codec.code], [is_implemented], codec.status))
             continue
         code_list = _grouped_multicodecs[_multihash_indices[label]][3]
         impl_list = _grouped_multicodecs[_multihash_indices[label]][4]
@@ -162,9 +171,10 @@ table.add_column("Code", style="bold blue")
 table.add_column("Name")
 table.add_column("Bitsize", style="bright_black")
 table.add_column("Implem.")
+table.add_column("Status")
 num_implemented = 0
 num_total = 0
-for name, tag, bitsize_list, code_list, impl_list in _grouped_multicodecs:
+for name, tag, bitsize_list, code_list, impl_list, status in _grouped_multicodecs:
     num_total += len(impl_list)
     impl_status = "[red]no"
     if all(impl_list):
@@ -174,17 +184,19 @@ for name, tag, bitsize_list, code_list, impl_list in _grouped_multicodecs:
         num_impl = sum(1 if b else 0 for b in impl_list)
         impl_status = f"[yellow]{num_impl}/{len(impl_list)}"
         num_implemented += num_impl
+    codec_status = "[yellow]draft" if status == "draft" else "[green]perm."
     if bitsize_list is None:
-        table.add_row(code2str(code_list[0]), name, "", impl_status)
+        table.add_row(code2str(code_list[0]), name, "", impl_status, codec_status)
         continue
     if len(bitsize_list) <= 1:
-        table.add_row(code2str(code_list[0]), f"{name}-{bitsize_list[0]}", str(bitsize_list[0]), impl_status)
+        table.add_row(code2str(code_list[0]), f"{name}", str(bitsize_list[0]), impl_status, codec_status)
     else:
         label = "-".join(name.split("-")[:-1])
         table.add_row(set_str(code_list, use_hex=hex_codes),
                       f"{label}-[bright_black]Bitsize",
                       set_str(bitsize_list),
-                      impl_status)
+                      impl_status,
+                      codec_status)
 console.print(f"> Multihash functions implemented: [bold blue]{num_implemented}/{num_total}")
 console.print(table)
 
@@ -196,6 +208,7 @@ table = Table()
 table.add_column("Code", style="bold blue")
 table.add_column("Name")
 table.add_column("Implem.")
+table.add_column("Status")
 num_implemented = 0
 num_total = 0
 for codec in multicodec.table(tag="multiaddr"):
@@ -203,10 +216,31 @@ for codec in multicodec.table(tag="multiaddr"):
     num_implemented += 1 if is_implemented else 0
     num_total += 1
     impl_status = "[green]yes" if is_implemented else "[red]no"
-    table.add_row(code2str(codec.code), codec.name, impl_status)
+    codec_status = "[yellow]draft" if codec.status == "draft" else "[green]perm."
+    table.add_row(code2str(codec.code), codec.name, impl_status, codec_status)
 console.print(f"> Multiaddr protocols implemented: [bold blue]{num_implemented}/{num_total}")
 console.print(table)
 
+# == Multibase table ==
+
+console.rule("Multibases")
+table = Table()
+table.add_column("Code", style="bold blue")
+table.add_column("Name")
+table.add_column("Implem.")
+table.add_column("Status")
+
+num_implemented = 0
+num_total = 0
+for base in multibase.table():
+    is_implemented = multibase.raw.exists(base.name)
+    num_implemented += 1 if is_implemented else 0
+    num_total += 1
+    impl_status = "[green]yes" if is_implemented else "[red]no"
+    codec_status = "[yellow]draft" if base.status == "draft" else "[green]perm."
+    table.add_row(base.code_printable, base.name, impl_status, codec_status)
+console.print(f"> Multibases implemented: [bold blue]{num_implemented}/{num_total}")
+console.print(table)
 
 # == Other multicodecs table ==
 
@@ -215,9 +249,11 @@ table = Table()
 table.add_column("Code", style="bold blue")
 table.add_column("Name")
 table.add_column("Tag", style="magenta")
+table.add_column("Status")
 for codec in multicodec.table():
     if codec.tag not in ("multihash", "multiaddr"):
-        table.add_row(code2str(codec.code), codec.name, codec.tag)
+        codec_status = "[yellow]draft" if codec.status == "draft" else "[green]perm."
+        table.add_row(code2str(codec.code), codec.name, codec.tag, codec_status)
 console.print(table)
 
 

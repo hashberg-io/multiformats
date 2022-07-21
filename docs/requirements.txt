@@ -4,4 +4,3 @@ sphinx_autodoc_typehints
 bases
 typing-extensions
 typing-validation
-pyskein

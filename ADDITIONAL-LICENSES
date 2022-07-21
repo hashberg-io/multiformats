@@ -1,8 +1,10 @@
-The following items are subject to MIT License by Protocol Labs Inc:
+The following items are subject to MIT License by Protocol Labs Inc, included below:
 
 - multibase table, downloaded from https://github.com/multiformats/multibase/raw/master/multibase.csv
 - multicodec table, downloaded from https://github.com/multiformats/multicodec/raw/master/table.csv
-- test vectors for multihash, downloaded from https://github.com/multiformats/multihash/raw/master/tests/values/test_cases.csv on 14 Dec 2021
+- the test vectors for multihash in multihash-test-str-vectors.csv, downloaded from https://github.com/multiformats/multihash/raw/master/tests/values/test_cases.csv on 14 Dec 2021
+
+Test vectors for murmur3 hash are public domain, courtesy of Ian Boyd https://stackoverflow.com/questions/14747343/murmurhash3-test-vectors#31929528
 
 
 The MIT License (MIT)

@@ -560,13 +560,6 @@
         "description": ""
     },
     {
-        "name": "bmt",
-        "tag": "multihash",
-        "code": "0xd6",
-        "status": "draft",
-        "description": "Binary Merkle Tree Hash"
-    },
-    {
         "name": "decred-block",
         "tag": "ipld",
         "code": "0xe0",
@@ -621,6 +614,13 @@
         "code": "0xe7",
         "status": "draft",
         "description": "Secp256k1 public key (compressed)"
+    },
+    {
+        "name": "dnslink",
+        "tag": "namespace",
+        "code": "0xe8",
+        "status": "permanent",
+        "description": "DNSLink path"
     },
     {
         "name": "bls12_381-g1-pub",
@@ -712,6 +712,13 @@
         "code": "0x0115",
         "status": "draft",
         "description": ""
+    },
+    {
+        "name": "webrtc",
+        "tag": "multiaddr",
+        "code": "0x0118",
+        "status": "draft",
+        "description": "WebRTC"
     },
     {
         "name": "p2p-circuit",
@@ -819,6 +826,20 @@
         "description": ""
     },
     {
+        "name": "webtransport",
+        "tag": "multiaddr",
+        "code": "0x01d1",
+        "status": "draft",
+        "description": ""
+    },
+    {
+        "name": "certhash",
+        "tag": "multiaddr",
+        "code": "0x01d2",
+        "status": "draft",
+        "description": "TLS certificate's fingerprint as a multihash"
+    },
+    {
         "name": "ws",
         "tag": "multiaddr",
         "code": "0x01dd",
@@ -868,6 +889,13 @@
         "description": "MessagePack"
     },
     {
+        "name": "car",
+        "tag": "serialization",
+        "code": "0x0202",
+        "status": "draft",
+        "description": "Content Addressable aRchive (CAR)"
+    },
+    {
         "name": "libp2p-peer-record",
         "tag": "libp2p",
         "code": "0x0301",
@@ -894,6 +922,20 @@
         "code": "0x0401",
         "status": "draft",
         "description": "CARv2 MultihashIndexSorted index format"
+    },
+    {
+        "name": "transport-bitswap",
+        "tag": "transport",
+        "code": "0x0900",
+        "status": "draft",
+        "description": "Bitswap datatransfer"
+    },
+    {
+        "name": "transport-graphsync-filecoinv1",
+        "tag": "transport",
+        "code": "0x0910",
+        "status": "draft",
+        "description": "Filecoin graphsync datatransfer"
     },
     {
         "name": "sha2-256-trunc254-padded",
@@ -1006,6 +1048,13 @@
         "code": "0x1205",
         "status": "draft",
         "description": "RSA public key. DER-encoded ASN.1 type RSAPublicKey according to IETF RFC 8017 (PKCS #1)"
+    },
+    {
+        "name": "sm2-pub",
+        "tag": "key",
+        "code": "0x1206",
+        "status": "draft",
+        "description": "SM2 public key (compressed)"
     },
     {
         "name": "ed25519-priv",
@@ -3297,6 +3346,27 @@
         "description": "Poseidon using BLS12-381 and arity of 2 with Filecoin parameters - high-security variant"
     },
     {
+        "name": "ssz",
+        "tag": "serialization",
+        "code": "0xb501",
+        "status": "draft",
+        "description": "SimpleSerialize (SSZ) serialization"
+    },
+    {
+        "name": "ssz-sha2-256-bmt",
+        "tag": "multihash",
+        "code": "0xb502",
+        "status": "draft",
+        "description": "SSZ Merkle tree root using SHA2-256 as the hashing function and SSZ serialization for the block binary"
+    },
+    {
+        "name": "iscc",
+        "tag": "softhash",
+        "code": "0xcc01",
+        "status": "draft",
+        "description": "ISCC (International Standard Content Code) - similarity preserving hash"
+    },
+    {
         "name": "zeroxcert-imprint-256",
         "tag": "zeroxcert",
         "code": "0xce11",
@@ -3386,5 +3456,12 @@
         "code": "0xb39910",
         "status": "draft",
         "description": "Subspace Network Namespace"
+    },
+    {
+        "name": "kumandra-ns",
+        "tag": "namespace",
+        "code": "0xb49910",
+        "status": "draft",
+        "description": "Kumandra Network Namespace"
     }
 ]

@@ -39,7 +39,7 @@ class Multihash:
     _cache: ClassVar[WeakValueDictionary] = WeakValueDictionary() # type: ignore
 
     _codec: Multicodec
-    _implementation: MultihashImpl
+    _implementation: Optional[MultihashImpl]
 
     __slots__ = ("__weakref__", "_codec", "_implementation")
 
@@ -58,20 +58,26 @@ class Multihash:
         # check that the codec is a multihash multicodec:
         if codec.tag != "multihash":
             raise MultihashValueError(f"Multicodec named {repr(codec.name)} exists, but is not a multihash.")
-        implementation: MultihashImpl = raw.get(codec.name)
+        if not raw.exists(codec.name):
+            raise MultihashKeyError(f"No implementation for multihash multicodec {repr(codec.name)}.")
         _cache = Multihash._cache
         if codec.name in _cache:
             # if a multihash instance with this name is already registered
             instance: Multihash = _cache[codec.name]
-            if instance.codec == codec and instance._implementation == implementation:
-                # nothing changed, can use the existing instance
-                return instance
+            if instance.codec == codec:
+                # same codec, check same implementation:
+                if instance._implementation is None:
+                    # implementation not loaded yet, can use the existing instance
+                    return instance
+                if codec.name in raw._hashfun and instance._implementation == raw._hashfun[codec.name]:
+                    # nothing changed, can use the existing instance
+                    return instance
             # otherwise remove the existing instance
             del _cache[codec.name]
         # create a fresh instance, register it and return it
         instance = super().__new__(cls)
         instance._codec = codec
-        instance._implementation = implementation
+        instance._implementation = None
         _cache[codec.name] = instance
         return instance
 
@@ -133,7 +139,7 @@ class Multihash:
         return max_digest_size
 
     @property
-    def implementation(self) ->MultihashImpl:
+    def implementation(self) -> MultihashImpl:
         """
             Returns the implementation of a multihash multicodec, as a pair:
 
@@ -154,7 +160,11 @@ class Multihash:
             :rtype: :obj:`~multiformats.multihash.raw.MultihashImpl`
 
         """
-        return self._implementation
+        implementation = self._implementation
+        if implementation is None:
+            implementation = raw.get(self.name)
+            self._implementation = implementation
+        return implementation
 
     def wrap(self, raw_digest: BytesLike) -> bytes:
         """
@@ -202,16 +212,23 @@ class Multihash:
 
             :param data: the raw digest
             :type data: :obj:`~multiformats.varint.BytesLike`
-            :param size: optional truncated size for the raw digest (if :obj:`None`, raw digest is not truncated)
+            :param size: size for the raw digest, in bytes. If not :obj:`None`, raw digest is truncated to fit the given size.
             :type size: :obj:`int` or :obj:`None`, *optional*
+
+            :raises ValueError: if size parameter is not :obj:`None` and negative.
+            :raises ValueError: if size parameter is not :obj:`None`, max digest size is not :obj:`None` and given size exceeds max digest size.
+            :raises ValueError: if size parameter is :obj:`None` but a size is required for the hash function (e.g. for the KangarooTwelve XOF).
 
             See :func:`digest` for more information.
         """
         hf, _ = self.implementation
-        raw_digest = hf(data)
-        if size is not None:
-            raw_digest = raw_digest[:size] # truncate digest
-        size = len(raw_digest)
+        raw_digest = hf(data, size)
+        # if size is not None:
+        #     raw_digest = raw_digest[:size] # truncate digest
+        if size is None:
+            size = len(raw_digest)
+        else:
+            assert size == len(raw_digest), f"Expected {size}B digest, found {len(raw_digest)}B digest."
         return self.codec.wrap(varint.encode(size)+raw_digest)
 
     def unwrap(self, digest: Union[BytesLike, BufferedIOBase]) -> bytes:
@@ -451,8 +468,12 @@ def digest(data: BytesLike, hashfun: Union[str, int, Multihash], *, size: Option
         :type data: :obj:`~multiformats.varint.BytesLike`
         :param hashfun: the multihash function name, code or object
         :type hashfun: :obj:`str`, :obj:`int` or :class:`Multihash`
-        :param size: optional truncated size for the raw digest (if :obj:`None`, raw digest is not truncated)
+        :param size: size for the raw digest, in bytes. If not :obj:`None`, raw digest is truncated to fit the given size.
         :type size: :obj:`int` or :obj:`None`, *optional*
+
+        :raises ValueError: if size parameter is not :obj:`None` and negative.
+        :raises ValueError: if size parameter is not :obj:`None`, max digest size is not :obj:`None` and given size exceeds max digest size.
+        :raises ValueError: if size parameter is :obj:`None` but a size is required for the hash function (e.g. for the KangarooTwelve XOF).
 
     """
     if not isinstance(hashfun, Multihash):

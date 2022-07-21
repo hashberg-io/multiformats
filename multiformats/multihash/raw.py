@@ -1,10 +1,19 @@
 """
     Implementation of raw hash functions used by multihash multicodecs.
 
-    Hash functions are implemented using the following libraries:
+    Hash functions are implemented using the following modules:
 
-    - `hashlib <https://docs.python.org/3/library/hashlib.html>`_
-    - `pyskein <https://pythonhosted.org/pyskein/>`_
+    - `hashlib <https://docs.python.org/3/library/hashlib.html>`_, for the ``sha``/``shake`` hash functions and the ``blake2`` hash functions.
+    - `pysha3 <https://github.com/tiran/pysha3>`_, for the ``keccak`` hash functions.
+    - `blake3 <https://github.com/oconnor663/blake3-py>`_, for the ``blake3`` hash function.
+    - `pyskein <https://pythonhosted.org/pyskein/>`_, for the ``skein`` hash functions.
+    - `mmh3 <https://github.com/hajimes/mmh3>`_, for the ``murmur3`` hash functions.
+    - `pycryptodomex <https://github.com/Legrandin/pycryptodome/>`_, for the ``ripemd-160`` hash function, \
+      the ``kangarootwelve`` hash function and the ``sha2-512-224``/``sha2-512-256`` hash functions.
+
+    All modules other than `hashlib <https://docs.python.org/3/library/hashlib.html>`_ are optional dependencies.
+    The :func:`get` function attempts to dynamically import any optional dependencies required by desired multihash
+    implementation, raising :py:obj:`ImportError` if the dependency is not installed.
 
     Core functionality is provided by the :func:`exists` and :func:`get` functions,
     which can be used to check whether an implementatino with given name is known, and if so to get the corresponding pair
@@ -22,18 +31,16 @@
     can always be discounted as invalid.
 """
 
-import hashlib
-from typing import Callable, Dict, Optional, Tuple
+import re
+from typing import Dict, Optional, Tuple
 from typing_validation import validate
-
-import skein # type: ignore
 
 from multiformats import multicodec
 from multiformats.varint import BytesLike
 from .err import MultihashKeyError, MultihashValueError
+from ._hashfuns import Hashfun, validate_hashfun_args, repeat_hashfun
 
-Hashfun = Callable[[BytesLike], bytes]
-"""Type alias for raw hash functions."""
+__all__ = ["Hashfun"]
 
 _hashfun: Dict[str, Tuple[Hashfun, Optional[int]]] = {}
 
@@ -57,8 +64,10 @@ def get(name: str) -> MultihashImpl:
     """
     validate(name, str)
     if name not in _hashfun:
-        raise MultihashKeyError(f"No implementation for multihash multicodec {repr(name)}.")
+        if not _jit_register_hashfun(name):
+            raise MultihashKeyError(f"No implementation for multihash multicodec {repr(name)}.")
     return _hashfun[name]
+
 
 def exists(name: str) -> bool:
     """
@@ -72,7 +81,9 @@ def exists(name: str) -> bool:
 
     """
     validate(name, str)
-    return name in _hashfun
+    if name in _hashfun:
+        return True
+    return _jit_register_hashfun(name, check_only=True)
 
 
 def register(name: str, hashfun: Hashfun, digest_size: Optional[int], *, overwrite: bool = False) -> None:
@@ -127,64 +138,156 @@ def unregister(name: str) -> None:
         raise MultihashKeyError(f"There is no implementation for multihash multicodec with name {repr(name)}.")
     del _hashfun[name]
 
-def _identity(data: BytesLike) -> bytes:
-    validate(data, BytesLike)
-    return bytes(data)
+# identity has function is always registered
+
+def _identity(data: BytesLike, size: Optional[int] = None) -> bytes:
+    validate_hashfun_args(data, size, None)
+    d = bytes(data)
+    if size is None:
+        return d
+    if len(d) < size:
+        raise MultihashValueError("With 'identity' hash, size must be at most data lenght in bytes.")
+    return d[:size]
 
 register("identity", _identity, None)
 
-def _hashlib_sha(version: int, digest_bits: Optional[int] = None) -> Hashfun:
-    name = ("sha1", f"sha{digest_bits}", f"sha3_{digest_bits}")[version-1]
-    h = getattr(hashlib, name)
-    def hashfun(data: BytesLike) -> bytes:
-        validate(data, BytesLike)
-        m: hashlib._Hash = h() # pylint: disable = no-member
-        m.update(data)
-        return m.digest()
-    return hashfun
+# just-in-time hash implementation registration functions
 
-register("sha1", _hashlib_sha(1), 20) # 20B = 160 bits
+_sha1_regex = re.compile(r"sha1")
+_sha23_regex = re.compile(r"sha(2|3)-(224|256|384|512)")
+_shake_regex = re.compile(r"sha(ke)-(128|256)")
+_sha2_512_regex = re.compile(r"sha2-512-(224|256)")
+_sha2_256_trunc254_padded_regex = re.compile(r"sha2-256-trunc254-padded")
 
-for _digest_bits in (256, 512):
-    register(f"sha2-{_digest_bits}", _hashlib_sha(2, _digest_bits), _digest_bits//8)
+def _jit_register_hashfun_sha(name: str, check_only: bool = False) -> bool:
+    # 'sha' hash functions
+    m = re.fullmatch(_sha1_regex, name)
+    if m is not None:
+        from ._hashfuns.sha import _jit_register_sha1 # pylint: disable = import-outside-toplevel
+        return _jit_register_sha1(m, None if check_only else register)
+    m = re.fullmatch(_sha23_regex, name)
+    if m is None:
+        m = re.fullmatch(_shake_regex, name)
+    if m is not None:
+        from ._hashfuns.sha import _jit_register_sha23ke # pylint: disable = import-outside-toplevel
+        return _jit_register_sha23ke(m, None if check_only else register)
+    m = re.fullmatch(_sha2_512_regex, name)
+    if m is not None:
+        from ._hashfuns.sha import _jit_register_sha2_512 # pylint: disable = import-outside-toplevel
+        return _jit_register_sha2_512(m, None if check_only else register)
+    m = re.fullmatch(_sha2_256_trunc254_padded_regex, name)
+    if m is not None:
+        from ._hashfuns.filecoin import _jit_register_sha_256_trunc254_padded # pylint: disable = import-outside-toplevel
+        return _jit_register_sha_256_trunc254_padded(m, None if check_only else register)
+    return False
 
-for _digest_bits in (224, 256, 384, 512):
-    register(f"sha3-{_digest_bits}", _hashlib_sha(3, _digest_bits), _digest_bits//8)
+_blake2_regex = re.compile(r"blake2([bs])-([89]|[1-9][0-9]|[1-5][0-9][0-9])")
+_blake3_regex = re.compile(r"blake3")
 
-def _hashlib_shake(digest_bits: int) -> Hashfun:
-    h = getattr(hashlib, f"shake_{digest_bits//2}")
-    def hashfun(data: BytesLike) -> bytes:
-        validate(data, BytesLike)
-        m: hashlib._Hash = h() # pylint: disable = no-member
-        m.update(data)
-        return m.digest(digest_bits//8) # type: ignore
-    return hashfun
+def _jit_register_hashfun_bla(name: str, check_only: bool = False) -> bool:
+    # 'blake' hash functions
+    m = re.fullmatch(_blake2_regex, name)
+    if m is not None:
+        from ._hashfuns.blake import _jit_register_blake2 # pylint: disable = import-outside-toplevel
+        return _jit_register_blake2(m, None if check_only else register)
+    m = re.fullmatch(_blake3_regex, name)
+    if m is not None:
+        from ._hashfuns.blake import _jit_register_blake3 # pylint: disable = import-outside-toplevel
+        return _jit_register_blake3(m, None if check_only else register)
+    return False
 
-for _digest_bits in (256, 512):
-    register(f"shake-{_digest_bits//2}", _hashlib_shake(_digest_bits), _digest_bits//8)
+_keccak_regex = re.compile(r"keccak-(224|256|384|512)")
 
-def _hashlib_blake2(version: str, digest_bits: int) -> Hashfun:
-    h = getattr(hashlib, f"blake2{version}")
-    def hashfun(data: BytesLike) -> bytes:
-        validate(data, BytesLike)
-        m: hashlib._Hash = h(digest_size=digest_bits//8) # pylint: disable = no-member
-        m.update(data)
-        return m.digest()
-    return hashfun
+def _jit_register_hashfun_kec(name: str, check_only: bool = False) -> bool:
+    # 'keccak' hash function
+    m = re.fullmatch(_keccak_regex, name)
+    if m is not None:
+        from ._hashfuns.keccak import _jit_register_keccak # pylint: disable = import-outside-toplevel
+        return _jit_register_keccak(m, None if check_only else register)
+    return False
 
-for _blake2_version in ("b", "s"):
-    for _digest_bits in range(8, 513 if _blake2_version == "b" else 257, 8):
-        register(f"blake2{_blake2_version}-{_digest_bits}", _hashlib_blake2(_blake2_version, _digest_bits), _digest_bits//8)
+_skein_regex = re.compile(r"skein(256|512|1024)-([89]|[1-9][0-9]|[1-9][0-9][0-9]|10[0-2][0-9])")
 
-def _skein(version: int, digest_bits: int) -> Hashfun:
-    h = getattr(skein, f"skein{version}")
-    def hashfun(data: BytesLike) -> bytes:
-        validate(data, BytesLike)
-        m: hashlib._Hash = h(digest_bits=digest_bits) # pylint: disable = no-member
-        m.update(data)
-        return m.digest()
-    return hashfun
+def _jit_register_hashfun_ske(name: str, check_only: bool = False) -> bool:
+    # 'skein' hash function
+    m = re.fullmatch(_skein_regex, name)
+    if m is not None:
+        from ._hashfuns.skein import _jit_register_skein # pylint: disable = import-outside-toplevel
+        return _jit_register_skein(m, None if check_only else register)
+    return False
 
-for _skein_version in (256, 512, 1024):
-    for _digest_bits in range(8, _skein_version+1, 8):
-        register(f"skein{_skein_version}-{_digest_bits}", _skein(_skein_version, _digest_bits), _digest_bits//8)
+_murmur3_regex = re.compile(r"murmur3-(32)|murmur3-(x64)-(64|128)")
+
+def _jit_register_hashfun_mur(name: str, check_only: bool = False) -> bool:
+    # 'murmur3' hash function
+    m = re.fullmatch(_murmur3_regex, name)
+    if m is not None:
+        from ._hashfuns.murmur3 import _jit_register_murmur3 # pylint: disable = import-outside-toplevel
+        return _jit_register_murmur3(m, None if check_only else register)
+    return False
+
+_md5_regex = re.compile("md5")
+
+def _jit_register_hashfun_md5(name: str, check_only: bool = False) -> bool:
+    # 'md5' hash function
+    m = re.fullmatch(_md5_regex, name)
+    if m is not None:
+        from ._hashfuns.md import _jit_register_md5 # pylint: disable = import-outside-toplevel
+        return _jit_register_md5(m, None if check_only else register)
+    return False
+
+_ripemd_regex = re.compile(r"ripemd-(160)")
+
+def _jit_register_hashfun_rip(name: str, check_only: bool = False) -> bool:
+    # 'ripemd' hash functions
+    m = re.fullmatch(_ripemd_regex, name)
+    if m is not None:
+        from ._hashfuns.md import _jit_register_ripemd # pylint: disable = import-outside-toplevel
+        return _jit_register_ripemd(m, None if check_only else register)
+    return False
+
+_kangarootwelve_regex = re.compile("kangarootwelve")
+
+def _jit_register_hashfun_kan(name: str, check_only: bool = False) -> bool:
+    # 'kangarootwelve' hash function
+    m = re.fullmatch(_kangarootwelve_regex, name)
+    if m is not None:
+        from ._hashfuns.kangarootwelve import _jit_register_kangarootwelve # pylint: disable = import-outside-toplevel
+        return _jit_register_kangarootwelve(m, None if check_only else register)
+    return False
+
+_dbl_sha2_regex = re.compile(r"dbl-sha2-(256)")
+
+def _jit_register_hashfun_dbl(name: str, check_only: bool = False) -> bool:
+    # 'dbl-sha2-256' hash function
+    m = re.fullmatch(_dbl_sha2_regex, name)
+    if m is not None:
+        sha2_256, _ = get("sha2-256")
+        assert sha2_256 is not None
+        dbl_sha2_256 = repeat_hashfun(sha2_256, repeat=2, truncate="end")
+        register("dbl-sha2-256", dbl_sha2_256, 32)
+        return True
+    return False
+
+# directory of just-in-time hash implementation registration functions
+
+_jit_register_hashfun_dir = {
+    "sha": _jit_register_hashfun_sha,
+    "bla": _jit_register_hashfun_bla,
+    "kec": _jit_register_hashfun_kec,
+    "ske": _jit_register_hashfun_ske,
+    "mur": _jit_register_hashfun_mur,
+    "md5": _jit_register_hashfun_md5,
+    "rip": _jit_register_hashfun_rip,
+    "kan": _jit_register_hashfun_kan,
+    "dbl": _jit_register_hashfun_dbl,
+}
+
+def _jit_register_hashfun(name: str, check_only: bool = False) -> bool:
+    # pylint: disable = too-many-return-statements
+    if len(name) < 3:
+        return False
+    jit_reg_fun = _jit_register_hashfun_dir.get(name[:3], None)
+    if jit_reg_fun is None:
+        return False
+    return jit_reg_fun(name, check_only)

@@ -7,7 +7,7 @@
 """
 
 from io import BufferedIOBase
-from typing import cast, List, overload, Tuple, Union, TypeVar
+from typing import BinaryIO, cast, List, Optional, overload, Tuple, Union, TypeVar
 from typing_extensions import Final
 from typing_validation import validate
 
@@ -52,7 +52,7 @@ def encode(x: int) -> bytes:
     return bytes(varint_bytelist)
 
 
-def decode(b: Union[BytesLike, BufferedIOBase]) -> int:
+def decode(b: Union[BytesLike, BufferedIOBase, BinaryIO]) -> int:
     """
         Decodes an unsigned varint from a bytes-like object or a buffered binary stream.
 
@@ -75,7 +75,7 @@ def decode(b: Union[BytesLike, BufferedIOBase]) -> int:
         b'\\x12\\xff\\x01'
 
         :param b: the bytes-like object or stream from which to decode a varint
-        :type b: :obj:`~multiformats.varint.BytesLike` or :obj:`~io.BufferedIOBase`
+        :type b: :obj:`~multiformats.varint.BytesLike`, :obj:`~io.BufferedIOBase` or :obj:`~typing.BinaryIO`
 
         :raises ValueError: if the input contains no bytes (from specs, the number 0 is encoded as ``0b00000000``)
         :raises ValueError: if the 9th byte of the input is a continuation byte (from specs, no number >= 2**63 is allowed)
@@ -98,6 +98,7 @@ def _no_next_byte_error(num_bytes_read: int) -> ValueError:
     return ValueError(f"Byte #{num_bytes_read-1} was a continuation byte, but byte #{num_bytes_read} not available.")
 
 _BufferedIOT = TypeVar("_BufferedIOT", bound=BufferedIOBase)
+_BinaryIOT = TypeVar("_BinaryIOT", bound=BinaryIO)
 
 @overload
 def decode_raw(b: BytesLike) -> Tuple[int, int, memoryview]:
@@ -107,7 +108,11 @@ def decode_raw(b: BytesLike) -> Tuple[int, int, memoryview]:
 def decode_raw(b: _BufferedIOT) -> Tuple[int, int, _BufferedIOT]:
     ...
 
-def decode_raw(b: Union[BytesLike, BufferedIOBase]) -> Tuple[int, int, Union[memoryview, BufferedIOBase]]:
+@overload
+def decode_raw(b: _BinaryIOT) -> Tuple[int, int, _BinaryIOT]:
+    ...
+
+def decode_raw(b: Union[BytesLike, BufferedIOBase, BinaryIO]) -> Tuple[int, int, Union[memoryview, BufferedIOBase, BinaryIO]]:
     """
         Specialised version of :func:`~multiformats.varint.decode` for partial decoding, returning a pair ``(x, n)`` of
         the decoded varint ``x`` and the number ``n`` of bytes read from the start and/or consumed from the stream.
@@ -150,23 +155,27 @@ def decode_raw(b: Union[BytesLike, BufferedIOBase]) -> Tuple[int, int, Union[mem
         # note: stream.read() consumed the bytes
 
         :param b: the bytes-like object or stream from which to decode a varint
-        :type b: :obj:`~multiformats.varint.BytesLike` or :obj:`~io.BufferedIOBase`
+        :type b: :obj:`~multiformats.varint.BytesLike`, :obj:`~io.BufferedIOBase` or :obj:`~typing.BinaryIO`
 
         :raises ValueError: same reasons as :func:`~multiformats.varint.decode`, except for the last (where no error is raised)
 
     """
+    stream_mode: Optional[type]
     if isinstance(b, BufferedIOBase):
-        stream_mode = True
+        stream_mode = BufferedIOBase
         validate(b, BufferedIOBase)
+    elif isinstance(b, BinaryIO):
+        stream_mode = BinaryIO
+        validate(b, BinaryIO)
     else:
-        stream_mode = False
+        stream_mode = None
         validate(b, BytesLike)
     expect_next = True
     num_bytes_read = 0
     x = 0
     while expect_next:
-        if stream_mode:
-            _next_byte: bytes = cast(BufferedIOBase, b).read(1)
+        if stream_mode is not None:
+            _next_byte: bytes = cast(Union[BufferedIOBase, BinaryIO], b).read(1)
             if len(_next_byte) == 0:
                 raise _no_next_byte_error(num_bytes_read)
             next_byte: int = _next_byte[0]
@@ -181,6 +190,6 @@ def decode_raw(b: Union[BytesLike, BufferedIOBase]) -> Tuple[int, int, Union[mem
             raise ValueError(f"Varints must be at most {_max_num_bytes} bytes long.")
     if num_bytes_read > 1 and x < 2**(7*(num_bytes_read-1)):
         raise ValueError(f"Number {x} was not minimally encoded (as a {num_bytes_read} bytes varint).")
-    if stream_mode:
-        return x, num_bytes_read, cast(BufferedIOBase, b)
+    if stream_mode is not None:
+        return x, num_bytes_read, cast(Union[BufferedIOBase, BinaryIO], b)
     return x, num_bytes_read, memoryview(cast(BytesLike, b))[num_bytes_read:]

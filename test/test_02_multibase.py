@@ -151,7 +151,7 @@ def test_api_failure_modes() -> None:
     except ValueError:
         pass
     try:
-        Multibase(name="my-codec", code="0x80")
+        Multibase(name="my-codec", code="0x79")
         assert False, "Codes in hex format must be non-printable ASCII characters."
     except ValueError:
         pass

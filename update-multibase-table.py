@@ -31,7 +31,7 @@ new_table, _ = multibase.build_multibase_tables(encodings)
 
 # Loads and validates the current multibase table:
 print("Building current multibase table...")
-with open("multiformats/multibase/multibase-table.csv", "r") as f:
+with open("multiformats/multibase/multibase-table.csv", "r", encoding="utf8") as f:
     current_text = f.read()
 reader = csv.DictReader(io.StringIO(current_text))
 clean_rows = ({k.strip(): v.strip() for k, v in row.items()} for row in reader)
@@ -92,15 +92,10 @@ print()
 if added or removed or changed:
     answer = input("Would you like to update the multibase table? (y/n) ")
     if answer.lower().startswith("y"):
-        with open("multiformats/multibase/multibase-table.csv", "w") as f:
+        with open("multiformats/multibase/multibase-table.csv", "w", encoding="utf8") as f:
             f.write(new_text)
-        with open("multiformats/multibase/multibase-table.json", "w") as f:
+        with open("multiformats/multibase/multibase-table.json", "w", encoding="utf8") as f:
             table = [new_table[code].to_json() for code in sorted(new_table.keys())]
             json.dump(table, f, indent=4)
 else:
     print("Nothing to update, exiting.")
-
-
-with open("multiformats/multibase/multibase-table.json", "w") as f:
-    table = [new_table[code].to_json() for code in sorted(new_table.keys())]
-    json.dump(table, f, indent=4)

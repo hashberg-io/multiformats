@@ -142,5 +142,11 @@
         "code": "z",
         "status": "default",
         "description": "base58 bitcoin"
+    },
+    {
+        "name": "base256emoji",
+        "code": "0x01F680",
+        "status": "draft",
+        "description": "base256 with custom alphabet using variable-sized-codepoints"
     }
 ]

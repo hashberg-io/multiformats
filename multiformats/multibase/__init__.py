@@ -39,7 +39,7 @@ class Multibase:
 
         :param name: the multibase name
         :type name: :obj:`str`
-        :param code: the multibase code, as single-char string or ``0xYZ`` hex-string of a byte
+        :param code: the multibase code, as single-char string or ``0x...`` hex-string of a non-empty bytestring
         :type code: :obj:`str`
         :param status: the multibase status
         :type status: ``'draft'``, ``'candidate'`` or ``'default'``, *optional*
@@ -91,20 +91,20 @@ class Multibase:
             MultibaseValueError: Multibase codes must be single-character strings
             or the hex digits '0xYZ' of a single byte.
 
-            :param code: the multibase code, as single character or ``0xYZ`` hex-string of a single byte
+            :param code: the multibase code, as single character or ``0x...`` hex-string of a non-empty bytestring
             :type code: :obj:`str`
 
             :raises ValueError: if the code is invalid
 
         """
         validate(code, str)
-        if re.match(r"^0x[0-9a-zA-Z][0-9a-zA-Z]$", code):
+        if re.match(r"^0x([0-9a-zA-Z][0-9a-zA-Z])+$", code):
             ord_code = int(code, base=16)
+            if ord_code in range(0x20, 0x7F):
+                raise MultibaseValueError("Multibase codes in hex format cannot be printable ASCII characters.")
             code = chr(ord_code)
         elif len(code) != 1:
-            raise MultibaseValueError("Multibase codes must be single-character strings or the hex digits '0xYZ' of a single byte.")
-        if ord(code) not in range(0x00, 0x80):
-            raise MultibaseValueError("Multibase codes must be ASCII characters.")
+            raise MultibaseValueError("Multibase codes must be single-character strings or the hex digits '0x...' of a non-empty bytestring.")
         return code
 
     @staticmethod
@@ -145,7 +145,9 @@ class Multibase:
         code = self.code
         ord_code = ord(code)
         if ord_code not in range(0x20, 0x7F):
-            return "0x"+base16.encode(bytes([ord_code]))
+            ord_code_num_bytes = max(1, math.ceil(ord_code.bit_length()/8))
+            ord_code_bytes = ord_code.to_bytes(ord_code_num_bytes, byteorder="big")
+            return "0x"+base16.encode(ord_code_bytes)
         return code
 
     @property
@@ -555,6 +557,6 @@ def build_multibase_tables(bases: Iterable[Multibase]) -> Tuple[Dict[str, Multib
 # Create the global code->multibase and name->multibase mappings.
 _code_table: Dict[str, Multibase]
 _name_table: Dict[str, Multibase]
-with importlib_resources.open_text("multiformats.multibase", "multibase-table.json") as _table_f:
+with importlib_resources.open_text("multiformats.multibase", "multibase-table.json", encoding="utf8") as _table_f:
     _table_json = json.load(_table_f)
     _code_table, _name_table = build_multibase_tables(Multibase(**row) for row in _table_json)

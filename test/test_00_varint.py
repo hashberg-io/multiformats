@@ -1,9 +1,10 @@
 """ Tests for the `multiformats.varint` module. """
 
-import pytest
 
 from io import BytesIO
 from random import Random
+
+import pytest
 from multiformats import varint
 
 random = Random(0)

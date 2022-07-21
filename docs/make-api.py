@@ -87,8 +87,12 @@ Set "toc_filename" to null to avoid generating a table of contents file.
         os.remove(apidoc_file)
     print()
 
+    mod_name_to_del: List[str] = []
+
     for mod_name, mod in modules_dict.items():
-        if mod_name in exclude_modules:
+        if any(mod_name.startswith(name) for name in exclude_modules):
+        # if mod_name in exclude_modules:
+            mod_name_to_del.append(mod_name)
             continue
         filename = f"{apidocs_folder}/{mod_name}.rst"
         print(f"Writing API docfile {filename}")
@@ -163,6 +167,10 @@ Set "toc_filename" to null to avoid generating a table of contents file.
         with open(filename, "w") as f:
             f.write("\n".join(lines))
         print("")
+
+
+    for mod_name in mod_name_to_del:
+        del modules_dict[mod_name]
 
     toctable_lines = [
         ".. toctree::",

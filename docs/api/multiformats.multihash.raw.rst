@@ -6,7 +6,8 @@ multiformats.multihash.raw
 Hashfun
 -------
 
-.. autodata:: multiformats.multihash.raw.Hashfun
+.. autoclass:: multiformats.multihash.raw.Hashfun
+    :members:
 
 MultihashImpl
 -------------
