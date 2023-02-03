@@ -211,7 +211,7 @@ class CID:
                       digest: Union[bytes, Tuple[Multihash, bytes]],
                      ) -> _CIDSubclass:
         # pylint: disable = too-many-arguments
-        instance: _CIDSubclass = super().__new__(CID_subclass)
+        instance: _CIDSubclass = object.__new__(CID_subclass)
         instance._base = base
         assert version in (0, 1)
         instance._version = cast(Literal[0, 1], version)
