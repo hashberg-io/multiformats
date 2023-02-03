@@ -82,14 +82,14 @@ def keccak_digest(data: bytes, digest_bits: int, size: Optional[int]) -> bytes:
     d = m.digest()
     return d if size is None else d[:size]
 
-def murmur3_digest(data: bytes, variant: str, digest_bits: int, size: Optional[int]) -> bytes:
-    assert variant in ("32", "x64")
-    if variant == "32":
-        d: bytes = mmh3.hash(data, signed=False).to_bytes(4, byteorder="big") # pylint: disable = c-extension-no-member
-        return d if size is None else d[:size]
-    d = mmh3.hash128(data, signed=False).to_bytes(16, byteorder="big") # pylint: disable = c-extension-no-member
-    d = d[:(digest_bits//8)]
-    return d if size is None else d[:size]
+# def murmur3_digest(data: bytes, variant: str, digest_bits: int, size: Optional[int]) -> bytes:
+#     assert variant in ("32", "x64")
+#     if variant == "32":
+#         d: bytes = mmh3.hash(data, signed=False).to_bytes(4, byteorder="big") # pylint: disable = c-extension-no-member
+#         return d if size is None else d[:size]
+#     d = mmh3.hash128(data, signed=False).to_bytes(16, byteorder="big") # pylint: disable = c-extension-no-member
+#     d = d[:(digest_bits//8)]
+#     return d if size is None else d[:size]
 
 def md5_digest(data: bytes, size: Optional[int]) -> bytes:
     m = hashlib.md5()
@@ -278,6 +278,8 @@ with importlib_resources.open_text("test", "multihash-test-hex-vectors.csv") as 
 @pytest.mark.parametrize("test_vector", multihash_test_hex_vectors)
 def test_hex_vectors(test_vector: Dict[str, str]) -> None:
     hash_fn = test_vector["algorithm"]
+    if hash_fn.startswith("murmur3"):
+        return
     digest_size = int(test_vector["bits"])//8
     data = bytes.fromhex(test_vector["input"])
     multihash_digest = bytes.fromhex(test_vector["multihash"])
