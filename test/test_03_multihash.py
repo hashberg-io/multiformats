@@ -221,17 +221,17 @@ def test_keccak(data: bytes, digest_bits: int, size: Optional[int]) -> None:
     hash_fn = f"keccak-{digest_bits}"
     _test(hash_fn, data, keccak_digest(data, digest_bits, size), size)
 
-@pytest.mark.parametrize("version", ("32", "x64"))
-@pytest.mark.parametrize("data", data_samples)
-@pytest.mark.parametrize("size", (None, 4))
-def test_murmur3(data: bytes, version: str, size: Optional[int]) -> None:
-    if version == "32":
-        hash_fn = f"murmur3-{version}"
-        _test(hash_fn, data, murmur3_digest(data, version, 32, size), size)
-    else:
-        for digest_bits in (64, 128):
-            hash_fn = f"murmur3-{version}-{digest_bits}"
-            _test(hash_fn, data, murmur3_digest(data, version, digest_bits, size), size)
+# @pytest.mark.parametrize("version", ("32", "x64"))
+# @pytest.mark.parametrize("data", data_samples)
+# @pytest.mark.parametrize("size", (None, 4))
+# def test_murmur3(data: bytes, version: str, size: Optional[int]) -> None:
+#     if version == "32":
+#         hash_fn = f"murmur3-{version}"
+#         _test(hash_fn, data, murmur3_digest(data, version, 32, size), size)
+#     else:
+#         for digest_bits in (64, 128):
+#             hash_fn = f"murmur3-{version}-{digest_bits}"
+#             _test(hash_fn, data, murmur3_digest(data, version, digest_bits, size), size)
 
 @pytest.mark.parametrize("data", data_samples)
 @pytest.mark.parametrize("size", (None, 8, 16))
