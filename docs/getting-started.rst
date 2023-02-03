@@ -84,4 +84,6 @@ Using ``multiformats_config.enable(codecs=[], bases=[])`` results in a minimal s
         "base58btc",
     ])
 
+Calling ``multiformats_config.enable`` **after** the multiformats library has been imported will fail raising ``multiformats_config.LockedConfigError``.
+
 GitHub repo: https://github.com/hashberg-io/multiformats
