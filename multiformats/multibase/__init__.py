@@ -21,12 +21,12 @@ from typing_validation import validate
 
 from bases import (base2, base16, base8, base10, base36, base58btc, base58flickr, base58ripple,
                    base32, base32hex, base32z, base64, base64url, base45,)
+from multiformats_config.multibase import load_multibase_table
 
 from multiformats.multibase import raw
 from multiformats.varint import BytesLike
 from .raw import RawEncoder, RawDecoder
 from .err import MultibaseKeyError, MultibaseValueError
-
 
 class Multibase:
     """
@@ -528,35 +528,36 @@ def decode_raw(s: str) -> Tuple[Multibase, bytes]:
     base = from_str(s)
     return base, base.decode(s)
 
+_code_table, _name_table = load_multibase_table()
 
-def build_multibase_tables(bases: Iterable[Multibase]) -> Tuple[Dict[str, Multibase], Dict[str, Multibase]]:
-    """
-        Creates code->encoding and name->encoding mappings from a finite iterable of encodings, returning the mappings.
+# def build_multibase_tables(bases: Iterable[Multibase]) -> Tuple[Dict[str, Multibase], Dict[str, Multibase]]:
+#     """
+#         Creates code->encoding and name->encoding mappings from a finite iterable of encodings, returning the mappings.
 
-        Example usage:
+#         Example usage:
 
-        >>> code_table, name_table = build_multicodec_tables(bases)
+#         >>> code_table, name_table = build_multicodec_tables(bases)
 
-        :param bases: the multibases to add to the table
-        ::
+#         :param bases: the multibases to add to the table
+#         ::
 
-        :raises ValueError: if the same encoding code or name is encountered multiple times
-    """
-    # validate(multicodecs, Iterable[Multicodec]) # TODO: not yet properly supported by typing-validation
-    code_table: Dict[str, Multibase] = {}
-    name_table: Dict[str, Multibase] = {}
-    for e in bases:
-        if e.code in code_table:
-            raise MultibaseValueError(f"Multicodec name {e.name} appears multiple times in table.")
-        code_table[e.code] = e
-        if e.name in name_table:
-            raise MultibaseValueError(f"Multicodec name {e.name} appears multiple times in table.")
-        name_table[e.name] = e
-    return code_table, name_table
+#         :raises ValueError: if the same encoding code or name is encountered multiple times
+#     """
+#     # validate(multicodecs, Iterable[Multicodec]) # TODO: not yet properly supported by typing-validation
+#     code_table: Dict[str, Multibase] = {}
+#     name_table: Dict[str, Multibase] = {}
+#     for e in bases:
+#         if e.code in code_table:
+#             raise MultibaseValueError(f"Multicodec name {e.name} appears multiple times in table.")
+#         code_table[e.code] = e
+#         if e.name in name_table:
+#             raise MultibaseValueError(f"Multicodec name {e.name} appears multiple times in table.")
+#         name_table[e.name] = e
+#     return code_table, name_table
 
 # Create the global code->multibase and name->multibase mappings.
-_code_table: Dict[str, Multibase]
-_name_table: Dict[str, Multibase]
-with importlib_resources.open_text("multiformats.multibase", "multibase-table.json", encoding="utf8") as _table_f:
-    _table_json = json.load(_table_f)
-    _code_table, _name_table = build_multibase_tables(Multibase(**row) for row in _table_json)
+# _code_table: Dict[str, Multibase] = {}
+# _name_table: Dict[str, Multibase] = {}
+# with importlib_resources.open_text("multiformats.multibase", "multibase-table.json", encoding="utf8") as _table_f:
+#     _table_json = json.load(_table_f)
+#     _code_table, _name_table = build_multibase_tables(Multibase(**row) for row in _table_json)

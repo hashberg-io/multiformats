@@ -332,5 +332,3 @@ License
 -------
 
 `MIT © Hashberg Ltd. <LICENSE>`_
-
-See `additional Licenses <ADDITIONAL-LICENSES>`_ for licensing of the multicodec table, the multibase table and test vectors for multihashes.

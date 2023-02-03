@@ -5,6 +5,8 @@
 # TODO: make tests parametrised
 
 from random import Random
+
+import multiformats_config
 from multiformats import multibase
 from multiformats.multibase import Multibase
 
@@ -123,7 +125,7 @@ def test_table() -> None:
             Multibase(name="identity", code="0x00", status="default", description=""),
             Multibase(name="my-codec", code="0x00", status="draft", description=""),
         ]
-        multibase.build_multibase_tables(multibases)
+        multiformats_config.multibase.build_multibase_tables(multibases)
         assert False, "Repeated codes not allowed."
     except ValueError:
         pass
@@ -132,7 +134,7 @@ def test_table() -> None:
             Multibase(name="identity", code="0x00", status="default", description=""),
             Multibase(name="identity", code="0x01", status="draft", description=""),
         ]
-        print(multibase.build_multibase_tables(multibases))
+        print(multiformats_config.multibase.build_multibase_tables(multibases))
         assert False, "Repeated names not allowed."
     except ValueError:
         pass

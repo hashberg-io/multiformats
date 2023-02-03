@@ -14,10 +14,10 @@ import sys
 from typing import AbstractSet, Any, cast, Dict, Iterable, Iterator, Mapping, Optional, overload, Set, Sequence, Tuple, Type, TypeVar, Union
 from typing_extensions import Literal
 from typing_validation import validate
+from multiformats_config.multicodec import load_multicodec_table
 
 from multiformats import varint
 from multiformats.varint import BytesLike
-# from . import err
 from .err import MulticodecKeyError, MulticodecValueError
 
 def _hexcode(code: int) -> str:
@@ -576,59 +576,60 @@ def table(*,
             continue
         yield m
 
+_code_table, _name_table = load_multicodec_table()
 
-def build_multicodec_tables(codecs: Iterable[Multicodec], *,
-                            allow_private_use: bool = False) -> Tuple[Dict[int, Multicodec], Dict[str, Multicodec]]:
-    """
-        Creates code->multicodec and name->multicodec mappings from a finite iterable of multicodecs,
-        returning the mappings.
+# def build_multicodec_tables(codecs: Iterable[Multicodec], *,
+#                             allow_private_use: bool = False) -> Tuple[Dict[int, Multicodec], Dict[str, Multicodec]]:
+#     """
+#         Creates code->multicodec and name->multicodec mappings from a finite iterable of multicodecs,
+#         returning the mappings.
 
-        Example usage:
+#         Example usage:
 
-        >>> code_table, name_table = build_multicodec_tables(codecs)
+#         >>> code_table, name_table = build_multicodec_tables(codecs)
 
-        :param codecs: multicodecs to be registered
-        :type codecs: iterable of :class:`Multicodec`
-        :param allow_private_use: whether to allow multicodec entries with private use codes in ``range(0x300000, 0x400000)`` (default :obj:`False`)
-        :type allow_private_use: :obj:`bool`, *optional*
+#         :param codecs: multicodecs to be registered
+#         :type codecs: iterable of :class:`Multicodec`
+#         :param allow_private_use: whether to allow multicodec entries with private use codes in ``range(0x300000, 0x400000)`` (default :obj:`False`)
+#         :type allow_private_use: :obj:`bool`, *optional*
 
-        :raises ValueError: if ``allow_private_use`` and a multicodec with private use code is encountered
-        :raises ValueError: if the same multicodec code is encountered multiple times, unless exactly one of the multicodecs
-        has permanent status (in which case that codec is the one inserted in the table)
-        :raises ValueError: if the same name is encountered multiple times
+#         :raises ValueError: if ``allow_private_use`` and a multicodec with private use code is encountered
+#         :raises ValueError: if the same multicodec code is encountered multiple times, unless exactly one of the multicodecs
+#         has permanent status (in which case that codec is the one inserted in the table)
+#         :raises ValueError: if the same name is encountered multiple times
 
-    """
-    # validate(codecs, Iterable[Multicodec]) # TODO: not yet properly supported by typing-validation
-    validate(allow_private_use, bool)
-    code_table: Dict[int, Multicodec] = {}
-    name_table: Dict[str, Multicodec] = {}
-    overwritten_draft_codes: Set[int] = set()
-    for m in codecs:
-        if not allow_private_use and m.is_private_use:
-            raise MulticodecValueError(f"Private use multicodec not allowed: {m}")
-        if m.code in code_table:
-            if code_table[m.code].status == "permanent":
-                if m.status == "draft":
-                    # this draft code has been superseded by a permanent one, skip it
-                    continue
-                raise MulticodecValueError(f"Multicodec code {m.hexcode} appears multiple times in table.")
-            if m.status != "permanent":
-                # overwriting draft code with another draft code: dodgy, need to check at the end
-                overwritten_draft_codes.add(m.code)
-        code_table[m.code] = m
-        if m.name in name_table:
-            raise MulticodecValueError(f"Multicodec name {m.name} appears multiple times in table.")
-        name_table[m.name] = m
-    for code in overwritten_draft_codes:
-        m = code_table[code]
-        if m.status != "permanent":
-            raise MulticodecValueError(f"Code {m.code} appears multiple times in table, "
-                              "but none of the associated multicodecs is permanent.")
-    return code_table, name_table
+#     """
+#     # validate(codecs, Iterable[Multicodec]) # TODO: not yet properly supported by typing-validation
+#     validate(allow_private_use, bool)
+#     code_table: Dict[int, Multicodec] = {}
+#     name_table: Dict[str, Multicodec] = {}
+#     overwritten_draft_codes: Set[int] = set()
+#     for m in codecs:
+#         if not allow_private_use and m.is_private_use:
+#             raise MulticodecValueError(f"Private use multicodec not allowed: {m}")
+#         if m.code in code_table:
+#             if code_table[m.code].status == "permanent":
+#                 if m.status == "draft":
+#                     # this draft code has been superseded by a permanent one, skip it
+#                     continue
+#                 raise MulticodecValueError(f"Multicodec code {m.hexcode} appears multiple times in table.")
+#             if m.status != "permanent":
+#                 # overwriting draft code with another draft code: dodgy, need to check at the end
+#                 overwritten_draft_codes.add(m.code)
+#         code_table[m.code] = m
+#         if m.name in name_table:
+#             raise MulticodecValueError(f"Multicodec name {m.name} appears multiple times in table.")
+#         name_table[m.name] = m
+#     for code in overwritten_draft_codes:
+#         m = code_table[code]
+#         if m.status != "permanent":
+#             raise MulticodecValueError(f"Code {m.code} appears multiple times in table, "
+#                               "but none of the associated multicodecs is permanent.")
+#     return code_table, name_table
 
 # Create the global code->multicodec and name->multicodec mappings.
-_code_table: Dict[int, Multicodec]
-_name_table: Dict[str, Multicodec]
-with importlib_resources.open_text("multiformats.multicodec", "multicodec-table.json") as _table_f:
-    _table_json = json.load(_table_f)
-    _code_table, _name_table = build_multicodec_tables(Multicodec(**row) for row in _table_json)
+# _code_table: Dict[int, Multicodec] = {}
+# _name_table: Dict[str, Multicodec] = {}
+# with importlib_resources.open_text("multiformats.multicodec", "multicodec-table.json") as _table_f:
+#     _table_json = json.load(_table_f)
+#     _code_table, _name_table = build_multicodec_tables(Multicodec(**row) for row in _table_json)

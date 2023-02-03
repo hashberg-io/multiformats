@@ -60,8 +60,8 @@ class CustomEncoding:
     def __init__(self, raw_encoder: RawEncoder, raw_decoder: RawDecoder):
         # validate(raw_encoder, Callable[[bytes], str]) # TODO: not yet supported by typing-validation
         # validate(raw_decoder, Callable[[str], bytes]) # TODO: not yet supported by typing-validation
-        self._raw_encoder = raw_encoder # type: ignore
-        self._raw_decoder = raw_decoder # type: ignore
+        self._raw_encoder = raw_encoder
+        self._raw_decoder = raw_decoder
 
     def encode(self, b: BytesLike) -> str:
         """
@@ -70,7 +70,7 @@ class CustomEncoding:
             :param b: the bytestring to be encoded
             :type b: :obj:`~multiformats.varint.BytesLike`
         """
-        raw_encoder: RawEncoder = self._raw_encoder # type: ignore
+        raw_encoder: RawEncoder = self._raw_encoder
         return raw_encoder(b)
 
     def decode(self, s: str) -> bytes:
@@ -80,12 +80,12 @@ class CustomEncoding:
             :param s: the string to be decoded
             :type s: :obj:`str`
         """
-        raw_decoder: RawDecoder = self._raw_decoder # type: ignore
+        raw_decoder: RawDecoder = self._raw_decoder
         return raw_decoder(s)
 
     def __repr__(self) -> str:
-        _raw_encoder: Callable[[bytes], str] = self._raw_encoder # type: ignore
-        _raw_decoder: Callable[[str], bytes] = self._raw_decoder # type: ignore
+        _raw_encoder: Callable[[bytes], str] = self._raw_encoder
+        _raw_decoder: Callable[[str], bytes] = self._raw_decoder
         return f"CustomEncoding({repr(_raw_encoder)}, {repr(_raw_decoder)})"
 
 

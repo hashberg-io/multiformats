@@ -4,6 +4,7 @@ from typing import Dict, List, Union
 
 import pytest
 
+import multiformats_config
 from multiformats import multicodec
 from multiformats.multicodec import Multicodec
 
@@ -144,7 +145,7 @@ table_failure_cases = [
 def test_table_failure_modes(multicodecs: List[Multicodec], reason: str, fails: bool) -> None:
     """ Tests failure modes for codec table building. """
     try:
-        multicodec.build_multicodec_tables(multicodecs)
+        multiformats_config.multicodec.build_multicodec_tables(multicodecs)
         assert not fails, reason
     except ValueError:
         assert fails, reason

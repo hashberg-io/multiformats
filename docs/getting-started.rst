@@ -32,8 +32,9 @@ while :class:`~multiformats.cid.CID` is a class for Content IDentifiers.
 The following are mandatory dependencies for this module:
 
 - `typing-extensions <https://github.com/python/typing_extensions>`_, for backward compatibility of static typing.
-- `typing-validation <https://github.com/hashberg-io/typing-validation>`_, for dynamic typechecking
-- `bases <https://github.com/hashberg-io/bases>`_, for implementation of base encodings used by Multibase
+- `typing-validation <https://github.com/hashberg-io/typing-validation>`_, for dynamic typechecking.
+- `bases <https://github.com/hashberg-io/bases>`_, for implementation of base encodings used by Multibase.
+- `multiformats-config <https://github.com/hashberg-io/multiformats-config>`_, handling pre-loading configuration of multicodec/multibase tables.
 
 The following are optional dependencies for this module:
 
@@ -49,5 +50,38 @@ You can install the latest release together with all optional dependencies as fo
 .. code-block:: console
 
     $ pip install --upgrade multiformats[full]
+
+If you'd like to only load a selection of multicodecs and/or multibases, you can do so by calling ``multiformats_config.enable()`` **before** importing the
+multiformats library, passing the desired multicodec names (as :obj:`str`) orcodes (as :obj:`int`) and the desired multibase names (as :obj:`str`) or codes (as :obj:`str` of length 1) to the ``codecs`` and ``bases`` keyword arguments, respectively:
+
+.. code-block:: python
+
+    import multiformats_config
+    multiformats_config.enable(codecs=["sha1", 0x29], bases=["base64url", "9"])
+    from multiformats import *
+
+If ``codecs`` is not set (or set to :obj:`None`), all multicodecs are loaded. If ``bases`` is not set (or set to :obj:`None`), all multibases are loaded.
+Using ``multiformats_config.enable(codecs=[], bases=[])`` results in a minimal set of (mandatory) multicodecs and multibases to be loaded:
+
+.. code-block:: python
+
+    _minimal_multicodecs = frozenset([
+        0x00, # 'identity'
+        0x01, # 'cidv1'
+        0x02, # 'cidv2'
+        0x12, # 'sha2-256'
+        0x14, # 'sha3-512'
+        0x16, # 'sha3-256'
+        0x70, # 'dag-pb'
+        0x71, # 'dag-cbor'
+        0x72, # 'libp2p-key'
+    ])
+
+    _minimal_multibases = frozenset([
+        "identity",
+        "base16",
+        "base32",
+        "base58btc",
+    ])
 
 GitHub repo: https://github.com/hashberg-io/multiformats

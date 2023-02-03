@@ -54,6 +54,19 @@ def print_diff(diff: list[tuple[str, int, int]], console: Console) -> None:
         table.add_row(t, str(c), bytesize_str(s))
     console.print(table)
 
+# == Extract commandline args ==
+
+description = "Implementation report for multiformats."
+parser = argparse.ArgumentParser(description=description)
+parser.add_argument("-m", help='loads a minimal set of multicodecs and multibases', action="store_true")
+parser.add_argument("-d", help='print codes as decimal rather than hex', action="store_true")
+parser.add_argument("-r", help='saves report to file', action="store_true")
+args = parser.parse_args()
+minimal_load = args.m
+hex_codes = not args.d
+save_report = args.r
+code2str: Callable[[int], str] = hex if hex_codes else str # type: ignore
+
 # == Intro panel with version ==
 
 version = get_version(root='.', version_scheme="post-release")
@@ -114,6 +127,9 @@ psutil_prev += psutil_diff
 
 tr = tracker.SummaryTracker()
 tr.diff()
+if minimal_load:
+    import multiformats_config
+    multiformats_config.enable(codecs=[], bases=[])
 import multiformats
 from multiformats import *
 gc.collect()
@@ -130,17 +146,6 @@ pympler_mem_usage_total = sum(pympler_mem_usage.values())
 pympler_mem_usage_pct = {k: v/pympler_mem_usage_total for k, v in pympler_mem_usage.items()}
 psutil_mem_usage_total = sum(psutil_mem_usage.values())
 psutil_mem_usage_pct = {k: v/psutil_mem_usage_total for k, v in psutil_mem_usage.items()}
-
-# == Extract commandline args ==
-
-description = "Implementation report for multiformats."
-parser = argparse.ArgumentParser(description=description)
-parser.add_argument("-d", help='print codes as decimal rather than hex', action="store_true")
-parser.add_argument("-r", help='saves report to file', action="store_true")
-args = parser.parse_args()
-hex_codes = not args.d
-save_report = args.r
-code2str: Callable[[int], str] = hex if hex_codes else str # type: ignore
 
 # == Memory usage table ==
 
