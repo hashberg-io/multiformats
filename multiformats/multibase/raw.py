@@ -206,10 +206,12 @@ def _jit_register_identity_encoding() -> None:
         """
             Implementation of the raw identity encoder according to the `multibase spec <https://github.com/multiformats/multibase/>`_.
         """
-        if isinstance(b, (bytes, bytearray)):
-            return b.decode("utf-8") # type: ignore
-        validate(b, memoryview)
-        return bytes(b).decode("utf-8")
+        validate(b, Union[bytes, bytearray, memoryview])
+        return str(b, "utf-8")
+        # if isinstance(b, (bytes, bytearray)):
+        #     return b.decode("utf-8")
+        # validate(b, memoryview)
+        # return bytes(b).decode("utf-8")
     identity_raw_encoder.__repr__ = lambda: "identity_raw_encoder" # type: ignore
     def identity_raw_decoder(s: str) -> bytes:
         """
