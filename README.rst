@@ -321,6 +321,8 @@ API
 
 For the full API documentation, see https://multiformats.readthedocs.io/
 
+The tables specifying all multicodecs and multibases known to this package are maintained as part of the `multiformats-config <https://github.com/hashberg-io/multiformats-config>`_ repository.
+
 
 Contributing
 ------------

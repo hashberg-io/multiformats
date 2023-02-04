@@ -85,5 +85,6 @@ Using ``multiformats_config.enable(codecs=[], bases=[])`` results in a minimal s
     ])
 
 Calling ``multiformats_config.enable`` **after** the multiformats library has been imported will fail raising ``multiformats_config.LockedConfigError``.
+The `multiformats-config <https://github.com/hashberg-io/multiformats-config>`_ repository also stores the tables specifying all multicodecs and multibases known to this package. 
 
 GitHub repo: https://github.com/hashberg-io/multiformats
