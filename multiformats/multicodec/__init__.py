@@ -58,24 +58,27 @@ class Multicodec:
 
     __slots__ = ("__weakref__", "_name", "_tag", "_code", "_status", "_description")
 
-    def __init__(self, *,
-                 name: str,
-                 tag: str,
-                 code: Union[int, str],
-                 status: str = "draft",
-                 description: str = ""
-                ):
+    def __new__(cls,
+                name: str,
+                tag: str,
+                code: Union[int, str],
+                status: str = "draft",
+                description: str = ""
+               ) -> "Multicodec":
+        # pylint: disable = too-many-arguments
         for arg in (name, tag, status, description):
             validate(arg, str)
         validate(code, Union[int, str])
         name = Multicodec._validate_name(name)
         code = Multicodec.validate_code(code)
         status = Multicodec._validate_status(status)
-        self._name = name
-        self._tag = tag
-        self._code = code
-        self._status = status
-        self._description = description
+        instance = super().__new__(cls)
+        instance._name = name
+        instance._tag = tag
+        instance._code = code
+        instance._status = status
+        instance._description = description
+        return instance
 
     @staticmethod
     def _validate_name(name: str) -> str:

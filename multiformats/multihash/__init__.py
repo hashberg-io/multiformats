@@ -43,7 +43,7 @@ class Multihash:
 
     __slots__ = ("__weakref__", "_codec", "_implementation")
 
-    def __new__(cls, *, codec: Union[str, int, Multicodec]) -> "Multihash":
+    def __new__(cls, codec: Union[str, int, Multicodec]) -> "Multihash":
         # check that the codec exists:
         if isinstance(codec, str):
             codec = multicodec.get(codec)

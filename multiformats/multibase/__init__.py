@@ -54,21 +54,23 @@ class Multibase:
 
     __slots__ = ("__weakref__", "_name", "_code", "_status", "_description")
 
-    def __init__(self, *,
-                 name: str,
-                 code: str,
-                 status: str = "draft",
-                 description: str = ""
-                ):
+    def __new__(cls,
+                name: str,
+                code: str,
+                status: str = "draft",
+                description: str = ""
+                ) -> "Multibase":
         for arg in (name, code, status, description):
             validate(arg, str)
         name = Multibase._validate_name(name)
         code = Multibase.validate_code(code)
         status = Multibase._validate_status(status)
-        self._name = name
-        self._code = code
-        self._status = status
-        self._description = description
+        instance = super().__new__(cls)
+        instance._name = name
+        instance._code = code
+        instance._status = status
+        instance._description = description
+        return instance
 
     @staticmethod
     def _validate_name(name: Optional[str]) -> str:
