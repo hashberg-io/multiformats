@@ -443,7 +443,7 @@ class CID:
         else:
             codec = self.codec
         if version is not None and version != self.version:
-            _CID_validate_version(version, base, codec, hashfun)
+            version = _CID_validate_version(version, base, codec, hashfun)
         else:
             version = self.version
         return CID._new_instance(CID, base, version, codec, hashfun, digest)
