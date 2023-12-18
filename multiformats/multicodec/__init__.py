@@ -14,7 +14,7 @@ import json
 import re
 import sys
 from typing import AbstractSet, Any, cast, Dict, Iterable, Iterator, Mapping, Optional, overload, Set, Sequence, Tuple, Type, TypeVar, Union
-from typing_extensions import Literal
+from typing_extensions import Literal, Final
 from typing_validation import validate
 from multiformats_config.multicodec import load_multicodec_table
 
@@ -27,6 +27,20 @@ def _hexcode(code: int) -> str:
     if len(hexcode) % 2 != 0:
         hexcode = "0x0"+hexcode[2:]
     return hexcode
+
+MulticodecStatus = Literal[
+    "draft", "permanent", "deprecated"
+]
+"""
+    Literal type of possible values for the :attr:`Multicodec.status` property.
+"""
+
+MulticodecStatusValues: Final[Tuple[MulticodecStatus, ...]] = (
+    "draft", "permanent", "deprecated"
+)
+"""
+    Collection of possible values for the :attr:`Multicodec.status` property.
+"""
 
 class Multicodec:
     """
@@ -55,7 +69,7 @@ class Multicodec:
     _name: str
     _tag: str
     _code: int
-    _status: Literal["draft", "permanent"]
+    _status: MulticodecStatus
     _description: str
 
     __slots__ = ("__weakref__", "_name", "_tag", "_code", "_status", "_description")
@@ -108,10 +122,10 @@ class Multicodec:
         return code
 
     @staticmethod
-    def _validate_status(status: str) -> Literal["draft", "permanent"]:
-        if status not in ("draft", "permanent"):
+    def _validate_status(status: str) -> MulticodecStatus:
+        if status not in MulticodecStatusValues:
             raise MulticodecValueError(f"Invalid multicodec status {repr(status)}.")
-        return cast(Literal["draft", "permanent"], status)
+        return cast(MulticodecStatus, status)
 
     @property
     def name(self) -> str:

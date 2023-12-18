@@ -18,7 +18,7 @@ import re
 from typing import Any, Callable, cast, Dict, Iterable, Iterator, List, Mapping, Optional, Tuple, Type, Union
 import sys
 
-from typing_extensions import Literal
+from typing_extensions import Literal, Final
 from typing_validation import validate
 
 from bases import (base2, base16, base8, base10, base36, base58btc, base58flickr, base58ripple,
@@ -29,6 +29,21 @@ from multiformats.multibase import raw
 from multiformats.varint import BytesLike
 from .raw import RawEncoder, RawDecoder
 from .err import MultibaseKeyError, MultibaseValueError
+
+MultibaseStatus = Literal[
+    "draft", "final", "reserved", "experimental",
+    "candidate", "default" # legacy values
+]
+"""
+    Literal type of possible values for the :attr:`Multibase.status` property.
+"""
+
+MultibaseStatusValues: Final[Tuple[MultibaseStatus, ...]] = (
+    "draft", "final", "reserved", "experimental", "candidate", "default"
+)
+"""
+    Collection of possible values for the :attr:`Multibase.status` property.
+"""
 
 class Multibase:
     """
@@ -51,7 +66,7 @@ class Multibase:
 
     _name: str
     _code: str
-    _status: Literal["draft", "candidate", "default"]
+    _status: MultibaseStatus
     _description: str
 
     __slots__ = ("__weakref__", "_name", "_code", "_status", "_description")
@@ -112,10 +127,11 @@ class Multibase:
         return code
 
     @staticmethod
-    def _validate_status(status: str) -> Literal["draft", "candidate", "default"]:
-        if status not in ("draft", "candidate", "default"):
+    def _validate_status(status: str) -> MultibaseStatus:
+        # if status not in ("draft", "candidate", "default"):
+        if status not in MultibaseStatusValues:
             raise MultibaseValueError(f"Invalid multibase encoding status {repr(status)}.")
-        return cast(Literal["draft", "candidate", "default"], status)
+        return cast(MultibaseStatus, status)
 
     @property
     def code(self) -> str:
@@ -155,8 +171,10 @@ class Multibase:
         return code
 
     @property
-    def status(self) -> Literal["draft", "candidate", "default"]:
-        """ Multibase status. Must be ``'draft'``, ``'candidate'`` or ``'default'``."""
+    def status(self) -> MultibaseStatus:
+        """
+            Multibase status.
+        """
         return self._status
 
     @property
