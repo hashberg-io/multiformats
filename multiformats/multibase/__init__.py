@@ -32,7 +32,7 @@ from .err import MultibaseKeyError, MultibaseValueError
 
 MultibaseStatus = Literal[
     "draft", "final", "reserved", "experimental",
-    "candidate", "default" # legacy values
+    "candidate", "default" # FIXME: deprecated legacy values
 ]
 """
     Literal type of possible values for the :attr:`Multibase.status` property.
@@ -287,7 +287,7 @@ class Multibase:
         return f"Multibase({', '.join(f'{k}={repr(v)}' for k, v in self.to_json().items())})"
 
     @property
-    def _as_tuple(self) -> Tuple[Type["Multibase"], str, str, Literal["draft", "candidate", "default"]]:
+    def _as_tuple(self) -> Tuple[Type["Multibase"], str, str, MultibaseStatus]:
         return (Multibase, self.name, self.code, self.status)
 
     def __hash__(self) -> int:

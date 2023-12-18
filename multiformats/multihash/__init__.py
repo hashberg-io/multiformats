@@ -58,8 +58,8 @@ class Multihash:
                 raise MultihashValueError(f"Multicodec named {repr(codec.name)} exists, but is not the one given.")
             codec = existing_codec
         # check that the codec is a multihash multicodec:
-        if codec.tag != "multihash":
-            raise MultihashValueError(f"Multicodec named {repr(codec.name)} exists, but is not a multihash.")
+        if codec.tag not in ("multihash", "hash"):
+            raise MultihashValueError(f"Multicodec named {repr(codec.name)} exists, but is not a hash or multihash.")
         if not raw.exists(codec.name):
             raise MultihashKeyError(f"No implementation for multihash multicodec {repr(codec.name)}.")
         _cache = Multihash._cache
@@ -123,6 +123,14 @@ class Multihash:
 
         """
         return self._codec
+
+    @property
+    def is_cryptographic(self) -> bool:
+        """
+            Whether this is a cryptographic hash or not, based on whether
+            the codec is tagged as ``'multihash'`` or just ``'hash'``.
+        """
+        return self.codec.tag=="multihash"
 
     @property
     def max_digest_size(self) -> Optional[int]:

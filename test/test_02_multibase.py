@@ -21,8 +21,8 @@ def test_get() -> None:
     enc = multibase.get("base16")
     assert enc.name == "base16"
     assert enc.code == "f"
-    assert enc.status == "default"
-    assert enc.description == "hexadecimal"
+    assert enc.status == "final"
+    assert enc.description == "Hexadecimal (lowercase)"
 
 def test_multibase_contructor() -> None:
     """ Tests `Multibase.from_json`. """

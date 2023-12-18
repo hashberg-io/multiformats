@@ -121,8 +121,8 @@ def register(name: str, hashfun: Hashfun, digest_size: Optional[int], *, overwri
         raise MultihashValueError(f"An implementation for the multihash multicodec named {repr(name)} already exists.")
     if name not in _hashfun:
         multihash = multicodec.get(name)
-        if multihash.tag != "multihash":
-            raise MultihashValueError(f"Multicodec '{multihash.name}' exists, but it is not a multihash multicodec.")
+        if multihash.tag not in ("multihash", "hash"):
+            raise MultihashValueError(f"Multicodec '{multihash.name}' exists, but it is not a hash or multihash multicodec.")
     _hashfun[name] = (hashfun, digest_size)
 
 

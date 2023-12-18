@@ -165,7 +165,7 @@ class Multicodec:
         return _hexcode(self._code)
 
     @property
-    def status(self) -> Literal["draft", "permanent"]:
+    def status(self) -> MulticodecStatus:
         """ Multicodec status. """
         return self._status
 
@@ -277,7 +277,7 @@ class Multicodec:
         return f"Multicodec({', '.join(f'{k}={repr(v)}' for k, v in self.to_json().items())})"
 
     @property
-    def _as_tuple(self) -> Tuple[Type["Multicodec"], str, str, int, Literal["draft", "permanent"]]:
+    def _as_tuple(self) -> Tuple[Type["Multicodec"], str, str, int, MulticodecStatus]:
         return (Multicodec, self.name, self.tag, self.code, self.status)
 
     def __hash__(self) -> int:
