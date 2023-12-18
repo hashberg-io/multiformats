@@ -4,6 +4,8 @@
     For expected address bytestring sizes, see the `multiaddr table <https://github.com/multiformats/multiaddr/blob/master/protocols.csv>`_.
 """
 
+from __future__ import annotations
+
 from ipaddress import IPv4Address, IPv6Address, AddressValueError
 from typing import Callable, Dict, Optional, Tuple
 from typing_validation import validate

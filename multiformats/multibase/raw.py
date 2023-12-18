@@ -28,6 +28,8 @@ r"""
 
 """
 
+from __future__ import annotations
+
 import binascii
 from itertools import product
 from types import MappingProxyType

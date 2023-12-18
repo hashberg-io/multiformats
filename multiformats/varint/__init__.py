@@ -6,6 +6,8 @@
     >>> from multiformats import varint
 """
 
+from __future__ import annotations
+
 from io import BufferedIOBase
 from typing import BinaryIO, cast, List, Optional, overload, Tuple, Union, TypeVar
 from typing_extensions import Final

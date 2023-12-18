@@ -6,6 +6,8 @@
     >>> from multiformats import multihash
 """
 
+from __future__ import annotations
+
 from io import BytesIO, BufferedIOBase
 from typing import AbstractSet, Any, cast, ClassVar, Dict, Iterator, Mapping, Optional, overload, Union, Sequence, Tuple, Type, TypeVar
 from weakref import WeakValueDictionary

@@ -2,6 +2,8 @@
     Implementation for the ``keccak`` hash functions, using the optional dependency `pysha3 <https://github.com/tiran/pysha3>`_.
 """
 
+from __future__ import annotations
+
 import hashlib
 from typing import Optional
 

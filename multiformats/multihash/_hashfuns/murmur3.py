@@ -2,6 +2,8 @@
     Implementation for the ``murmur3`` hash functions, using the optional dependency `mmh3 <https://github.com/hajimes/mmh3>`_.
 """
 
+from __future__ import annotations
+
 from typing import Optional
 
 from multiformats.varint import BytesLike
@@ -9,7 +11,7 @@ from .utils import Hashfun, validate_hashfun_args
 
 def _murmur3(version: str, digest_bits: int) -> Hashfun:
     try:
-        import mmh3 # type: ignore # pylint: disable = import-outside-toplevel
+        import mmh3 # pylint: disable = import-outside-toplevel
     except ImportError as e:
         raise ImportError("Module 'mmh3' must be installed to use 'murmur3' hash functions. Consider running 'pip install mmh3'.") from e
     if version == "32":

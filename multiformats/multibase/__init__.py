@@ -6,6 +6,8 @@
     >>> from multiformats import multibase
 """
 
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 import binascii
 import importlib.resources as importlib_resources

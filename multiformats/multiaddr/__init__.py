@@ -6,6 +6,8 @@
     >>> from multiformats import multiaddr
 """
 
+from __future__ import annotations
+
 from itertools import islice, chain
 from typing import Any, cast, ClassVar, Dict, Iterator, List, Optional, overload, Sequence, Tuple, Type, Union
 from weakref import WeakValueDictionary

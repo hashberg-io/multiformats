@@ -2,6 +2,8 @@
     Utilities for hash function implementation.
 """
 
+from __future__ import annotations
+
 from typing import Optional
 from typing_extensions import Literal, Protocol, runtime_checkable
 from typing_validation import validate

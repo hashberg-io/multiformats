@@ -6,6 +6,8 @@
     >>> from multiformats import multicodec
 """
 
+from __future__ import annotations
+
 import importlib.resources as importlib_resources
 from io import BufferedIOBase
 import json

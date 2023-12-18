@@ -15,7 +15,9 @@
     while :class:`~multiformats.cid.CID` is a class for Content IDentifiers.
 """
 
-__version__ = "0.2.1"
+from __future__ import annotations
+
+__version__ = "0.3.0"
 
 from . import varint
 from . import multicodec

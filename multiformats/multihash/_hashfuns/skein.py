@@ -2,6 +2,8 @@
     Implementation for the ``skein`` hash functions, using the optional dependency `pyskein <https://pythonhosted.org/pyskein/>`_.
 """
 
+from __future__ import annotations
+
 import hashlib
 from typing import Optional
 

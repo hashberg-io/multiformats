@@ -8,6 +8,8 @@
     >>> from multiformats import CID
 """
 
+from __future__ import annotations
+
 from typing import Any, cast, FrozenSet, Tuple, Type, TypeVar, Union
 from typing_extensions import Literal, Final
 from typing_validation import validate

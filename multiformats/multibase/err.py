@@ -2,6 +2,8 @@
     Errors for the :mod:`~multiformats.multibase` module.
 """
 
+from __future__ import annotations
+
 import builtins
 
 class MultibaseKeyError(builtins.KeyError): # pylint: disable = redefined-builtin

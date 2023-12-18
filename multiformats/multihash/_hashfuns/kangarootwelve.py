@@ -2,6 +2,8 @@
     Implementation for the ``kangarootwelve`` hash function, using `pycryptodomex <https://github.com/Legrandin/pycryptodome/>`_.
 """
 
+from __future__ import annotations
+
 from typing import Optional
 
 from multiformats.varint import BytesLike

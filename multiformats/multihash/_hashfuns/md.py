@@ -3,6 +3,8 @@
     using `hashlib <https://docs.python.org/3/library/hashlib.html>`_ and `pycryptodomex <https://github.com/Legrandin/pycryptodome/>`_.
 """
 
+from __future__ import annotations
+
 import hashlib
 from typing import Optional
 

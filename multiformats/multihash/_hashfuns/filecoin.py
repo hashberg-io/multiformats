@@ -10,6 +10,8 @@
     - https://github.com/filecoin-project/neptune
 """
 
+from __future__ import annotations
+
 import hashlib
 from hashlib import sha256
 from typing import Optional
