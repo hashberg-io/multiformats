@@ -1,0 +1,6 @@
+{
+    "CIDVersion": "multiformats.cid",
+    "BytesLike": "multiformats.varint",
+    "RawEncoder": "multiformats.multibase.raw",
+    "RawDecoder": "multiformats.multibase.raw"
+}

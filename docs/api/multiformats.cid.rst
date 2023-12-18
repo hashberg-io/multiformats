@@ -7,4 +7,5 @@ CID
 ---
 
 .. autoclass:: multiformats.cid.CID
+    :show-inheritance:
     :members:

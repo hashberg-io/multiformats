@@ -7,6 +7,7 @@ Multihash
 ---------
 
 .. autoclass:: multiformats.multihash.Multihash
+    :show-inheritance:
     :members:
 
 digest

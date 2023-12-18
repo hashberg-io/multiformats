@@ -7,10 +7,12 @@ MultihashKeyError
 -----------------
 
 .. autoclass:: multiformats.multihash.err.MultihashKeyError
+    :show-inheritance:
     :members:
 
 MultihashValueError
 -------------------
 
 .. autoclass:: multiformats.multihash.err.MultihashValueError
+    :show-inheritance:
     :members:

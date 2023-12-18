@@ -7,6 +7,7 @@ CustomEncoding
 --------------
 
 .. autoclass:: multiformats.multibase.raw.CustomEncoding
+    :show-inheritance:
     :members:
 
 exists

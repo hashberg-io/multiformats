@@ -7,6 +7,7 @@ Multibase
 ---------
 
 .. autoclass:: multiformats.multibase.Multibase
+    :show-inheritance:
     :members:
 
 decode

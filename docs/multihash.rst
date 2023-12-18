@@ -74,7 +74,7 @@ The :func:`~multiformats.multihash.wrap` function and the method :meth:`~multifo
 >>> sha2_256.wrap(raw_digest).hex()
 '1214c0535e4be2b79ffd93291305436bf889314e4a3f'
 
-Note the both multihash code and digest length are wrapped as varints (see the :mod:`~multiformats.multihash.multiformats.varint` module) and can span multiple bytes:
+Note the both multihash code and digest length are wrapped as varints (see the :mod:`~multiformats.varint` module) and can span multiple bytes:
 
 >>> skein1024_1024 = multihash.get("skein1024-1024")
 >>> skein1024_1024.codec

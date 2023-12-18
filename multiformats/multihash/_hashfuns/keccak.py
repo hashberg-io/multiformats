@@ -13,6 +13,7 @@ from .utils import Hashfun, validate_hashfun_args
 def _keccak(digest_bits: int) -> Hashfun:
     # FIXME: pysha3 is not longer available
     raise NotImplementedError("keccak hashes are not currently supported.")
+    # pylint: disable = unreachable
     try:
         import sha3 # type: ignore # pylint: disable = import-outside-toplevel
     except ImportError as e:
@@ -29,6 +30,7 @@ def _keccak(digest_bits: int) -> Hashfun:
 def _jit_register_keccak(m, register) -> bool: # type: ignore
     # FIXME: pysha3 is not longer available
     raise NotImplementedError("keccak hashes are not currently supported.")
+    # pylint: disable = unreachable
     digest_bits = int(m[1])
     if register is not None:
         register(f"keccak-{digest_bits}", _keccak(digest_bits), digest_bits//8)

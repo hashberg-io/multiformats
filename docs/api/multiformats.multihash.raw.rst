@@ -7,6 +7,7 @@ Hashfun
 -------
 
 .. autoclass:: multiformats.multihash.raw.Hashfun
+    :show-inheritance:
     :members:
 
 MultihashImpl

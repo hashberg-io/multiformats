@@ -7,18 +7,21 @@ Addr
 ----
 
 .. autoclass:: multiformats.multiaddr.Addr
+    :show-inheritance:
     :members:
 
 Multiaddr
 ---------
 
 .. autoclass:: multiformats.multiaddr.Multiaddr
+    :show-inheritance:
     :members:
 
 Proto
 -----
 
 .. autoclass:: multiformats.multiaddr.Proto
+    :show-inheritance:
     :members:
 
 byteslike

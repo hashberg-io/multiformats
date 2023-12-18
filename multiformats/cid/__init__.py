@@ -9,12 +9,16 @@
 """
 
 from __future__ import annotations
+import sys
 
-from typing import Any, cast, FrozenSet, Tuple, Type, TypeVar, Union
+from typing import Any, ClassVar, cast, FrozenSet, Tuple, Type, TypeVar, Union
+from weakref import WeakValueDictionary
+
 from typing_extensions import Literal, Final
 from typing_validation import validate
 
 from bases import base58btc
+
 from multiformats import varint, multicodec, multibase, multihash
 
 from multiformats.multicodec import Multicodec
@@ -22,10 +26,18 @@ from multiformats.multibase import Multibase
 from multiformats.multihash import Multihash, _validate_raw_digest_size
 from multiformats.varint import BytesLike, byteslike
 
+if sys.version_info[1] >= 11:
+    from typing import Self
+else:
+    from typing_extensions import Self
+
 _CIDSubclass = TypeVar("_CIDSubclass", bound="CID")
 
 CIDVersion = Literal[0, 1]
+""" Type alias for a CID version. """
+
 CIDVersionNumbers: Final[FrozenSet[int]] = frozenset({0, 1})
+""" Constant for CID version numbers. """
 
 def _binary_cid_from_str(cid: str) -> Tuple[bytes, Multibase]:
     if len(cid) == 46 and cid.startswith("Qm"):
@@ -139,15 +151,6 @@ class CID:
         #  ^^ 0x55 = 'raw' codec
         >>> bytes(cid)
 
-        :param base: default multibase to use when encoding this CID
-        :type base: :obj:`str` or :class:`~multiformats.multibase.Multibase`
-        :param version: the CID version
-        :type version: 0 or 1
-        :param codec: the content multicodec
-        :type codec: :obj:`str`, :obj:`int` or :class:`~multiformats.multicodec.Multicodec`
-        :param digest: the content multihash digest, or a pair of multihash codec and raw content digest
-        :type digest: see below
-
         The ``digest`` parameter can be specified in the following ways:
 
         - as a :obj:`str`, in which case it is treated as a hex-string and converted to :obj:`bytes` using :obj:`bytes.fromhex`
@@ -166,12 +169,24 @@ class CID:
         - as a :obj:`str`, in which case it is treated as a hex-string and converted to :obj:`bytes` using :obj:`bytes.fromhex`
         - as a :obj:`~multiformats.varint.BytesLike`, in which case it is converted to :obj:`bytes` directly
 
+        :param base: default multibase to use when encoding this CID
+        :type base: :obj:`str` or :class:`~multiformats.multibase.Multibase`
+        :param version: the CID version (0 or 1)
+        :param codec: the content multicodec
+        :type codec: :obj:`str`, :obj:`int` or :class:`~multiformats.multicodec.Multicodec`
+        :param digest: the content multihash digest, or a pair of multihash codec and raw content digest (see below)
 
         :raises ValueError: if the CID version is unsupported
         :raises ValueError: if version is 0 but base is not 'base58btc' or codec is not 'dag-pb'
         :raises KeyError: if the multibase, multicodec or multihash are unknown
 
     """
+
+    __InstanceKey = Tuple[Multibase, CIDVersion, Multicodec, Multihash, bytes]
+    __instances: ClassVar[WeakValueDictionary[
+        CID.__InstanceKey,
+        CID
+    ]] = WeakValueDictionary()
 
     _base: Multibase
     _version: CIDVersion
@@ -185,8 +200,14 @@ class CID:
                 base: Union[str, Multibase],
                 version: int,
                 codec: Union[str, int, Multicodec],
-                digest: Union[str, BytesLike, Tuple[Union[str, int, Multihash], Union[str, BytesLike]]],
-                ) -> _CIDSubclass:
+                digest: Union[
+                    str,
+                    BytesLike,
+                    Tuple[
+                        Union[str, int, Multihash],
+                        Union[str, BytesLike]
+                    ]
+                ]) -> _CIDSubclass:
         # pylint: disable = too-many-arguments
         base = _CID_validate_multibase(base)
         codec = _CID_validate_multicodec(codec)
@@ -213,23 +234,34 @@ class CID:
                       digest: Union[bytes, Tuple[Multihash, bytes]],
                      ) -> _CIDSubclass:
         # pylint: disable = too-many-arguments
-        instance: _CIDSubclass = object.__new__(CID_subclass)
-        instance._base = base
         assert version in (0, 1)
-        instance._version = cast(Literal[0, 1], version)
-        instance._codec = codec
-        instance._hashfun = hashfun
         if isinstance(digest, bytes):
-            instance._digest = digest
+            pass # digest = digest
         elif isinstance(digest, byteslike):
-            instance._digest = bytes(digest)
+            digest = bytes(digest)
         else:
             _hashfun, raw_digest = digest
             if not isinstance(raw_digest, bytes):
                 raw_digest = bytes(raw_digest)
             assert _hashfun == hashfun, "You passed different multihashes to a _new_instance call with digest as a pair."
-            instance._digest = hashfun.wrap(raw_digest)
-        return instance
+            digest = hashfun.wrap(raw_digest)
+        key: CID.__InstanceKey = (
+            base,
+            cast(Literal[0, 1], version),
+            codec,
+            hashfun,
+            digest
+        )
+        instance = CID.__instances.get(key)
+        if instance is None:
+            instance = object.__new__(CID_subclass)
+            instance._base = base
+            instance._version = cast(Literal[0, 1], version)
+            instance._codec = codec
+            instance._hashfun = hashfun
+            instance._digest = digest
+            CID.__instances[key] = instance
+        return cast(_CIDSubclass, instance)
 
     @property
     def version(self) -> CIDVersion:

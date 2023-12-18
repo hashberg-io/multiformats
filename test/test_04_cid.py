@@ -79,6 +79,8 @@ def test_encode_decode(data: bytes, base: str, v: int, codec: str, hashfun: str)
         assert b == digest
     assert cid == CID.decode(s)
     assert cid.set(base="base58btc") == CID.decode(b)
+    assert cid is CID.decode(s).set(base=cid.base)
+    assert cid is CID.decode(b).set(base=cid.base)
     if v == 1:
         for other_base in ["base58btc", "base32", "base32pad", "base64", "base64pad", "proquint"]:
             assert cid.set(base=other_base) == CID.decode(cid.encode(other_base))

@@ -7,6 +7,7 @@ Multicodec
 ----------
 
 .. autoclass:: multiformats.multicodec.Multicodec
+    :show-inheritance:
     :members:
 
 exists
