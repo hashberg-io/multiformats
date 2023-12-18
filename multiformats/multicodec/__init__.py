@@ -96,6 +96,9 @@ class Multicodec:
         instance._description = description
         return instance
 
+    def __getnewargs__(self) -> tuple[str, str, int, MulticodecStatus, str]:
+        return (self.name, self.tag, self.code, self.status, self.description)
+
     @staticmethod
     def _validate_name(name: str) -> str:
         if not re.match(r"^[a-z][a-z0-9_-]+$", name):

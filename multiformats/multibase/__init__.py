@@ -89,6 +89,9 @@ class Multibase:
         instance._description = description
         return instance
 
+    def __getnewargs__(self) -> tuple[str, str, MultibaseStatus, str]:
+        return (self.name, self.code, self.status, self.description)
+
     @staticmethod
     def _validate_name(name: Optional[str]) -> str:
         validate(name, Optional[str])

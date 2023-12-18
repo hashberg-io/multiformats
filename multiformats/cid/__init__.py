@@ -225,6 +225,9 @@ class CID:
             return CID._new_instance(cls, base, version, codec, hashfun, digest)
         return CID._new_instance(cls, base, version, codec, hashfun, (hashfun, raw_digest))
 
+    def __getnewargs__(self) -> tuple[Multibase, CIDVersion, Multicodec, bytes]:
+        return self.base, self.version, self.codec, self.digest
+
     @staticmethod
     def _new_instance(CID_subclass: Type[_CIDSubclass],
                       base: Multibase,

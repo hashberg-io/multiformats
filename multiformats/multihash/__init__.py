@@ -83,6 +83,9 @@ class Multihash:
         _cache[codec.name] = instance
         return instance
 
+    def __getnewargs__(self) -> tuple[Multicodec]:
+        return (self.codec,)
+
     @property
     def name(self) -> str:
         """
