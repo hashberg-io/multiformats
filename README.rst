@@ -52,12 +52,11 @@ The following are mandatory dependencies for this module:
 
 The following are optional dependencies for this module:
 
-- `pysha3 <https://github.com/tiran/pysha3>`_, for the ``keccak`` hash functions.
 - `blake3 <https://github.com/oconnor663/blake3-py>`_, for the ``blake3`` hash function.
 - `pyskein <https://pythonhosted.org/pyskein/>`_, for the ``skein`` hash functions.
 - `mmh3 <https://github.com/hajimes/mmh3>`_, for the ``murmur3`` hash functions.
 - `pycryptodomex <https://github.com/Legrandin/pycryptodome/>`_, for the ``ripemd-160`` hash function, \
-  the ``kangarootwelve`` hash function and the ``sha2-512-224``/``sha2-512-256`` hash functions.
+  the ``kangarootwelve`` hash function, the ``keccak`` hash functions and the ``sha2-512-224``/``sha2-512-256`` hash functions.
 
 You can install the latest release together with all optional dependencies as follows:
 
