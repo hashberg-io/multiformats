@@ -1,63 +1,59 @@
-╭────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ Multiformats implementation report v0.1.4.post3+g4cb2705.d20230203                                         │
-╰────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
-─────────────────────────────────────────── Memory Usage (pympler) ───────────────────────────────────────────
-> memory baseline: 25.7MiB
-> multiformats memory total:     1.2MiB
-┏━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━┓
-┃ Component         ┃ Obj. count ┃ Memory ┃ Memory % ┃
-┡━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━━┩
-│ typing-extensions │        597 │ 107KiB │       9% │
-│ typing-validation │        492 │  79KiB │       6% │
-│ bases             │       1404 │ 262KiB │      21% │
-│ multiformats      │       6581 │ 795KiB │      64% │
+┌────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ Multiformats implementation report v0.3.1.post0+g48a40f2.d20231219                                         │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+──────────────────────────────────────────────── Memory Usage ────────────────────────────────────────────────
+> memory baseline: 36.9MiB
+> multiformats memory total:     1.0MiB
+┌───────────────────┬────────────┬────────┬──────────┐
+│ Component         │ Obj. count │ Memory │ Memory % │
+├───────────────────┼────────────┼────────┼──────────┤
+│ typing-extensions │        432 │  93KiB │       9% │
+│ typing-validation │        698 │ 117KiB │      11% │
+│ bases             │       1301 │ 248KiB │      24% │
+│ multiformats      │       4921 │ 566KiB │      55% │
 └───────────────────┴────────────┴────────┴──────────┘
-─────────────────────────────────────────── Memory Usage (psutil) ────────────────────────────────────────────
-> memory baseline: 25.7MiB
-> multiformats memory total:     4.8MiB
-┏━━━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━┓
-┃ Component         ┃ Memory ┃ Memory % ┃
-┡━━━━━━━━━━━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━━┩
-│ typing-extensions │ 2.3MiB │      49% │
-│ typing-validation │ 136KiB │       3% │
-│ bases             │ 1.1MiB │      22% │
-│ multiformats      │ 1.2MiB │      26% │
-└───────────────────┴────────┴──────────┘
 ──────────────────────────────────────────── Multihash functions ─────────────────────────────────────────────
-> Multihash functions implemented: 344/353
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━┓
-┃ Code                             ┃ Name                         ┃ Bitsize              ┃ Implem. ┃ Status ┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━┩
+> Multihash functions implemented: 340/363
+┌──────────────────────────────────┬──────────────────────────────┬──────────────────────┬─────────┬────────┐
+│ Code                             │ Name                         │ Bitsize              │ Implem. │ Status │
+├──────────────────────────────────┼──────────────────────────────┼──────────────────────┼─────────┼────────┤
 │ 0x0                              │ identity                     │                      │ yes     │ perm.  │
 │ 0x11                             │ sha1                         │ 160                  │ yes     │ perm.  │
 │ {0x12, 0x13, 0x20, 0x1013}       │ sha2-Bitsize                 │ {224, 256, 384, 512} │ yes     │ perm.  │
 │ {0x14, 0x15, 0x16, 0x17}         │ sha3-Bitsize                 │ {224, 256, 384, 512} │ yes     │ perm.  │
 │ {0x18, 0x19}                     │ shake-Bitsize                │ {256, 512}           │ yes     │ draft  │
-│ {0x1a, 0x1b, 0x1c, 0x1d}         │ keccak-Bitsize               │ {224, 256, 384, 512} │ yes     │ draft  │
+│ {0x1a, 0x1b, 0x1c, 0x1d}         │ keccak-Bitsize               │ {224, 256, 384, 512} │ no      │ draft  │
 │ 0x1e                             │ blake3                       │                      │ yes     │ draft  │
+│ {0x22, 0x1022}                   │ murmur3-x64-Bitsize          │ {64, 128}            │ no      │ perm.  │
+│ 0x23                             │ murmur3-32                   │ 32                   │ no      │ draft  │
 │ 0x56                             │ dbl-sha2-256                 │ 256                  │ yes     │ draft  │
 │ 0xd4                             │ md4                          │                      │ no      │ draft  │
 │ 0xd5                             │ md5                          │ 128                  │ yes     │ draft  │
+│ 0x132                            │ crc32                        │                      │ no      │ draft  │
+│ 0x164                            │ crc64-ecma                   │                      │ no      │ draft  │
 │ 0x1012                           │ sha2-256-trunc254-padded     │ 256                  │ yes     │ perm.  │
 │ {0x1014, 0x1015}                 │ sha2-512-Bitsize             │ {224, 256}           │ yes     │ perm.  │
 │ {0x1052, 0x1053, 0x1054, 0x1055} │ ripemd-Bitsize               │ {128, 160, 256, 320} │ 1/4     │ draft  │
 │ 0x1100                           │ x11                          │                      │ no      │ draft  │
 │ 0x1d01                           │ kangarootwelve               │                      │ yes     │ draft  │
 │ 0x534d                           │ sm3-256                      │ 256                  │ no      │ draft  │
+│ 0x7012                           │ sha256a                      │                      │ no      │ draft  │
 │ {0xb201, 0xb202, ..., 0xb240}    │ blake2b-Bitsize              │ {8, 16, ..., 512}    │ yes     │ draft  │
 │ {0xb241, 0xb242, ..., 0xb260}    │ blake2s-Bitsize              │ {8, 16, ..., 256}    │ yes     │ draft  │
 │ {0xb301, 0xb302, ..., 0xb320}    │ skein256-Bitsize             │ {8, 16, ..., 256}    │ yes     │ draft  │
 │ {0xb321, 0xb322, ..., 0xb360}    │ skein512-Bitsize             │ {8, 16, ..., 512}    │ yes     │ draft  │
 │ {0xb361, 0xb362, ..., 0xb3e0}    │ skein1024-Bitsize            │ {8, 16, ..., 1024}   │ yes     │ draft  │
+│ {0xb3e1, 0xb3e2}                 │ xxh-Bitsize                  │ {32, 64}             │ no      │ draft  │
+│ {0xb3e3, 0xb3e4}                 │ xxh3-Bitsize                 │ {64, 128}            │ no      │ draft  │
 │ 0xb401                           │ poseidon-bls12_381-a2-fc1    │                      │ no      │ perm.  │
 │ 0xb402                           │ poseidon-bls12_381-a2-fc1-sc │                      │ no      │ draft  │
 │ 0xb502                           │ ssz-sha2-256-bmt             │                      │ no      │ draft  │
 └──────────────────────────────────┴──────────────────────────────┴──────────────────────┴─────────┴────────┘
 ──────────────────────────────────────────── Multiaddr protocols ─────────────────────────────────────────────
-> Multiaddr protocols implemented: 18/40
-┏━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━┓
-┃ Code     ┃ Name               ┃ Implem. ┃ Status ┃
-┡━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━┩
+> Multiaddr protocols implemented: 18/43
+┌──────────┬────────────────────┬─────────┬────────┐
+│ Code     │ Name               │ Implem. │ Status │
+├──────────┼────────────────────┼─────────┼────────┤
 │ 0x4      │ ip4                │ yes     │ perm.  │
 │ 0x6      │ tcp                │ yes     │ perm.  │
 │ 0x21     │ dccp               │ no      │ draft  │
@@ -70,10 +66,11 @@
 │ 0x38     │ dnsaddr            │ no      │ perm.  │
 │ 0x84     │ sctp               │ no      │ draft  │
 │ 0x111    │ udp                │ yes     │ draft  │
-│ 0x113    │ p2p-webrtc-star    │ yes     │ draft  │
-│ 0x114    │ p2p-webrtc-direct  │ yes     │ draft  │
-│ 0x115    │ p2p-stardust       │ yes     │ draft  │
-│ 0x118    │ webrtc             │ no      │ draft  │
+│ 0x113    │ p2p-webrtc-star    │ yes     │ depr.  │
+│ 0x114    │ p2p-webrtc-direct  │ yes     │ depr.  │
+│ 0x115    │ p2p-stardust       │ yes     │ depr.  │
+│ 0x118    │ webrtc-direct      │ no      │ draft  │
+│ 0x119    │ webrtc             │ no      │ draft  │
 │ 0x122    │ p2p-circuit        │ yes     │ perm.  │
 │ 0x12d    │ udt                │ yes     │ draft  │
 │ 0x12e    │ utp                │ yes     │ draft  │
@@ -88,6 +85,7 @@
 │ 0x1c0    │ tls                │ yes     │ draft  │
 │ 0x1c1    │ sni                │ no      │ draft  │
 │ 0x1c6    │ noise              │ yes     │ draft  │
+│ 0x1c8    │ shs                │ no      │ draft  │
 │ 0x1cc    │ quic               │ yes     │ perm.  │
 │ 0x1cd    │ quic-v1            │ no      │ perm.  │
 │ 0x1d1    │ webtransport       │ no      │ draft  │
@@ -98,42 +96,43 @@
 │ 0x1e0    │ http               │ yes     │ draft  │
 │ 0x3f42   │ silverpine         │ no      │ draft  │
 │ 0x706c61 │ plaintextv2        │ no      │ draft  │
+│ 0xd02000 │ scion              │ no      │ draft  │
 └──────────┴────────────────────┴─────────┴────────┘
 ───────────────────────────────────────────────── Multibases ─────────────────────────────────────────────────
 > Multibases implemented: 24/25
-┏━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━┓
-┃ Code     ┃ Name              ┃ Implem. ┃ Status ┃
-┡━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━┩
-│ 0x00     │ identity          │ yes     │ perm.  │
-│ 0        │ base2             │ yes     │ perm.  │
-│ 7        │ base8             │ yes     │ draft  │
-│ 9        │ base10            │ yes     │ draft  │
-│ B        │ base32upper       │ yes     │ perm.  │
-│ C        │ base32padupper    │ yes     │ perm.  │
-│ F        │ base16upper       │ yes     │ perm.  │
-│ K        │ base36upper       │ yes     │ draft  │
-│ M        │ base64pad         │ yes     │ perm.  │
-│ T        │ base32hexpadupper │ yes     │ perm.  │
-│ U        │ base64urlpad      │ yes     │ perm.  │
-│ V        │ base32hexupper    │ yes     │ perm.  │
-│ Z        │ base58flickr      │ yes     │ perm.  │
-│ b        │ base32            │ yes     │ perm.  │
-│ c        │ base32pad         │ yes     │ perm.  │
-│ f        │ base16            │ yes     │ perm.  │
-│ h        │ base32z           │ yes     │ draft  │
-│ k        │ base36            │ yes     │ draft  │
-│ m        │ base64            │ yes     │ perm.  │
-│ p        │ proquint          │ yes     │ draft  │
-│ t        │ base32hexpad      │ yes     │ perm.  │
-│ u        │ base64url         │ yes     │ perm.  │
-│ v        │ base32hex         │ yes     │ perm.  │
-│ z        │ base58btc         │ yes     │ perm.  │
-│ 0x01F680 │ base256emoji      │ no      │ draft  │
-└──────────┴───────────────────┴─────────┴────────┘
+┌──────────┬───────────────────┬─────────┬──────────┐
+│ Code     │ Name              │ Implem. │ Status   │
+├──────────┼───────────────────┼─────────┼──────────┤
+│ 0x00     │ identity          │ yes     │ resrvd.  │
+│ 0        │ base2             │ yes     │ experim. │
+│ 7        │ base8             │ yes     │ draft    │
+│ 9        │ base10            │ yes     │ draft    │
+│ B        │ base32upper       │ yes     │ final    │
+│ C        │ base32padupper    │ yes     │ draft    │
+│ F        │ base16upper       │ yes     │ final    │
+│ K        │ base36upper       │ yes     │ draft    │
+│ M        │ base64pad         │ yes     │ experim. │
+│ T        │ base32hexpadupper │ yes     │ experim. │
+│ U        │ base64urlpad      │ yes     │ final    │
+│ V        │ base32hexupper    │ yes     │ experim. │
+│ Z        │ base58flickr      │ yes     │ experim. │
+│ b        │ base32            │ yes     │ final    │
+│ c        │ base32pad         │ yes     │ draft    │
+│ f        │ base16            │ yes     │ final    │
+│ h        │ base32z           │ yes     │ draft    │
+│ k        │ base36            │ yes     │ draft    │
+│ m        │ base64            │ yes     │ final    │
+│ p        │ proquint          │ yes     │ experim. │
+│ t        │ base32hexpad      │ yes     │ experim. │
+│ u        │ base64url         │ yes     │ final    │
+│ v        │ base32hex         │ yes     │ experim. │
+│ z        │ base58btc         │ yes     │ final    │
+│ 0x01F680 │ base256emoji      │ no      │ experim. │
+└──────────┴───────────────────┴─────────┴──────────┘
 ───────────────────────────────────────────── Other Multicodecs ──────────────────────────────────────────────
-┏━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┳━━━━━━━━┓
-┃ Code     ┃ Name                           ┃ Tag           ┃ Status ┃
-┡━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━╇━━━━━━━━┩
+┌──────────┬────────────────────────────────┬───────────────┬────────┐
+│ Code     │ Name                           │ Tag           │ Status │
+├──────────┼────────────────────────────────┼───────────────┼────────┤
 │ 0x1      │ cidv1                          │ cid           │ perm.  │
 │ 0x2      │ cidv2                          │ cid           │ draft  │
 │ 0x3      │ cidv3                          │ cid           │ draft  │
@@ -144,6 +143,7 @@
 │ 0x31     │ multihash                      │ multiformat   │ draft  │
 │ 0x32     │ multiaddr                      │ multiformat   │ draft  │
 │ 0x33     │ multibase                      │ multiformat   │ draft  │
+│ 0x34     │ varsig                         │ multiformat   │ draft  │
 │ 0x50     │ protobuf                       │ serialization │ draft  │
 │ 0x51     │ cbor                           │ ipld          │ perm.  │
 │ 0x55     │ raw                            │ ipld          │ perm.  │
@@ -160,6 +160,7 @@
 │ 0x83     │ leofcoin-pr                    │ ipld          │ draft  │
 │ 0x85     │ dag-jose                       │ ipld          │ draft  │
 │ 0x86     │ dag-cose                       │ ipld          │ draft  │
+│ 0x8c     │ lbry                           │ namespace     │ draft  │
 │ 0x90     │ eth-block                      │ ipld          │ perm.  │
 │ 0x91     │ eth-block-list                 │ ipld          │ perm.  │
 │ 0x92     │ eth-tx-trie                    │ ipld          │ perm.  │
@@ -170,7 +171,7 @@
 │ 0x97     │ eth-account-snapshot           │ ipld          │ perm.  │
 │ 0x98     │ eth-storage-trie               │ ipld          │ perm.  │
 │ 0x99     │ eth-receipt-log-trie           │ ipld          │ draft  │
-│ 0x9a     │ eth-reciept-log                │ ipld          │ draft  │
+│ 0x9a     │ eth-receipt-log                │ ipld          │ draft  │
 │ 0xa0     │ aes-128                        │ key           │ draft  │
 │ 0xa1     │ aes-192                        │ key           │ draft  │
 │ 0xa2     │ aes-256                        │ key           │ draft  │
@@ -199,6 +200,7 @@
 │ 0xec     │ x25519-pub                     │ key           │ draft  │
 │ 0xed     │ ed25519-pub                    │ key           │ draft  │
 │ 0xee     │ bls12_381-g1g2-pub             │ key           │ draft  │
+│ 0xef     │ sr25519-pub                    │ key           │ draft  │
 │ 0xf0     │ dash-block                     │ ipld          │ draft  │
 │ 0xf1     │ dash-tx                        │ ipld          │ draft  │
 │ 0xfa     │ swarm-manifest                 │ ipld          │ draft  │
@@ -211,6 +213,7 @@
 │ 0x200    │ json                           │ ipld          │ perm.  │
 │ 0x201    │ messagepack                    │ serialization │ draft  │
 │ 0x202    │ car                            │ serialization │ draft  │
+│ 0x300    │ ipns-record                    │ serialization │ perm.  │
 │ 0x301    │ libp2p-peer-record             │ libp2p        │ perm.  │
 │ 0x302    │ libp2p-relay-rsvp              │ libp2p        │ perm.  │
 │ 0x309    │ memorytransport                │ libp2p        │ perm.  │
@@ -218,6 +221,7 @@
 │ 0x401    │ car-multihash-index-sorted     │ serialization │ draft  │
 │ 0x900    │ transport-bitswap              │ transport     │ draft  │
 │ 0x910    │ transport-graphsync-filecoinv1 │ transport     │ draft  │
+│ 0x920    │ transport-ipfs-gateway-http    │ transport     │ draft  │
 │ 0xd1d    │ multidid                       │ multiformat   │ draft  │
 │ 0x1022   │ murmur3-x64-128                │ hash          │ draft  │
 │ 0x1200   │ p256-pub                       │ key           │ draft  │
@@ -230,17 +234,26 @@
 │ 0x1300   │ ed25519-priv                   │ key           │ draft  │
 │ 0x1301   │ secp256k1-priv                 │ key           │ draft  │
 │ 0x1302   │ x25519-priv                    │ key           │ draft  │
+│ 0x1303   │ sr25519-priv                   │ key           │ draft  │
 │ 0x1305   │ rsa-priv                       │ key           │ draft  │
+│ 0x1306   │ p256-priv                      │ key           │ draft  │
+│ 0x1307   │ p384-priv                      │ key           │ draft  │
+│ 0x1308   │ p521-priv                      │ key           │ draft  │
+│ 0x1309   │ bls12_381-g1-priv              │ key           │ draft  │
+│ 0x130a   │ bls12_381-g2-priv              │ key           │ draft  │
+│ 0x130b   │ bls12_381-g1g2-priv            │ key           │ draft  │
+│ 0x2000   │ aes-gcm-256                    │ encryption    │ draft  │
+│ 0x7012   │ sha256a                        │ hash          │ draft  │
 │ 0xb3e1   │ xxh-32                         │ hash          │ draft  │
 │ 0xb3e2   │ xxh-64                         │ hash          │ draft  │
 │ 0xb3e3   │ xxh3-64                        │ hash          │ draft  │
 │ 0xb3e4   │ xxh3-128                       │ hash          │ draft  │
-│ 0xb403   │ urdca-2015-canon               │ ipld          │ draft  │
+│ 0xb403   │ rdfc-1                         │ ipld          │ draft  │
 │ 0xb501   │ ssz                            │ serialization │ draft  │
 │ 0xb601   │ json-jcs                       │ ipld          │ draft  │
 │ 0xcc01   │ iscc                           │ softhash      │ draft  │
 │ 0xce11   │ zeroxcert-imprint-256          │ zeroxcert     │ draft  │
-│ 0xd000   │ varsig                         │ varsig        │ draft  │
+│ 0xd000   │ nonstandard-sig                │ varsig        │ perm.  │
 │ 0xd0e7   │ es256k                         │ varsig        │ draft  │
 │ 0xd0ea   │ bls-12381-g1-sig               │ varsig        │ draft  │
 │ 0xd0eb   │ bls-12381-g2-sig               │ varsig        │ draft  │

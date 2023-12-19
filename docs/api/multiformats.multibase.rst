@@ -10,6 +10,11 @@ Multibase
     :show-inheritance:
     :members:
 
+MultibaseStatusValues
+---------------------
+
+.. autodata:: multiformats.multibase.MultibaseStatusValues
+
 decode
 ------
 

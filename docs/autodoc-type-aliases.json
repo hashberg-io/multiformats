@@ -4,5 +4,5 @@
     "RawEncoder": "multiformats.multibase.raw",
     "RawDecoder": "multiformats.multibase.raw",
     "MulticodecStatus": "multiformats.multicodec",
-    "MultibasecStatus": "multiformats.multibase",
+    "MultibaseStatus": "multiformats.multibase"
 }

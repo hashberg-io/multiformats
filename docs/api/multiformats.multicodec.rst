@@ -10,6 +10,11 @@ Multicodec
     :show-inheritance:
     :members:
 
+MulticodecStatusValues
+----------------------
+
+.. autodata:: multiformats.multicodec.MulticodecStatusValues
+
 exists
 ------
 

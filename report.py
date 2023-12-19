@@ -4,7 +4,7 @@
 # pylint: disable = wrong-import-position, wrong-import-order, unused-import
 
 if __name__ != "__main__":
-    raise RuntimeError("usage: report.py [-h] [-d]")
+    raise RuntimeError("usage: report.py [-h] [-d] [-r]")
 
 # == Script imports ==
 
@@ -149,7 +149,8 @@ psutil_mem_usage_pct = {k: v/psutil_mem_usage_total for k, v in psutil_mem_usage
 
 # == Memory usage table ==
 
-console.rule("Memory Usage (pympler)")
+# console.rule("Memory Usage (pympler)")
+console.rule("Memory Usage")
 
 table = Table()
 table.add_column("Component", style="white")
@@ -167,29 +168,29 @@ console.print(f"> multiformats memory total:     [bold blue]{pympler_mem_usage_t
 console.print(table)
 
 
-console.rule("Memory Usage (psutil)")
+# console.rule("Memory Usage (psutil)")
 
-table = Table()
-table.add_column("Component", style="white")
-table.add_column("Memory", style="bold blue", justify="right")
-table.add_column("Memory %", style="bold blue", justify="right")
-for k, v in psutil_mem_usage.items():
-    pct = f"{psutil_mem_usage_pct[k]:.0%}" if k in psutil_mem_usage_pct else ""
-    if v >= 1000/1024:
-        table.add_row(k, f"{v:.1f}MiB", pct)
-    else:
-        table.add_row(k, f"{1024*v:.0f}KiB", pct)
-console.print(f"> memory baseline: [bold blue]{baseline:.1f}MiB[white]")
-console.print(f"> multiformats memory total:     [bold blue]{psutil_mem_usage_total:.1f}MiB[white]")
-console.print(table)
+# table = Table()
+# table.add_column("Component", style="white")
+# table.add_column("Memory", style="bold blue", justify="right")
+# table.add_column("Memory %", style="bold blue", justify="right")
+# for k, v in psutil_mem_usage.items():
+#     pct = f"{psutil_mem_usage_pct[k]:.0%}" if k in psutil_mem_usage_pct else ""
+#     if v >= 1000/1024:
+#         table.add_row(k, f"{v:.1f}MiB", pct)
+#     else:
+#         table.add_row(k, f"{1024*v:.0f}KiB", pct)
+# console.print(f"> memory baseline: [bold blue]{baseline:.1f}MiB[white]")
+# console.print(f"> multiformats memory total:     [bold blue]{psutil_mem_usage_total:.1f}MiB[white]")
+# console.print(table)
 
 
 # == Group multihash multicodecs together ==
 # TODO: consider introduce grouped multicodecs doing this directly, to reduce mem footprint (currently footprint is negligible)
 
 _multihash_indices: Dict[str, int] = {}
-_grouped_multicodecs: List[Tuple[str, str, Optional[List[int]], List[int], List[bool], typing_extensions.Literal["draft", "permanent"]]] = []
-for codec in multicodec.table(tag="multihash"):
+_grouped_multicodecs: List[Tuple[str, str, Optional[List[int]], List[int], List[bool], typing_extensions.Literal["draft", "permanent", "deprecated"]]] = []
+for codec in multicodec.table(tag=["hash", "multihash"]):
     is_implemented = multihash.is_implemented(codec.name)
     tokens = codec.name.split("-")
     if len(tokens) == 1:
@@ -268,7 +269,7 @@ for name, tag, bitsize_list, code_list, impl_list, status in _grouped_multicodec
         num_impl = sum(1 if b else 0 for b in impl_list)
         impl_status = f"[yellow]{num_impl}/{len(impl_list)}"
         num_implemented += num_impl
-    codec_status = "[yellow]draft" if status == "draft" else "[green]perm."
+    codec_status = "[yellow]draft" if status == "draft" else "[green]perm." if status =="permanent" else "[red]depr."
     if bitsize_list is None:
         table.add_row(code2str(code_list[0]), name, "", impl_status, codec_status)
         continue
@@ -300,7 +301,7 @@ for codec in multicodec.table(tag="multiaddr"):
     num_implemented += 1 if is_implemented else 0
     num_total += 1
     impl_status = "[green]yes" if is_implemented else "[red]no"
-    codec_status = "[yellow]draft" if codec.status == "draft" else "[green]perm."
+    codec_status = "[yellow]draft" if codec.status == "draft" else "[green]perm." if codec.status =="permanent" else "[red]depr."
     table.add_row(code2str(codec.code), codec.name, impl_status, codec_status)
 console.print(f"> Multiaddr protocols implemented: [bold blue]{num_implemented}/{num_total}")
 console.print(table)
@@ -321,7 +322,7 @@ for base in multibase.table():
     num_implemented += 1 if is_implemented else 0
     num_total += 1
     impl_status = "[green]yes" if is_implemented else "[red]no"
-    codec_status = "[yellow]draft" if base.status == "draft" else "[green]perm."
+    codec_status = "[yellow]draft" if base.status == "draft" else "[green]final" if base.status == "final" else "[yellow]experim." if base.status == "experimental" else "[green]resrvd."
     table.add_row(base.code_printable, base.name, impl_status, codec_status)
 console.print(f"> Multibases implemented: [bold blue]{num_implemented}/{num_total}")
 console.print(table)
