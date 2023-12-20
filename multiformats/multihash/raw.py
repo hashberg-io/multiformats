@@ -4,12 +4,11 @@
     Hash functions are implemented using the following modules:
 
     - `hashlib <https://docs.python.org/3/library/hashlib.html>`_, for the ``sha``/``shake`` hash functions and the ``blake2`` hash functions.
-    - `pysha3 <https://github.com/tiran/pysha3>`_, for the ``keccak`` hash functions.
     - `blake3 <https://github.com/oconnor663/blake3-py>`_, for the ``blake3`` hash function.
     - `pyskein <https://pythonhosted.org/pyskein/>`_, for the ``skein`` hash functions.
     - `mmh3 <https://github.com/hajimes/mmh3>`_, for the ``murmur3`` hash functions.
     - `pycryptodomex <https://github.com/Legrandin/pycryptodome/>`_, for the ``ripemd-160`` hash function, \
-      the ``kangarootwelve`` hash function and the ``sha2-512-224``/``sha2-512-256`` hash functions.
+    the ``kangarootwelve`` hash function, the ``keccak`` hash functions and the ``sha2-512-224``/``sha2-512-256`` hash functions.
 
     All modules other than `hashlib <https://docs.python.org/3/library/hashlib.html>`_ are optional dependencies.
     The :func:`get` function attempts to dynamically import any optional dependencies required by desired multihash
@@ -276,7 +275,7 @@ def _jit_register_hashfun_dbl(name: str, check_only: bool = False) -> bool:
 _jit_register_hashfun_dir = {
     "sha": _jit_register_hashfun_sha,
     "bla": _jit_register_hashfun_bla,
-    # "kec": _jit_register_hashfun_kec, # kec is currently unavailable
+    "kec": _jit_register_hashfun_kec,
     "ske": _jit_register_hashfun_ske,
     "mur": _jit_register_hashfun_mur,
     "md5": _jit_register_hashfun_md5,

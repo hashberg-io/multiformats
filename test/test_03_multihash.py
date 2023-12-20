@@ -10,10 +10,8 @@ from typing import Any, Dict, Optional, TextIO
 import pytest
 import skein  # type: ignore
 from blake3 import blake3 # type: ignore
-# import sha3 # type: ignore
-# FIXME: find an alternative implementation for keccak
 import mmh3 # type: ignore
-from Cryptodome.Hash import RIPEMD160, KangarooTwelve, SHA512
+from Cryptodome.Hash import RIPEMD160, KangarooTwelve, SHA512, keccak
 
 from multiformats import multihash
 from multiformats.multihash import wrap, digest, unwrap
@@ -79,12 +77,11 @@ def skein_digest(data: bytes, variant: int, digest_bits: int, size: Optional[int
     d = m.digest()
     return d if size is None else d[:size]
 
-# def keccak_digest(data: bytes, digest_bits: int, size: Optional[int]) -> bytes:
-#     m: hashlib._Hash = getattr(sha3, f"keccak_{digest_bits}")()
-#     m.update(data)
-#     d = m.digest()
-#     return d if size is None else d[:size]
-# FIXME: find an alternative implementation for keccak
+def keccak_digest(data: bytes, digest_bits: int, size: Optional[int]) -> bytes:
+    m: hashlib._Hash = keccak.new(digest_bits=digest_bits)
+    m.update(data)
+    d = m.digest()
+    return d if size is None else d[:size]
 
 # def murmur3_digest(data: bytes, variant: str, digest_bits: int, size: Optional[int]) -> bytes:
 #     assert variant in ("32", "x64")
@@ -218,13 +215,12 @@ def test_skein(data: bytes, version: int, size: Optional[int]) -> None:
         hash_fn = f"skein{version}-{digest_bits}"
         _test(hash_fn, data, skein_digest(data, version, digest_bits, size), size)
 
-# @pytest.mark.parametrize("digest_bits", (224, 256, 384, 512))
-# @pytest.mark.parametrize("data", data_samples)
-# @pytest.mark.parametrize("size", (None, 16, 28))
-# def test_keccak(data: bytes, digest_bits: int, size: Optional[int]) -> None:
-#     hash_fn = f"keccak-{digest_bits}"
-#     _test(hash_fn, data, keccak_digest(data, digest_bits, size), size)
-# FIXME: find an alternative implementation for keccak
+@pytest.mark.parametrize("digest_bits", (224, 256, 384, 512))
+@pytest.mark.parametrize("data", data_samples)
+@pytest.mark.parametrize("size", (None, 16, 28))
+def test_keccak(data: bytes, digest_bits: int, size: Optional[int]) -> None:
+    hash_fn = f"keccak-{digest_bits}"
+    _test(hash_fn, data, keccak_digest(data, digest_bits, size), size)
 
 # @pytest.mark.parametrize("version", ("32", "x64"))
 # @pytest.mark.parametrize("data", data_samples)
