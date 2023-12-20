@@ -517,8 +517,7 @@ class CID:
     @staticmethod
     def decode(cid: Union[str, BytesLike]) -> "CID":
         """
-            Decodes a CID from a bytestring or a hex string (which will be converted to :obj:`bytes`
-            using :obj:`bytes.fromhex`). Note: the hex string is not multibase encoded.
+            Decodes a CID from a bytestring or a multibase-encoded string.
 
             Example usage for CIDv1 multibase-encoded string:
 
