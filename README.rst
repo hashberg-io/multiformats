@@ -143,6 +143,11 @@ Object-oriented style:
 >>> base32.decode('bjbswy3dpeblw64tmmqqq')
 b'Hello World!'
 
+Object-oriented style without prefix:
+
+>>> multibase.get("base64url").raw_decoder("1IFOwqNRAXr7bxkzsaUP4c5TsfODswA3L8EZYoaWP08")
+b'\xd4\x81N\xc2\xa3Q\x01z\xfbo\x193\xb1\xa5\x0f\xe1\xceS\xb1\xf3\x83\xb3\x007/\xc1\x19b\x86\x96?O'
+
 
 Multihash digest
 ^^^^^^^^^^^^^^^^
